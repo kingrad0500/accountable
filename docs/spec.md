@@ -156,21 +156,24 @@ pyproject.toml, uv.lock Python project, package in backend/
 playwright.config.ts    e2e config: starts its own backend + frontend on test ports
 backend/
   accountable/
-    main.py             FastAPI app, routers, startup (create + seed if new)
-    db.py               engine, metadata, tables, connection helper
-    schemas.py          Pydantic request/response models and validation
-    stages.py           stage list, default probabilities, change_stage()
-    routers/            organizations.py, contacts.py, deals.py, activities.py, dashboard.py
-    dashboard.py        dashboard queries
+    main.py             FastAPI app, mounts each area's router, startup (create + seed if new)
+    config.py           settings from the environment: database path, today()
+    db.py               engine, pragmas, all tables, connection per request
+    organizations.py    routes, models, rules, timeline for organizations
+    contacts.py         the same for contacts
+    deals.py            the same for deals, plus stage rules and board ordering
+    activities.py       the same for activities, plus the shared timeline query
+    dashboard.py        dashboard route and figures
     seed.py             sample data; `python -m accountable.seed` resets
-  tests/                pytest
+  tests/                pytest, one file per area
 frontend/
   src/
     main.tsx, App.tsx   router + providers
-    api/                typed fetch client, TanStack Query hooks per resource
-    components/         DataTable, ConfirmDelete, Timeline, ActivityForm, StageBadge, Money, ...
-    features/           dashboard/, organizations/, contacts/, deals/, pipeline/
-    lib/                format (money, dates), stages, late/overdue helpers
+    api/                typed fetch client and API types
+    components/         TopBar, QuickSearch, DataTable, FormDialog, ConfirmDelete, Pill, Money
+    features/           organizations/, contacts/, deals/, activities/, pipeline/, dashboard/
+                        each with its pages, components, form schema and query hooks
+    lib/                format, dates, stages
     styles/             tokens.css, global styles
   vite.config.ts
 e2e/                    Playwright tests
