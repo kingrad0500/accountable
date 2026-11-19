@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Dashboard · Direction C</title>
+<link rel="stylesheet" href="shared/tokens.css">
+<script src="shared/data.js"></script>
+<script src="shared/shell-c.js"></script>
+<style id="shell"></style>
+<style>
+  .head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 26px; }
+  .figs { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .fig { padding: 20px 22px; }
+  .fig span { font-size: 12.5px; color: var(--ink-muted); font-weight: 500; }
+  .fig b { display: block; font-family: var(--font-mono); font-weight: 600; letter-spacing: -0.035em; font-size: 26px; margin-top: 8px; }
+  .fig.hero { background: var(--sea-green); }
+  .fig.hero span { color: var(--ink); }
+  .fig.hero b { font-size: 40px; }
+  .fig small { display: block; font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+  .fig.hero small { color: var(--ink); }
+  .row { display: grid; grid-template-columns: 1fr 360px; gap: 18px; margin-bottom: 18px; }
+  .card { padding: 22px 24px; }
+  .card h2 { font-size: 16px; font-weight: 600; }
+  .ch { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .ch small { font-size: 12.5px; color: var(--ink-muted); }
+  .sub { display: flex; justify-content: space-between; align-items: baseline; margin: 18px 0 2px; }
+  .sub h3 { font-size: 13.5px; font-weight: 600; }
+  .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .fu-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .fu-col h3 { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+  .fu-col h3 .n { font-family: var(--font-mono); font-size: 12px; padding: 0 7px; border-radius: 99px; background: var(--bg); }
+  .fu-col.od h3 { color: var(--raspberry-ink); }
+  .fu-col.od h3 .n { background: var(--raspberry-ink); color: #fff; }
+  .fu { background: var(--bg); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: 20px 1fr; gap: 10px; margin-bottom: 8px; }
+  .fu-col.od .fu { background: #FFF3F5; }
+  .cb { display: block; width: 18px; height: 18px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 2px #B7C8CD; margin-top: 1px; }
+  .fu .t { font-size: 13px; font-weight: 600; }
+  .fu .m { font-size: 12px; color: var(--ink-muted); margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+  .fu .d { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-muted); margin-top: 6px; }
+  .fu-col.od .fu .d { color: var(--raspberry-ink); font-weight: 600; }
+  .tl { position: relative; padding-left: 4px; }
+  .tl-i { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding-bottom: 14px; position: relative; }
+  .tl-i:not(:last-child)::before { content: ""; position: absolute; left: 13.5px; top: 30px; bottom: 2px; width: 1px; background: var(--sea-mist); }
+  .tl-i .ico { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 99px; }
+  .tl-i .t { font-size: 13px; line-height: 1.4; }
+  .tl-i .m { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="c-wrap" id="app"></div>
+<script>
+document.getElementById('shell').textContent = SHELL_C_CSS;
+
+// A real funnel: stacked trapezoids, width proportional to value reached.
+function funnelSvg() {
+  const W = 312, rowH = 58, gap = 4, rows = FUNNEL.rows, max = rows[0].value;
+  const w = (v) => 70 + (v / max) * (W - 70);
+  const txt = { new: '#fff', qualified: '#073B4C', proposal: '#073B4C', negotiation: '#fff', won: '#073B4C' };
+  const fill = { new: '#0E7CA0', qualified: '#FFC145', proposal: '#F78C6B', negotiation: '#073B4C', won: '#06D6A0' };
+  let s = `<svg viewBox="0 0 ${W} ${rows.length * (rowH + gap)}" width="100%" role="img" aria-label="Sales funnel">`;
+  rows.forEach((r, i) => {
+    const top = w(r.value), bot = rows[i + 1] ? w(rows[i + 1].value) : top * 0.86;
+    const y = i * (rowH + gap), cx = W / 2;
+    s += `<path d="M${cx - top / 2},${y} L${cx + top / 2},${y} L${cx + bot / 2},${y + rowH} L${cx - bot / 2},${y + rowH} Z" fill="${fill[r.key]}" stroke-linejoin="round"/>`;
+    s += `<text x="${cx}" y="${y + 25}" text-anchor="middle" font-size="12.5" font-weight="600" fill="${txt[r.key]}">${stageOf(r.key).name} · ${r.count}</text>`;
+    s += `<text x="${cx}" y="${y + 44}" text-anchor="middle" font-family="var(--font-mono)" font-size="14" font-weight="600" fill="${txt[r.key]}">${usdShort(r.value)}</text>`;
+  });
+  return s + '</svg>';
+}
+
+const tlIcon = { stage: ['stage', 'var(--sea-mist)', 'var(--ink)'], call: ['call', 'var(--cerulean-ink)', '#fff'], email: ['email', 'var(--coral)', 'var(--ink)'], note: ['note', 'var(--marigold)', 'var(--ink)'] };
+
+document.getElementById('app').innerHTML = shellC('dashboard') + `
+<main class="c-main">
+  <header class="head">
+    <div><div class="c-eyebrow">Wednesday, 18 November</div><h1 class="c-h1">Dashboard</h1></div>
+    <button class="btn btn-primary">${icon('plus', 16, 2.5)} Add deal</button>
+  </header>
+
+  <section class="figs">
+    <div class="panel fig hero"><span>Revenue won, last 12 months (USD)</span><b>${usd(FIG.revenueWon12)}</b><small>${FIG.wonCount12} deals won · +18% on the year before</small></div>
+    <div class="panel fig"><span>Open pipeline (USD)</span><b>${usd(FIG.openValue)}</b><small>${FIG.openCount} open deals</small></div>
+    <div class="panel fig"><span>Expected revenue (USD)</span><b>${usd(FIG.expected)}</b><small>Value × probability</small></div>
+    <div class="panel fig"><span>Win rate, 12 months</span><b>${Math.round(FIG.winRate * 100)}%</b><small>${FIG.wonCount12} won · ${FIG.lostCount12} lost</small></div>
+  </section>
+
+  <section class="row">
+    <div class="panel card">
+      <div class="ch"><h2>Revenue won by month</h2><small>USD · Dec 2025 to Nov 2026</small></div>
+      ${lineChart({ values: REVENUE_WON, labels: MONTHS, width: 820, height: 250, stroke: 'var(--sea-green-ink)', fill: '#06D6A0', fillOpacity: 0.3, grid: '#DCE5E8', text: '#4F6E78', dotFill: '#fff', callout: 9, calloutBg: 'var(--ink)', calloutText: '#fff', label: 'Revenue won by month' })}
+      <div class="sub"><h3>Deals won and lost</h3>
+        <div class="legend"><span><i style="background:var(--sea-green)"></i>Won, above the line</span><span><i style="background:var(--coral)"></i>Lost, below</span></div></div>
+      ${barChart({ mirrored: true, labels: MONTHS, series: [{ values: WON_COUNT, color: 'var(--sea-green)' }, { values: LOST_COUNT, color: 'var(--coral)' }], width: 820, height: 170, grid: '#C6D3D7', text: '#4F6E78', label: 'Deals won and lost by month' })}
+    </div>
+    <div class="panel card">
+      <div class="ch"><h2>Sales funnel</h2></div>
+      <p class="muted" style="font-size:12.5px;margin-bottom:16px">Value of deals that reached each stage</p>
+      ${funnelSvg()}
+      <p class="muted" style="font-size:12.5px;margin-top:14px;text-align:center">Lost along the way: <span class="mono">${usd(FUNNEL.lost)}</span><br>across ${FUNNEL.lostCount} deals</p>
+    </div>
+  </section>
+
+  <section class="row">
+    <div class="panel card">
+      <div class="ch" style="margin-bottom:16px"><h2>Follow-ups</h2><small>Tick one to mark it done</small></div>
+      <div class="fu-cols">
+        ${['Overdue', 'Today', 'Upcoming'].map((g) => {
+          const items = FOLLOW_UPS.filter((f) => f.group === g);
+          return `<div class="fu-col ${g === 'Overdue' ? 'od' : ''}"><h3>${g}<span class="n">${items.length}</span></h3>
+            ${items.map((f) => `<div class="fu"><span class="cb" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark done"></span>
+              <div><div class="t">${f.text}</div><div class="m">${icon(f.type, 12)}${f.rel}</div><div class="m">${f.org}</div><div class="d">${g === 'Today' ? 'Due today' : 'Due ' + f.due}</div></div></div>`).join('')}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="panel card">
+      <div class="ch" style="margin-bottom:16px"><h2>Recent activity</h2><a href="#" class="muted" style="font-size:12.5px">All</a></div>
+      <div class="tl">
+        ${RECENT.slice(0, 6).map((r) => {
+          const [ic, bg, fg] = tlIcon[r.kind];
+          return `<div class="tl-i"><span class="ico" style="background:${bg};color:${fg}">${icon(ic, 13)}</span><div>
+            <div class="t">${r.kind === 'stage' ? `<b>${r.rel}</b> moved from ${r.from} to ${r.to}` : r.text}</div>
+            <div class="m">${r.kind === 'stage' ? r.org : r.rel + ' · ' + r.org} · ${r.when}</div></div></div>`;
+        }).join('')}
+      </div>
+    </div>
+  </section>
+</main>`;
+</script>
+</body>
+</html>

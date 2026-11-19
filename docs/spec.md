@@ -32,6 +32,7 @@ Each requirement has an ID so tests and reviews can point to it.
 - **G7** Every screen loads, and responds to every action, in under 500 ms on an ordinary laptop with 3,000 deals, 3,000 contacts and 10,000 activities.
 - **G8** Every action works from the keyboard. Focus is always visible. Text meets WCAG AA contrast.
 - **G9** The browser console shows no errors or warnings during normal use.
+- **G10** A quick search box in the top bar finds deals, contacts and organizations by name as you type, and lists up to 8 matches grouped by type. Enter or a click opens the record. `/` focuses the box. It searches the lists already loaded in the browser. This is a small addition the intent doesn't ask for, taken from the chosen design.
 
 ### Tables (Organizations, Contacts, Deals)
 
@@ -63,7 +64,7 @@ Each requirement has an ID so tests and reviews can point to it.
 
 ### Dashboard
 
-- **DB1** Four headline figures: revenue won in the last 12 months, open pipeline value, expected revenue, and win rate over the last 12 months.
+- **DB1** Five headline figures: revenue won in the last 12 months, open pipeline value, expected revenue, win rate over the last 12 months, and "Needs attention" (late deals plus overdue follow-ups).
 - **DB2** A line chart of revenue won per month, over the last 12 months including this one.
 - **DB3** A bar chart of deals won and deals lost per month, over the same 12 months.
 - **DB4** A sales funnel showing the value that reached each stage, New to Won (see concern 6). Lost value is given beside it.
@@ -115,7 +116,7 @@ Definitions:
 - **P1a** A "Closed deals" filter (Last 30 days, Last 90 days, Last 12 months, All; default Last 90 days) limits Won and Lost to deals closed in that period. The open columns and the open totals ignore it. The choice is remembered in the browser. Each of Won and Lost shows "12 more closed earlier" with a link to the Deals table filtered by that stage.
 - **P2** Dragging a card to another column changes its stage (DL5 applies). Dragging within a column changes its place. A card can be dropped anywhere in a column, and it stays exactly there after a refresh.
 - **P3** Each column header shows the stage, the number of deals, their total value and expected revenue. A header strip above the board shows the open total value and expected revenue. All figures update the moment a card drops, before the server replies.
-- **P4** Each column has an "Add deal" button. The new deal starts at that stage and goes to the top of the column.
+- **P4** Each column has an "Add deal" button that opens a short form in the column (name, organization, value, close date), with a link to the full form. The new deal starts at that stage and goes to the top of the column.
 - **P5** Cards show name, organization, value, close date, probability and the main contact's initials. Late cards show the Late label.
 - **P6** Keyboard: Space picks up a focused card, arrow keys move it, Space drops it, Escape cancels. Each card also has a "Move to" menu listing the stages. A screen reader hears each step.
 - **P7** If the server rejects a move, the card goes back and a message says why.
@@ -242,14 +243,16 @@ All under `/api`. JSON in and out. Errors use FastAPI's standard shape. Validati
 
 ### Screens
 
-**Shell.** A Midnight sidebar on the left, 232px wide. It has the Accountable wordmark at the top and five links with icons: Dashboard, Pipeline, Deals, Contacts, Organizations. The active link has a Sea Green pill behind it, with Midnight text. Text is Sea Mist. The main area has the `#F0F4F5` background. Each page starts with its title (28px, semibold) and its main action on the right, such as "Add deal".
+The design follows direction B in `docs/mockups/` (`dashboard-b.html` and `pipeline-b.html`, with screenshots). Where this text and the mockups differ, this text wins.
 
-**Dashboard.** It's a 12-column grid.
-- Row 1: four figure tiles. Each has a label, a large number in JetBrains Mono and a small comparison line (for example "+$18,000 on last month").
-- Row 2: the revenue won line chart (8 columns) and the funnel (4 columns).
-- Row 3: the won/lost bar chart (6 columns), recent activity (3 columns) and follow-ups (3 columns).
+**Shell.** No sidebar. A floating white top bar, rounded 16px, sits 16px from the top of the page. On the left is the Accountable wordmark with its mark: a Midnight rounded square holding a Sea Green "A" in Instrument Serif. In the middle are five tabs with icons, in a light tray: Dashboard, Pipeline, Deals, Contacts, Organizations. The active tab is a white pill with a soft shadow. On the right are the quick search box (G10) and the page's main action as a Sea Green button, such as "Add deal". Content is centered, at most 1400px wide, on the `#F0F4F5` background.
 
-The line chart is a smooth line in dark Sea Green over a soft Sea Green area fill. Its y-axis uses short money ("$40k"), and the tooltip shows the full amount and the number of deals. The bar chart groups Won (Sea Green) and Lost (Coral) bars by month. The funnel is a stack of centered horizontal bars, one per stage, each in its stage color. Bar widths are proportional to value. The value and deal count are written on or beside each bar. A small line underneath gives the lost value. Follow-ups show Overdue in dark Raspberry, with a checkbox to mark each one done.
+**Dashboard.** The title is a greeting for the time of day ("Good afternoon"), with the date and "all figures in USD" on the right. Below it, a 12-column grid:
+- Row 1, full width: a Midnight panel, rounded 20px, with Sea Mist text. On the left, the figures (DB1): revenue won over 12 months as a large Sea Green tile, then open pipeline, expected revenue, win rate, and "Needs attention" (late deals plus overdue follow-ups, its number in light Raspberry `#FF8FA8`). On the right, the revenue won line chart, drawn for a dark background: a bright Sea Green line and soft area fill, faint dashed gridlines, and the best month labelled.
+- Row 2: the funnel (5 columns) and the won/lost bar chart (7 columns). The funnel is one row per stage: a stage dot and name, a bar on a light track in the stage color, and the value on the right. Between rows, a small line says what share carried on ("↓ 86% carried on"). The lost value is given underneath. The bar chart groups Won (Sea Green) and Lost (Coral) bars by month.
+- Row 3: follow-ups (7 columns) and recent activity (5 columns). Follow-ups are a table with a done checkbox, due date, task, the related contact or deal with a type icon, and the organization. Overdue dates are dark Raspberry and today's say "Today". Recent activity shows when on the left and the entry on the right. A stage change shows the new stage as a pill.
+
+The line chart's tooltip shows the full amount and the number of deals won that month.
 
 **Tables.** A white panel holds a toolbar (search box on the left, filters, "Add" button) and the table. Headings are 13px, medium weight and muted Midnight. Rows are 48px tall with a light hover tint. Money and numbers are right-aligned in JetBrains Mono. Stage and status show as colored pills. The Edit and Delete icon buttons appear on row hover and on focus, and always have accessible labels.
 
@@ -257,7 +260,23 @@ The line chart is a smooth line in dark Sea Green over a soft Sea Green area fil
 - Left (wider): the timeline, with the "Log activity" composer at its top. Each entry has a type icon in a colored circle (note Marigold, call Cerulean, email Coral, stage change Sea Mist), the description, the related record and a relative date ("3 days ago", with the full date on hover). Follow-ups show their date and a done checkbox.
 - Right: panels with the linked records, for example the organization's contacts and deals.
 
-**Pipeline.** A strip at the top gives the open value and expected revenue. Below it, six columns, each 272px wide, on a light Sea Mist tint. Each column header has a stage color dot, the name, the count, the total and the expected revenue. Cards are white, rounded 12px, with a soft shadow. While dragging, the card lifts with a larger shadow and the drop position shows as a gap. A late card has a Raspberry "Late" pill and its date in dark Raspberry. It doesn't get a colored edge.
+**Pipeline.**
+- **Toolbar.** A summary strip on the left: open value (on a Midnight chip), expected revenue, open deals and late count. On the right, the "Closed deals: Last 90 days" dropdown (P1a).
+- **Columns.** Six of them. The four open ones share the width equally and Won and Lost are a little narrower. Each column starts with a header block filled in its stage color:
+  - New: dark Cerulean, white text
+  - Qualified: Marigold, Midnight text
+  - Proposal: Coral, Midnight text
+  - Negotiation: Midnight, white text
+  - Won: Sea Green, Midnight text
+  - Lost: Sea Mist, Midnight text
+
+  The header shows the name, the deal count, the total in large JetBrains Mono and the expected revenue. Open columns also get a thin meter for their share of open value. Won and Lost say "Closed in the last 90 days" instead.
+- **Add deal.** A quiet "Add deal" button sits under each header. It opens a small form in place, inside the column: deal name, organization, value and close date, with "Add to Qualified" (for example) and Cancel. "More details" opens the full form.
+- **Cards.** White, rounded 12px, with a soft shadow:
+  - Open cards show the name with the value on the right, then the organization and probability, then the close date with a calendar icon and the main contact's initials.
+  - Won and Lost cards are shorter, with the value in short form ("$59k").
+  - A late card has a very light Raspberry tint (`#FFF3F5`), a "Late" pill in place of the initials, and its date in dark Raspberry. It has no outline or colored edge.
+- **Dragging.** The card lifts with a larger shadow and the drop position shows as a gap.
 
 ### Visual design
 
@@ -265,7 +284,7 @@ The line chart is a smooth line in dark Sea Green over a soft Sea Green area fil
 
 - Instrument Sans for all UI text: 14px body, 13px secondary text, and headings from 18 to 28px, semibold.
 - JetBrains Mono for money, numbers, dates in tables and figures, with tabular figures.
-- Instrument Serif only as an accent: the dashboard's date line ("Wednesday, 18 November") under the page title.
+- Instrument Serif only as an accent: the "A" in the wordmark's mark.
 
 #### Colors
 

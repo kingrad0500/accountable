@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Dashboard · Direction A</title>
+<link rel="stylesheet" href="shared/tokens.css">
+<script src="shared/data.js"></script>
+<script src="shared/shell-a.js"></script>
+<style id="shell"></style>
+<style>
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+  .tile { grid-column: span 3; padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .tile .label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink-muted); }
+  .tile .chip { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; }
+  .tile .big { font-family: var(--font-mono); font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin-top: 6px; }
+  .tile .sub { font-size: 12.5px; color: var(--ink-muted); }
+  .tile .up { color: var(--sea-green-ink); font-weight: 600; }
+  .card { padding: 20px 22px; }
+  .card h2 { font-size: 16px; font-weight: 600; }
+  .card .ch { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; gap: 12px; }
+  .card .ch small { font-size: 12.5px; color: var(--ink-muted); }
+  .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .funnel { display: flex; flex-direction: column; gap: 8px; }
+  .f-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 10px; }
+  .f-row .nm { font-size: 13px; font-weight: 500; }
+  .f-bar { height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 12px; font-weight: 600; margin: 0 auto; min-width: 120px; }
+  .f-note { margin-top: 12px; font-size: 12.5px; color: var(--ink-muted); }
+  .list { display: flex; flex-direction: column; }
+  .ra { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 10px 0; }
+  .ra + .ra { box-shadow: 0 -1px 0 var(--tint); }
+  .ico { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; }
+  .ra .t { font-size: 13px; line-height: 1.35; }
+  .ra .m { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+  .grp { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); margin: 10px 0 4px; display: flex; gap: 6px; align-items: center; }
+  .grp.od { color: var(--raspberry-ink); }
+  .fu { display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; padding: 8px 0; align-items: start; }
+  .cb { width: 18px; height: 18px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--sea-mist); margin-top: 1px; }
+  .fu .t { font-size: 13px; font-weight: 500; }
+  .fu .m { font-size: 12px; color: var(--ink-muted); }
+  .fu .d { font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted); white-space: nowrap; }
+  .fu.od .d { color: var(--raspberry-ink); font-weight: 600; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+  .stats div { background: var(--bg); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .stats span { font-size: 12px; color: var(--ink-muted); }
+  .stats b { font-size: 16px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="a-wrap" id="app"></div>
+<script>
+document.getElementById('shell').textContent = SHELL_A_CSS;
+const actIcon = { stage: ['stage', 'var(--sea-mist)', 'var(--ink)'], call: ['call', 'var(--cerulean-ink)', '#fff'], email: ['email', 'var(--coral)', 'var(--ink)'], note: ['note', 'var(--marigold)', 'var(--ink)'] };
+const fmax = FUNNEL.rows[0].value;
+
+document.getElementById('app').innerHTML = shellA('dashboard') + `
+<main class="a-main">
+  <header class="a-head">
+    <div><h1>Dashboard</h1><div class="a-date">Wednesday, 18 November</div></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-quiet">${icon('note', 16)} Log activity</button>
+      <button class="btn btn-primary">${icon('plus', 16, 2.5)} Add deal</button>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="panel tile">
+      <div class="label"><span class="chip" style="background:#D5F7EC;color:var(--sea-green-ink)">${icon('trend', 16)}</span>Revenue won · 12 months (USD)</div>
+      <div class="big">${usd(FIG.revenueWon12)}</div>
+      <div class="sub"><span class="up">+18%</span> on the 12 months before</div>
+    </div>
+    <div class="panel tile">
+      <div class="label"><span class="chip" style="background:#DCEFF6;color:var(--cerulean-ink)">${icon('pipeline', 16)}</span>Open pipeline (USD)</div>
+      <div class="big">${usd(FIG.openValue)}</div>
+      <div class="sub">${FIG.openCount} open deals · ${FIG.lateCount} late</div>
+    </div>
+    <div class="panel tile">
+      <div class="label"><span class="chip" style="background:#FFF1D1;color:var(--marigold-ink)">${icon('deals', 16)}</span>Expected revenue (USD)</div>
+      <div class="big">${usd(FIG.expected)}</div>
+      <div class="sub">Value × probability of open deals</div>
+    </div>
+    <div class="panel tile">
+      <div class="label"><span class="chip" style="background:#FDE3DA;color:var(--coral-ink)">${icon('check', 16)}</span>Win rate · 12 months</div>
+      <div class="big">${Math.round(FIG.winRate * 100)}%</div>
+      <div class="sub">${FIG.wonCount12} won, ${FIG.lostCount12} lost</div>
+    </div>
+
+    <div class="panel card" style="grid-column: span 8">
+      <div class="ch"><h2>Revenue won by month</h2><small>USD · Dec 2025 to Nov 2026</small></div>
+      ${lineChart({ values: REVENUE_WON, labels: MONTHS, width: 760, height: 280, stroke: 'var(--sea-green-ink)', fill: '#06D6A0', grid: '#DCE5E8', text: '#4F6E78', dotFill: '#fff', callout: 9, calloutBg: 'var(--ink)', calloutText: '#fff', label: 'Revenue won by month' })}
+    </div>
+
+    <div class="panel card" style="grid-column: span 4">
+      <div class="ch"><h2>Sales funnel</h2><small>Value reaching each stage</small></div>
+      <div class="funnel">
+        ${FUNNEL.rows.map((r) => {
+          const s = stageOf(r.key);
+          const dark = r.key === 'negotiation' || r.key === 'new';
+          return `<div class="f-row"><span class="nm">${s.name}</span>
+            <div class="f-bar" style="width:${Math.max(38, (r.value / fmax) * 100)}%;background:${r.key === 'new' ? 'var(--cerulean-ink)' : s.fill};color:${dark ? '#fff' : 'var(--ink)'}">
+              <span class="mono">${usdShort(r.value)}</span><span style="opacity:.8">${r.count}</span></div></div>`;
+        }).join('')}
+      </div>
+      <p class="f-note">Lost along the way: <span class="mono">${usd(FUNNEL.lost)}</span> across ${FUNNEL.lostCount} deals</p>
+    </div>
+
+    <div class="panel card" style="grid-column: span 5">
+      <div class="ch"><h2>Deals won and lost</h2>
+        <div class="legend"><span><i style="background:var(--sea-green)"></i>Won</span><span><i style="background:var(--coral)"></i>Lost</span></div></div>
+      ${barChart({ labels: MONTHS, series: [{ values: WON_COUNT, color: 'var(--sea-green)' }, { values: LOST_COUNT, color: 'var(--coral)' }], width: 470, height: 250, grid: '#DCE5E8', text: '#4F6E78', label: 'Deals won and lost by month' })}
+      <div class="stats">
+        <div><span>Best month</span><b class="mono">Sep · 4 won</b></div>
+        <div><span>Average deal won (USD)</span><b class="mono">${usd(FIG.revenueWon12 / FIG.wonCount12)}</b></div>
+        <div><span>Late deals</span><b class="mono" style="color:var(--raspberry-ink)">${FIG.lateCount}</b></div>
+      </div>
+    </div>
+
+    <div class="panel card" style="grid-column: span 4">
+      <div class="ch"><h2>Recent activity</h2><a href="#" class="muted" style="font-size:12.5px">All</a></div>
+      <div class="list">
+        ${RECENT.slice(0, 5).map((r) => {
+          const [ic, bg, fg] = actIcon[r.kind];
+          const text = r.kind === 'stage' ? `<b>${r.rel}</b> moved from ${r.from} to ${r.to}` : r.text;
+          return `<div class="ra"><span class="ico" style="background:${bg};color:${fg}">${icon(ic, 14)}</span>
+            <div><div class="t">${text}</div><div class="m">${r.kind === 'stage' ? r.org : r.rel + ' · ' + r.org} · ${r.when}</div></div></div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="panel card" style="grid-column: span 3">
+      <div class="ch"><h2>Follow-ups</h2><small class="mono">${FOLLOW_UPS.length}</small></div>
+      ${['Overdue', 'Today', 'Upcoming'].map((g) => `
+        <div class="grp ${g === 'Overdue' ? 'od' : ''}">${g === 'Overdue' ? icon('clock', 13) : ''}${g}</div>
+        ${FOLLOW_UPS.filter((f) => f.group === g).slice(0, g === 'Upcoming' ? 2 : 3).map((f) => `
+          <div class="fu ${g === 'Overdue' ? 'od' : ''}"><span class="cb" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark done"></span>
+            <div><div class="t">${f.text}</div><div class="m">${f.org}</div></div><span class="d">${f.due}</span></div>`).join('')}
+      `).join('')}
+    </div>
+  </section>
+</main>`;
+</script>
+</body>
+</html>

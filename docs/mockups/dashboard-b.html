@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Dashboard · Direction B</title>
+<link rel="stylesheet" href="shared/tokens.css">
+<script src="shared/data.js"></script>
+<script src="shared/shell-b.js"></script>
+<style id="shell"></style>
+<style>
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+  .hero { grid-column: span 12; background: var(--ink); color: var(--sea-mist); border-radius: 20px; padding: 26px 28px 18px; display: grid; grid-template-columns: 360px 1fr; gap: 32px; }
+  .hero h2 { color: #fff; font-size: 15px; font-weight: 600; }
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .kpi { background: rgb(205 216 219 / 0.07); border-radius: 14px; padding: 14px 16px; }
+  .kpi span { font-size: 12px; font-weight: 500; }
+  .kpi b { display: block; font-family: var(--font-mono); color: #fff; font-size: 22px; font-weight: 600; letter-spacing: -0.03em; margin-top: 6px; }
+  .kpi small { display: block; font-size: 12px; margin-top: 2px; }
+  .kpi .g { color: var(--sea-green); font-weight: 600; }
+  .kpi.feature { grid-column: span 2; background: var(--sea-green); color: var(--ink); }
+  .kpi.feature b { color: var(--ink); font-size: 34px; }
+  .hero .ch { display: flex; justify-content: space-between; align-items: baseline; }
+  .hero .ch small { font-size: 12.5px; }
+  .card { padding: 20px 22px; }
+  .card h2 { font-size: 15px; font-weight: 600; }
+  .card .ch { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .card .ch small { font-size: 12.5px; color: var(--ink-muted); }
+  .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  /* Funnel as a staircase with conversion between steps */
+  .stair { display: flex; flex-direction: column; }
+  .st { display: grid; grid-template-columns: 96px 1fr 84px; gap: 12px; align-items: center; height: 40px; }
+  .st .nm { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+  .st .track { height: 26px; background: var(--bg); border-radius: 8px; overflow: hidden; }
+  .st .fill { height: 100%; border-radius: 8px; }
+  .st .v { font-family: var(--font-mono); font-size: 13px; font-weight: 600; text-align: right; }
+  .conv { display: grid; grid-template-columns: 96px 1fr 84px; gap: 12px; height: 16px; font-size: 11px; color: var(--ink-muted); }
+  .conv span { grid-column: 2; font-family: var(--font-mono); padding-left: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 99px; }
+  /* Follow-up table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 12px; font-weight: 500; color: var(--ink-muted); padding: 0 8px 8px; }
+  td { padding: 10px 8px; box-shadow: 0 -1px 0 var(--tint); vertical-align: middle; }
+  td.d { font-family: var(--font-mono); white-space: nowrap; }
+  tr.od td.d { color: var(--raspberry-ink); font-weight: 600; }
+  .cb { display: block; width: 18px; height: 18px; border-radius: 6px; box-shadow: inset 0 0 0 2px var(--sea-mist); }
+  .tag { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-muted); }
+  .ra { display: grid; grid-template-columns: 74px 1fr; gap: 12px; padding: 9px 0; }
+  .ra + .ra { box-shadow: 0 -1px 0 var(--tint); }
+  .ra .w { font-size: 12px; color: var(--ink-muted); padding-top: 1px; }
+  .ra .t { font-size: 13px; line-height: 1.35; }
+  .ra .m { font-size: 12px; color: var(--ink-muted); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="b-page" id="app"></div>
+<script>
+document.getElementById('shell').textContent = SHELL_B_CSS;
+const fmax = FUNNEL.rows[0].value;
+const kindIcon = { call: 'call', email: 'email', note: 'note', stage: 'stage' };
+
+document.getElementById('app').innerHTML = shellB('dashboard') + `
+<div class="b-title"><h1>Good afternoon</h1><span class="muted">Wednesday, 18 November 2026 · all figures in USD</span></div>
+<section class="grid">
+  <div class="hero">
+    <div>
+      <h2>How sales are going</h2>
+      <div class="kpis">
+        <div class="kpi feature"><span>Revenue won, last 12 months</span><b>${usd(FIG.revenueWon12)}</b><small>+18% on the 12 months before</small></div>
+        <div class="kpi"><span>Open pipeline</span><b>${usd(FIG.openValue)}</b><small>${FIG.openCount} deals</small></div>
+        <div class="kpi"><span>Expected revenue</span><b>${usd(FIG.expected)}</b><small>Value × probability</small></div>
+        <div class="kpi"><span>Win rate, 12 months</span><b>${Math.round(FIG.winRate * 100)}%</b><small><span class="g">${FIG.wonCount12} won</span> · ${FIG.lostCount12} lost</small></div>
+        <div class="kpi"><span>Needs attention</span><b style="color:#FF8FA8">${FIG.lateCount + FIG.overdueCount}</b><small>${FIG.lateCount} late deals · ${FIG.overdueCount} overdue</small></div>
+      </div>
+    </div>
+    <div>
+      <div class="ch"><h2>Revenue won by month</h2><small>Dec 2025 to Nov 2026</small></div>
+      ${lineChart({ values: REVENUE_WON, labels: MONTHS, width: 900, height: 330, stroke: '#06D6A0', fill: '#06D6A0', fillOpacity: 0.28, grid: 'rgba(205,216,219,0.16)', text: '#A9BEC4', dotFill: '#073B4C', callout: 9, calloutBg: '#06D6A0', calloutText: '#073B4C', label: 'Revenue won by month' })}
+    </div>
+  </div>
+
+  <div class="panel card" style="grid-column: span 5">
+    <div class="ch"><h2>Sales funnel</h2><small>Value that reached each stage</small></div>
+    <div class="stair">
+      ${FUNNEL.rows.map((r, i) => {
+        const s = stageOf(r.key);
+        const conv = i ? `<div class="conv"><span>↓ ${Math.round((r.value / FUNNEL.rows[i - 1].value) * 100)}% carried on</span></div>` : '';
+        return conv + `<div class="st"><span class="nm"><span class="dot" style="background:${s.dot}"></span>${s.name}</span>
+          <div class="track"><div class="fill" style="width:${(r.value / fmax) * 100}%;background:${s.fill}"></div></div>
+          <span class="v">${usdShort(r.value)}</span></div>`;
+      }).join('')}
+    </div>
+    <p class="muted" style="font-size:12.5px;margin-top:12px">Lost along the way: <span class="mono">${usd(FUNNEL.lost)}</span> across ${FUNNEL.lostCount} deals</p>
+  </div>
+
+  <div class="panel card" style="grid-column: span 7">
+    <div class="ch"><h2>Deals won and lost by month</h2>
+      <div class="legend"><span><i style="background:var(--sea-green)"></i>Won</span><span><i style="background:var(--coral)"></i>Lost</span></div></div>
+    ${barChart({ labels: MONTHS, series: [{ values: WON_COUNT, color: 'var(--sea-green)' }, { values: LOST_COUNT, color: 'var(--coral)' }], width: 700, height: 272, grid: '#DCE5E8', text: '#4F6E78', label: 'Deals won and lost by month' })}
+  </div>
+
+  <div class="panel card" style="grid-column: span 7">
+    <div class="ch"><h2>Follow-ups</h2><small>${FIG.overdueCount} overdue · 2 today · 3 upcoming</small></div>
+    <table>
+      <thead><tr><th style="width:28px"></th><th>Due</th><th>Task</th><th>For</th><th>Organization</th></tr></thead>
+      <tbody>
+        ${FOLLOW_UPS.map((f) => `<tr class="${f.group === 'Overdue' ? 'od' : ''}">
+          <td><span class="cb" role="checkbox" aria-checked="false" tabindex="0" aria-label="Mark done"></span></td>
+          <td class="d">${f.group === 'Today' ? 'Today' : f.due}</td>
+          <td style="font-weight:500">${f.text}</td>
+          <td><span class="tag">${icon(f.type, 14)}${f.rel}</span></td>
+          <td class="muted">${f.org}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel card" style="grid-column: span 5">
+    <div class="ch"><h2>Recent activity</h2><a href="#" class="muted" style="font-size:12.5px">All</a></div>
+    ${RECENT.map((r) => `<div class="ra"><span class="w">${r.when}</span><div>
+      <div class="t">${r.kind === 'stage' ? `<b>${r.rel}</b> moved from ${r.from} to <span class="pill stage-${r.to.toLowerCase()}" style="padding:0 7px;font-size:11.5px">${r.to}</span>` : r.text}</div>
+      <div class="m">${icon(kindIcon[r.kind], 12)}${r.kind === 'stage' ? 'Stage change' : r.rel} · ${r.org}</div></div></div>`).join('')}
+  </div>
+</section>`;
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+/* Brand tokens from docs/spec.md and docs/TECH_STACK.md.
+   Mockups load the fonts from Google Fonts for convenience; the app bundles them. */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #F0F4F5;
+  --panel: #FFFFFF;
+  --tint: #E6EDEF;
+  --ink: #073B4C;
+  --ink-muted: #4F6E78;
+  --sea-green: #06D6A0;
+  --sea-green-ink: #04805F;
+  --marigold: #FFC145;
+  --marigold-ink: #9A6700;
+  --coral: #F78C6B;
+  --coral-ink: #B4432A;
+  --cerulean: #118AB2;
+  --cerulean-ink: #0E7CA0;
+  --raspberry: #EF476F;
+  --raspberry-ink: #D63A60;
+  --sea-mist: #CDD8DB;
+  --shadow: 0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05);
+  --shadow-lift: 0 12px 32px rgb(7 59 76 / 0.18), 0 2px 6px rgb(7 59 76 / 0.10);
+  --font-sans: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.45 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--cerulean); outline-offset: 2px; border-radius: 6px; }
+svg { display: block; }
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.muted { color: var(--ink-muted); }
+.panel { background: var(--panel); border-radius: 16px; box-shadow: var(--shadow); }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; line-height: 18px; white-space: nowrap;
+}
+.stage-new { background: var(--cerulean-ink); color: #fff; }
+.stage-qualified { background: var(--marigold); color: var(--ink); }
+.stage-proposal { background: var(--coral); color: var(--ink); }
+.stage-negotiation { background: var(--ink); color: #fff; }
+.stage-won { background: var(--sea-green); color: var(--ink); }
+.stage-lost { background: var(--sea-mist); color: var(--ink); }
+.late { background: var(--raspberry-ink); color: #fff; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 14px; border-radius: 10px;
+  font-weight: 600; font-size: 14px;
+}
+.btn-primary { background: var(--sea-green); color: var(--ink); }
+.btn-quiet { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+
+.avatar {
+  display: inline-grid; place-items: center;
+  width: 24px; height: 24px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+  background: var(--tint); color: var(--ink);
+}
