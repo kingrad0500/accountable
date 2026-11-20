@@ -310,6 +310,9 @@ Defined once in `tokens.css` as CSS variables and mapped into Tailwind.
 | `--raspberry` | `#EF476F` | Late, overdue, delete |
 | `--raspberry-ink` | `#D63A60` | Raspberry behind small white text, Raspberry text on white |
 | `--sea-mist` | `#CDD8DB` | Lost stage, sidebar text, column tint |
+| `--raspberry-deep` | `#B8294F` | Late date on a late card's `#FFF3F5` tint |
+
+*Note (2026-11-19, building):* the contrast test showed `--raspberry-ink` on the late card tint is 4.19:1, under AA for the card's small date text, so a deeper shade, `--raspberry-deep` (4.9:1), was added for that one use.
 
 #### Shape and depth
 

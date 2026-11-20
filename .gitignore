@@ -77,3 +77,7 @@ Thumbs.db
 logs/
 *.log
 tmp/
+
+# Local app data and the end-to-end test database
+data/
+e2e/.tmp/

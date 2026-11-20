@@ -1,0 +1,37 @@
+/* Brand tokens (docs/spec.md, Colors). Defined once here and mapped into Tailwind.
+   Every text/background pair in use is checked by styles/contrast.test.ts. */
+@import "@fontsource-variable/instrument-sans/wght.css";
+@import "@fontsource/instrument-serif/latin-400.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+
+:root {
+  --bg: #f0f4f5;
+  --panel: #ffffff;
+  --tint: #e6edef;
+  --ink: #073b4c;
+  --ink-muted: #4f6e78;
+  --sea-green: #06d6a0;
+  --sea-green-ink: #04805f;
+  --marigold: #ffc145;
+  --marigold-ink: #9a6700;
+  --coral: #f78c6b;
+  --coral-ink: #b4432a;
+  --cerulean: #118ab2;
+  --cerulean-ink: #0e7ca0;
+  --raspberry: #ef476f;
+  --raspberry-ink: #d63a60;
+  --raspberry-light: #ff8fa8;
+  --raspberry-deep: #b8294f;
+  --late-tint: #fff3f5;
+  --sea-mist: #cdd8db;
+  --hero-muted: #a9bec4;
+
+  --shadow: 0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05);
+  --shadow-lift: 0 12px 32px rgb(7 59 76 / 0.18), 0 2px 6px rgb(7 59 76 / 0.1);
+
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
