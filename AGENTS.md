@@ -44,6 +44,6 @@ Run `npm run check` from the repo root before you call any work done. It runs ev
 1. Backend unit tests (pytest, `backend/tests/`)
 2. Frontend typecheck (`tsc`)
 3. Frontend unit tests (Vitest, `frontend/src/**/*.test.ts(x)`)
-4. End-to-end tests (Playwright in the installed Google Chrome, `e2e/`), including the speed checks on the large dataset
+4. End-to-end tests (Playwright in the installed Google Chrome, `e2e/`), including the speed checks on the large dataset and a text contrast check on every screen in both modes (`e2e/contrast.ts`)
 
-It keeps going after a failing suite, so you see every failure in one run, then prints a summary and exits with 1. The tests start their own servers on test ports with their own database, so nothing else needs to be running and your data is never touched. Fix failures until it passes; don't skip or weaken a test to get there. Run one suite with `npm run test:backend`, `npm run test:frontend` or `npm run test:e2e`.
+It keeps going after a failing suite, so you see every failure in one run, then prints a summary and exits with 1. Runs take turns: a second `npm test` or `npm run check` (including the Stop hook's) prints "Waiting for another check or test run" and waits, so the speed checks never run on a busy machine. Don't start one in the background just before you end a turn; the hook will wait for it. The tests start their own servers on test ports with their own database, so nothing else needs to be running and your data is never touched. Fix failures until it passes; don't skip or weaken a test to get there. Run one suite with `npm run test:backend`, `npm run test:frontend` or `npm run test:e2e`.

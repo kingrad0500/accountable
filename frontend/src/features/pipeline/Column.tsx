@@ -52,7 +52,7 @@ export const Column = memo(function Column({
       >
         <div className="flex items-center justify-between font-semibold">
           <h2 className="text-[14px]">{s.label}</h2>
-          <span className="mono text-[12px] opacity-85" data-testid={`count-${stage}`}>
+          <span className="mono text-[12px]" data-testid={`count-${stage}`}>
             {plural(totals.count, "deal")}
           </span>
         </div>
@@ -63,10 +63,10 @@ export const Column = memo(function Column({
           <Money value={totals.value} />
         </div>
         {closed ? (
-          <p className="text-[12px] opacity-85">{closedCaption}</p>
+          <p className="text-[12px]">{closedCaption}</p>
         ) : (
           <>
-            <p className="text-[12px] opacity-85" data-testid={`expected-${stage}`}>
+            <p className="text-[12px]" data-testid={`expected-${stage}`}>
               Expected <Money value={totals.expected} className="font-semibold" />
             </p>
             <div

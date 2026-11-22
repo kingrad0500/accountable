@@ -100,7 +100,7 @@ const ROLE_PAIRS: Pair[] = [
   ["dot-negotiation", "surface", 3, "Negotiation dot on panels"],
   ["dot-negotiation", "raised", 3, "Negotiation dot in the Move to menu"],
   ["dot-negotiation", "bg", 3, "Negotiation funnel bar on its track"],
-  ["sea-green", "brand-mark", 3, "the wordmark's 21px A on its mark"],
+  ["sea-green", "brand-mark", 4.5, "the wordmark's A on its mark (21px, normal weight)"],
   ["brand-mark", "raised", 1.4, "the wordmark's mark stands out from the top bar"],
   ["text-green", "bg", 3, "chart lines on the page"],
   ["text-muted", "surface", 3, "checkbox outline"],

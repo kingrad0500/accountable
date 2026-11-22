@@ -23,7 +23,7 @@ Testing will cover:
 
 1. Unit tests for the frontend, using Vitest
 2. Unit tests for the backend, using pytest
-3. End-to-end tests of the whole app in a browser, in `e2e/`, using Playwright Test (`@playwright/test`) with the installed Google Chrome. They start the app themselves, so `npm test` needs nothing else running.
+3. End-to-end tests of the whole app in a browser, in `e2e/`, using Playwright Test (`@playwright/test`) with the installed Google Chrome. They start the app themselves, so `npm test` needs nothing else running. `npm test` and `npm run check` take turns: a second run, such as the Stop hook's `check:quick`, waits for the first, because two at once slow each other down until the speed tests fail.
 
 The tests use a database of their own, so running them never changes your data.
 
@@ -63,9 +63,10 @@ Every pairing meets WCAG AA. Normal text needs 4.5:1; large or bold text, icons,
 - In dark mode the same text roles point at the bright brand colors or lighter shades instead (Sea Green, Marigold, Coral `#FA9A7C`, Cerulean `#5CC0E2`, Raspberry `#FF8FA8`), with Sea Mist text and `#9DB4BB` muted text, since they sit on black or deep Midnight.
 - White text sits on the brand Cerulean and Raspberry only at 14px bold or larger. Smaller white text, such as stage pills and the Late label, uses the darker Cerulean and Raspberry shades.
 - Focus is a 2px Cerulean outline with a 2px offset.
-- Two Midnight marks get dark-mode roles so they don't vanish: the Negotiation dot and funnel bar (`--dot-negotiation`, Steel `#6E97A5`) and the wordmark's mark (`--brand-mark`, `#1D5568`).
+- Two Midnight marks get dark-mode roles so they don't vanish: the Negotiation dot and funnel bar (`--dot-negotiation`, Steel `#6E97A5`) and the wordmark's mark (`--brand-mark`, `#1A5063`).
 - `styles/contrast.test.ts` parses `tokens.css`, resolves the roles for each mode and checks every role pair in use in both modes, and every fill pair once. It also fails if a hex value appears twice, or anywhere outside the palette, and if light mode's values drift from what they were before dark mode.
 - `styles/colors.test.ts` fails if any file in `frontend/src` other than `tokens.css`, or `index.html`, holds a color value: hex, `rgb()`, `hsl()`, a named CSS color or a Tailwind default palette class. `global.css` switches Tailwind's default palette off (`--color-*: initial`), so only token classes exist.
+- `e2e/contrast.spec.ts` checks every piece of visible text on every section and a record page of each kind, in both modes, with a hand-written checker (`e2e/contrast.ts`, no dependency). It reads the computed colors and composites each element's background and opacity from `<html>` down, so dimmed text, translucent fills and `color-mix()` tints are measured as drawn, which the token-pair test can't see. Two more tests prove the checker catches failures and passes good text. It doesn't check SVG chart text, dots, bars or other marks; reviews do (`docs/REVIEW.md`).
 
 ### Libraries
 
