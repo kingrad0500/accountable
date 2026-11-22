@@ -78,7 +78,7 @@ Each requirement has an ID so tests and reviews can point to it.
 - **G8** Every action works from the keyboard. Focus is always visible. Text meets WCAG AA contrast.
 - **G9** The browser console shows no errors or warnings during normal use.
 - **G10** A quick search box in the top bar finds deals, contacts and organizations by name as you type, and lists up to 8 matches grouped by type. Arrow keys move through the matches; Enter or a click opens the record. `/` focuses the box unless you're typing elsewhere. It searches the lists in the browser, which it loads the first time the box is used, so other pages don't pay for them.
-- **G11** A sun/moon icon button in the top bar switches between light and dark mode on every page, straight away and without a reload. Its accessible label says what it does: "Switch to dark mode" or "Switch to light mode". Light mode is the default. The choice is remembered in the browser (`localStorage`, key `accountable-theme`) and applied by a small script in `index.html` before the first paint, so a reload in dark mode never flashes light. If the stored value is missing or unreadable, the app opens in light mode. Every section, dialog, menu, chart, tooltip and toast follows the mode.
+- **G11** A sun/moon icon button in the top bar switches between light and dark mode on every page, straight away and without a reload. Its accessible label says what it does: "Switch to dark mode" or "Switch to light mode". Light mode is the default. The choice is remembered in the browser (`localStorage`, key `accountable.theme`, alongside the board's `accountable.pipeline.closedDeals`) and applied by a small script in `index.html` before the first paint, so a reload in dark mode never flashes light. If the stored value is missing or unreadable, the app opens in light mode. Every section, dialog, menu, chart, tooltip and toast follows the mode.
 
 ### Tables (Organizations, Contacts, Deals)
 
@@ -369,6 +369,7 @@ Defined once in `tokens.css`, in two layers (Decision 13), and both layers are m
 | `--slate` | `#4F6E78` | Light secondary text |
 | `--slate-light` | `#9DB4BB` | Dark secondary text |
 | `--sea-green` | `#06D6A0` | Primary buttons, Won, fills (Midnight text) |
+| `--sea-green-hover` | `#05C493` | Primary button hover |
 | `--sea-green-ink` | `#04805F` | Sea Green text and chart lines on white |
 | `--marigold` | `#FFC145` | Qualified, fills (Midnight text) |
 | `--marigold-ink` | `#9A6700` | Marigold text on white |
@@ -380,6 +381,7 @@ Defined once in `tokens.css`, in two layers (Decision 13), and both layers are m
 | `--cerulean-light` | `#5CC0E2` | Cerulean text on dark |
 | `--raspberry` | `#EF476F` | Late, overdue, delete |
 | `--raspberry-ink` | `#D63A60` | Late pill and delete button (white text), Raspberry text on white |
+| `--raspberry-ink-hover` | `#C22F53` | Delete button hover |
 | `--raspberry-deep` | `#B8294F` | Late date on the light late tint (4.9:1; `--raspberry-ink` is only 4.19:1 there) |
 | `--raspberry-light` | `#FF8FA8` | Raspberry text on dark, and the "Needs attention" number on the Midnight panel |
 | `--rose-50` | `#FFF3F5` | Light late tint |
@@ -407,7 +409,7 @@ Defined once in `tokens.css`, in two layers (Decision 13), and both layers are m
 | `--shadow` | soft Midnight shadow | `0 1px 2px rgb(0 0 0 / 0.4)` | Panels and cards |
 | `--shadow-lift` | larger Midnight shadow | `0 16px 40px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4)` | A dragged card, and in dark mode every raised surface. In light mode each raised element keeps the shadow it has today |
 
-The rule is: on a fill, text is a palette color; on a surface, text is a role. So a hue like Cerulean has one fill token and one text role, and there's never a second token holding the same value. Overlay and shadows hold their own `rgb()` values because they are transparent.
+The rule is: on a fill, text is a palette color; on a surface, text is a role. So a hue like Cerulean has one fill token and one text role, and there's never a second token holding the same value. Overlay and shadows hold their own `rgb()` values because they are transparent. Any other translucent color is a `color-mix()` of a token (for example the faint Sea Mist tiles on the Midnight panel), never a written-out `rgb()` value.
 
 Dark text on every surface (lowest pair first): `--text-muted` on `--tint` 4.79:1, `--text-raspberry` on `--tint` 4.83:1, `--text-coral` on `--tint` 4.94:1, `--text-cerulean` on `--tint` 5.0:1; every pair on `--surface`, `--bg` and `--raised` is above 5.2:1. The focus ring (Cerulean) is 4.13:1 on the dark page, 5.3:1 on black and 3.25:1 on the raised surface.
 
