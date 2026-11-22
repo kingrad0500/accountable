@@ -30,6 +30,12 @@ Run `npm run check` from the repo root before you call any work done. It runs ev
 
 `npm run check:quick` runs the same without the end-to-end tests, for a fast loop while working. `npm run format` fixes the formatting. Fix what the checks find; don't weaken a rule, skip a test or add a disable comment to get them passing. If a rule doesn't suit the project, ask first.
 
+## Hooks
+
+- **Git pre-commit** (lefthook, `lefthook.yml`, installed by `npm install`): formats the staged files and stages the fixes, then runs ESLint and ruff on them, `tsc` and `ty`, and gitleaks on the staged changes. No tests, so it stays quick (about 5 seconds). `git commit -n` skips it.
+- **When Claude finishes a turn** (`.claude/hooks/check-on-stop.mjs`): runs `npm run check:quick` and, if it fails, sends the output back to fix. It blocks once per turn, then lets the stop through.
+- **Before Claude edits a file** (`.claude/hooks/protect-env.mjs`): blocks any edit to a `.env` file, and any Bash command that names one. `.env.example` and similar files are allowed.
+
 ## Testing
 
 `npm test` runs just the tests. It runs every suite in order and fails if any test fails:
