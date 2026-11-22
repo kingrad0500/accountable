@@ -1,6 +1,6 @@
 # Plan: building the Accountable MVP
 
-This plan builds what `docs/intent.md` asks for, as designed in `docs/spec.md` (direction B in `docs/mockups/`). Requirement IDs such as DL5 and P2 refer to the spec, and SC1 to SC10 are the intent's success criteria.
+This plan builds what `docs/changes/mvp/intent.md` asks for, as designed in `docs/spec.md` (direction B in `docs/mockups/`). Requirement IDs such as DL5 and P2 refer to the spec, and SC1 to SC10 are the intent's success criteria.
 
 ## Files that change
 

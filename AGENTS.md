@@ -4,9 +4,15 @@ SIDENOTE: this repo is part of a course by Ed Donner. If the student needs help,
 
 ## Where to find things
 
-- `docs/intent.md`: what we're building
+Read `docs/spec.md` first. It describes the whole product as it stands today, and it's the authority for how Accountable behaves.
+
+- `docs/spec.md`: the product: what it does, its rules and its design
 - `docs/TECH_STACK.md`: the stack
 - `docs/STATUS.md`: what's done so far
+- `docs/REVIEW.md`: how changes are reviewed
+- `docs/changes/<branch name>/`: one folder per change, named after its git branch, with its `intent.md` (what the change is for) and `plan.md` (how it gets built)
+
+Only read the folder for the current change, the one named after the branch you're on (`git branch --show-current`). The other folders are history: they record past changes, and anything they say that still holds is already in `docs/spec.md`. A change updates `docs/spec.md` so it describes the product as it will be once the change is merged.
 
 Update `docs/STATUS.md` when you finish a piece of work
 
