@@ -2,30 +2,41 @@ name: CI
 
 on:
   push:
-  pull_request:
 
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+  check:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the whole history, so gitleaks scans every commit
+
+      # Secrets first, so a leaked one fails the run straight away.
+      - name: Install gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz \
+            | tar -xz -C /usr/local/bin gitleaks
+      - name: Scan for secrets (gitleaks)
+        run: |
+          gitleaks git --no-banner --redact --config .gitleaks.toml .
+          gitleaks dir --no-banner --redact --config .gitleaks.toml .
+
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
-      - uses: astral-sh/setup-uv@v6
-      # GitHub's runners come with Google Chrome installed, which the end-to-end tests use.
-      - run: npm install
+      # setup-uv has no major version tags, so it's pinned to a full release. It installs the latest uv.
+      - uses: astral-sh/setup-uv@v10.4.0
+      - run: npm ci
       - run: uv sync
-      - run: npm test
-      - uses: actions/upload-artifact@v4
+
+      # The end-to-end tests use the Google Chrome already installed on GitHub's runner.
+      - run: npm run check
+
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: playwright-report-${{ matrix.os }}
+          name: playwright-report
           path: |
             playwright-report/
             test-results/
