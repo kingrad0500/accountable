@@ -37,18 +37,18 @@ One salesperson at a business-to-business services company, using Accountable on
 - One documented command resets the data to the sample data.
 - Tables and the board stay smooth with a few thousand records.
 - There's no sign-in. The computer itself is the boundary that keeps the data private, so the servers listen on localhost only and nothing calls an outside service.
-- The look follows Accountable's brand guidelines (the `brand` skill), which take priority over any general design guidance. Light mode only, designed for a laptop or desktop screen.
+- The look follows Accountable's brand guidelines (the `brand` skill), which take priority over any general design guidance. Light mode by default, with a dark mode the user can switch to. Designed for a laptop or desktop screen.
 
 ### Not in the product
 
-Sign-in, user accounts or several users; dark mode or a layout for phones; AI features; email, calendar or phone integrations; currencies other than US dollars; reports beyond the dashboard; tags or custom fields; changing the pipeline stages; importing or exporting data.
+Sign-in, user accounts or several users; following the device's own dark mode setting; a layout for phones; AI features; email, calendar or phone integrations; currencies other than US dollars; reports beyond the dashboard; tags or custom fields; changing the pipeline stages; importing or exporting data.
 
 ## Decisions
 
 These rules settle questions the requirements below depend on. Each was chosen on purpose, so a change that alters one should say so.
 
 1. **Stage colors.** The brand has five colors and the board has six stages, and Raspberry is kept for alerts. New = Cerulean, Qualified = Marigold, Proposal = Coral, Negotiation = Midnight, Won = Sea Green, Lost = Sea Mist. Raspberry is used only for late, overdue and delete. This breaks the brand's "Sea Green, Marigold and Coral first" order for stages, because Won reads most naturally as green.
-2. **Contrast.** White on Cerulean (3.96:1) and white on Raspberry (3.62:1) fail normal-text contrast, and Sea Green on white (1.89:1) fails even for chart lines. So bright colors are fills with Midnight text on top. Each color has a darker "ink" shade for text, icons and chart lines. White text sits on brand Cerulean and Raspberry only at 14px bold and up; smaller white text uses the darker shades. A unit test checks every pairing. See [Colors](#colors) and `docs/TECH_STACK.md`.
+2. **Contrast.** White on Cerulean (3.96:1) and white on Raspberry (3.62:1) fail normal-text contrast, and Sea Green on white (1.89:1) fails even for chart lines. So bright colors are fills with Midnight text on top. Each color has a darker "ink" shade for text, icons and chart lines. White text sits on brand Cerulean and Raspberry only at 14px bold and up; smaller white text uses the darker shades. Dark mode points the text roles at the bright brand colors or lighter shades instead, since text sits on black; the fills and their Midnight text don't change. A unit test checks every pairing, in both modes for roles. See [Colors](#colors) and `docs/TECH_STACK.md`.
 3. **Deals with no organization.** An organization is required on a deal, but deleting an organization leaves its deals with none. These deals show a "No organization" label. The Deals table has a "No organization" filter so they're easy to find. Saving one of them from the edit form asks for an organization, the same as a new deal. Moving the deal on the board still works without one.
 4. **Won and Lost columns don't grow without limit.** A filter above the board, "Closed deals: Last 30 days / Last 90 days / Last 12 months / All", set to 90 days by default, applies only to Won and Lost, by close date. Open columns always show every deal, and the open totals don't depend on it. The board remembers the choice in the browser. A deal dragged to Won or Lost gets today as its close date, so it always stays in view.
 5. **Timelines follow the current links.** An activity on a deal shows on the timeline of the deal's current main contact, worked out when the timeline is read. The organization timeline works the same way: it shows activity for the contacts and deals that belong to the organization now.
@@ -59,6 +59,8 @@ These rules settle questions the requirements below depend on. Each was chosen o
 10. **"Today" is the computer's local date.** Late deals, overdue follow-ups and the Won/Lost close date all depend on it. Backend and browser run on the same machine, so they agree. Dates without a time (close date, follow-up date) are stored as `YYYY-MM-DD`. Activity times are stored in UTC and shown in local time.
 11. **Winning a deal doesn't change the contact's status.** The status stays manual. Upgrading a lead to customer when a deal is won is a likely early request.
 12. **Sample dates age.** The sample data is placed relative to the day it's seeded. A week later, more follow-ups are overdue and more deals are late. That's expected, and `npm run seed` refreshes everything.
+13. **Dark mode remaps roles, not colors.** Light mode is the default and looks exactly as it did before dark mode existed. Colors live in two layers in `tokens.css` (see [Colors](#colors)): a fixed **palette**, where every hex value appears once and never changes with the mode, and a small set of **roles** (page, surface, text, tints, lines, shadows), each an alias to a palette color. Dark mode only points the roles at different palette colors, under `[data-theme="dark"]` on `<html>`. Fills (stage colors, Sea Green buttons, pills, the Midnight summary panel) use the palette directly with fixed text on top, so they don't change; anything that sits on a surface uses a role. Components, charts included, never use a color value, so nothing else needs to know which mode is on. The mode doesn't follow the device setting: it changes only when the user clicks the toggle.
+14. **Dark surfaces get depth from tone, not shadow.** The brand sets a deep Midnight page (`#04232E`) and black panels and cards. Black panels sit below the page, like wells cut into it, so content reads as set into the frame. Anything that floats above the page (the top bar, dialogs, menus, popovers, tooltips, toasts and a card being dragged) uses a lighter **raised** surface (`#0F3644`) plus a deep black shadow, because in the dark a higher layer is a lighter one. The stack runs well (black), page, raised, with tints for hover and selection on top. In light mode surface and raised are both white and the soft shadows do the work, as before. No outlines are added in either mode.
 
 ## Requirements
 
@@ -71,11 +73,12 @@ Each requirement has an ID so tests and reviews can point to it.
 - **G3** `npm run seed` deletes all data and reloads the sample data.
 - **G4** Every change is saved to SQLite before the UI confirms it. Changes survive a refresh and a restart.
 - **G5** The app works with no internet connection once installed.
-- **G6** Light mode only, designed for screens 1280px wide and up. At 1280px nothing is cut off. The pipeline board scrolls sideways inside its own panel, not the page.
+- **G6** Designed for screens 1280px wide and up. At 1280px nothing is cut off. The pipeline board scrolls sideways inside its own panel, not the page.
 - **G7** Every screen loads, and responds to every action, in under 500 ms on an ordinary laptop with 3,000 deals, 3,000 contacts and 10,000 activities.
 - **G8** Every action works from the keyboard. Focus is always visible. Text meets WCAG AA contrast.
 - **G9** The browser console shows no errors or warnings during normal use.
 - **G10** A quick search box in the top bar finds deals, contacts and organizations by name as you type, and lists up to 8 matches grouped by type. Arrow keys move through the matches; Enter or a click opens the record. `/` focuses the box unless you're typing elsewhere. It searches the lists in the browser, which it loads the first time the box is used, so other pages don't pay for them.
+- **G11** A sun/moon icon button in the top bar switches between light and dark mode on every page, straight away and without a reload. Its accessible label says what it does: "Switch to dark mode" or "Switch to light mode". Light mode is the default. The choice is remembered in the browser (`localStorage`, key `accountable-theme`) and applied by a small script in `index.html` before the first paint, so a reload in dark mode never flashes light. If the stored value is missing or unreadable, the app opens in light mode. Every section, dialog, menu, chart, tooltip and toast follows the mode.
 
 ### Tables (Organizations, Contacts, Deals)
 
@@ -218,11 +221,12 @@ frontend/
   src/
     main.tsx, App.tsx   router + providers
     api/                typed fetch client and API types
-    components/         TopBar, QuickSearch, DataTable, FormDialog, ConfirmDelete, Pill, Money
+    components/         TopBar, QuickSearch, ThemeToggle, DataTable, FormDialog, ConfirmDelete, Pill, Money
     features/           organizations/, contacts/, deals/, activities/, pipeline/, dashboard/
                         each with its pages, components, form schema and query hooks
-    lib/                format, dates, stages
-    styles/             tokens.css, global styles
+    lib/                format, dates, stages, theme (read, apply and remember the mode)
+    styles/             tokens.css (light and dark values), global styles
+  index.html            sets the stored mode on <html> before the first paint (G11)
   vite.config.ts
 e2e/                    Playwright tests
 docs/                   this spec, the tech stack, status, review policy, mockups,
@@ -299,16 +303,16 @@ All under `/api`. JSON in and out. Errors use FastAPI's standard shape. Validati
 
 ### Screens
 
-The design follows direction B in `docs/mockups/` (`dashboard-b.html` and `pipeline-b.html`, with screenshots). Where this text and the mockups differ, this text wins.
+The design follows direction B in `docs/mockups/` (`dashboard-b.html` and `pipeline-b.html`, with screenshots). Where this text and the mockups differ, this text wins. The mockups show light mode only; dark mode follows Decisions 13 and 14 and the dark column of the roles in [Colors](#colors).
 
-**Shell.** No sidebar. A floating white top bar, rounded 16px, sits 16px from the top of the page. On the left is the Accountable wordmark with its mark: a Midnight rounded square holding a Sea Green "A" in Instrument Serif. In the middle are five tabs with icons, in a light tray: Dashboard, Pipeline, Deals, Contacts, Organizations. The active tab is a white pill with a soft shadow. On the right are the quick search box (G10), with a "/" hint, and the page's main action as a Sea Green button, such as "Add deal". Content is centered, at most 1400px wide, on the `#F0F4F5` background. Each page sets the browser tab's title.
+**Shell.** No sidebar. A floating top bar on the raised surface (Decision 14), rounded 16px, sits 16px from the top of the page. On the left is the Accountable wordmark with its mark: a Midnight rounded square holding a Sea Green "A" in Instrument Serif. In the middle are five tabs with icons, in a light tray: Dashboard, Pipeline, Deals, Contacts, Organizations. The active tab is a pill on the surface color (white, or black in dark mode) with a soft shadow. On the right are the quick search box (G10), with a "/" hint, the mode toggle (G11), and the page's main action as a Sea Green button, such as "Add deal". Content is centered, at most 1400px wide, on the page background (`--bg`). Each page sets the browser tab's title.
 
 **Dashboard.** The title is a greeting for the time of day ("Good afternoon"), with the date and "all figures in USD" on the right. Below it, a 12-column grid:
 - Row 1, full width: a Midnight panel, rounded 20px, with Sea Mist text. On the left, the figures (DB1): revenue won over 12 months as a large Sea Green tile, then open pipeline, expected revenue, win rate, and "Needs attention" (late deals plus overdue follow-ups, its number in light Raspberry `#FF8FA8`). On the right, the revenue won line chart, drawn for a dark background: a bright Sea Green line and soft area fill, faint dashed gridlines, the best month labelled and this month's point drawn larger. Its tooltip shows the full amount and the number of deals won that month.
-- Row 2: the funnel (5 columns) and the won/lost bar chart (7 columns). The funnel is one row per stage: a stage dot and name, a bar on a light track in the stage color, and the value on the right. Between rows, a small line says what share carried on ("↓ 86% carried on"). The lost value is given underneath. The bar chart groups Won (Sea Green) and Lost (Coral) bars by month. Its tooltip has Midnight text with colored keys, not colored words.
-- Row 3: follow-ups (7 columns) and recent activity (5 columns). Follow-ups are a table with a done checkbox, due date, task, the related contact or deal with a type icon, and the organization. Overdue dates are dark Raspberry and today's say "Today". Recent activity shows when on the left and the entry on the right. A stage change shows the new stage as a pill.
+- Row 2: the funnel (5 columns) and the won/lost bar chart (7 columns). The funnel is one row per stage: a stage dot and name, a bar on a light track in the stage color, and the value on the right. Between rows, a small line says what share carried on ("↓ 86% carried on"). The lost value is given underneath. The bar chart groups Won (Sea Green) and Lost (Coral) bars by month. Its tooltip is a raised surface with `--text` and colored keys, not colored words. Gridlines, axis text and tooltips use roles, so the chart follows the mode. The summary panel's line chart looks the same in both modes, because the Midnight panel is a fill and doesn't change; its colors still come from the palette, not from values in the chart code.
+- Row 3: follow-ups (7 columns) and recent activity (5 columns). Follow-ups are a table with a done checkbox, due date, task, the related contact or deal with a type icon, and the organization. Overdue dates are `--text-raspberry` and today's say "Today". Recent activity shows when on the left and the entry on the right. A stage change shows the new stage as a pill.
 
-**Tables.** A white panel holds a toolbar (search box on the left, filters, "Add" button) and the table. Filter dropdowns on the page have a filter icon and a chevron. Headings are 13px, medium weight and muted Midnight; money columns say "(USD)". Rows are 48px tall with a light hover tint. Money and numbers are right-aligned in JetBrains Mono. Stage and status show as colored pills. The Edit and Delete icon buttons appear on row hover and on focus, and always have accessible labels.
+**Tables.** A panel holds a toolbar (search box on the left, filters, "Add" button) and the table. Filter dropdowns on the page have a filter icon and a chevron. Headings are 13px, medium weight and muted Midnight; money columns say "(USD)". Rows are 48px tall with a light hover tint. Money and numbers are right-aligned in JetBrains Mono. Stage and status show as colored pills. The Edit and Delete icon buttons appear on row hover and on focus, and always have accessible labels.
 
 **Record pages.** A header panel with the name, key fields and Edit and Delete. Below that, two columns:
 - Left (wider): the timeline, with the "Log activity" composer at its top. Each entry has a type icon in a colored circle (note Marigold, call Cerulean, email Coral, stage change Sea Mist), the description, the related record and a relative date ("3 days ago", with the full date on hover). Follow-ups show their date and a done checkbox.
@@ -326,12 +330,12 @@ The design follows direction B in `docs/mockups/` (`dashboard-b.html` and `pipel
 
   The header shows the name, the deal count, the total in large JetBrains Mono and the expected revenue. Open columns also get a thin meter for their share of open value. Won and Lost say "Closed in the last 90 days" instead.
 - **Add deal.** A quiet "Add deal" button sits under each header. It opens a small form in place, inside the column: deal name, organization, value and close date, with "Add to Qualified" (for example) and Cancel. "More details" opens the full form.
-- **Cards.** White, rounded 12px, with a soft shadow:
+- **Cards.** On the surface color (white, or black in dark mode), rounded 12px, with a soft shadow:
   - Open cards show the name with the value on the right, then the organization and probability, then the close date with a calendar icon and the main contact's initials.
   - Won and Lost cards are shorter, with the value in short form ("$59k").
-  - A late card has a very light Raspberry tint (`#FFF3F5`), a "Late" pill in place of the initials, and its date in dark Raspberry. It has no outline or colored edge.
+  - A late card has a Raspberry tint (`--late-tint`), a "Late" pill in place of the initials, and its date in `--text-late`. It has no outline or colored edge.
   - The "Move to" button shows on hover and when the card or the button has keyboard focus. It's always in the Tab order.
-- **Dragging.** The card lifts with a larger shadow and the drop position shows as a gap.
+- **Dragging.** The card lifts with a larger shadow, on the raised surface, and the drop position shows as a gap.
 
 ### Visual design
 
@@ -343,38 +347,77 @@ The design follows direction B in `docs/mockups/` (`dashboard-b.html` and `pipel
 
 #### Colors
 
-Defined once in `tokens.css` as CSS variables and mapped into Tailwind.
+Defined once in `tokens.css`, in two layers (Decision 13), and both layers are mapped into Tailwind. No component, chart or library theme uses a color value directly.
+
+**Palette.** Every hex value, once. These never change with the mode. Fills use them directly, with the text shown.
 
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#F0F4F5` | Page background |
-| `--panel` | `#FFFFFF` | Panels and cards |
-| `--tint` | `#E6EDEF` | Hover and selected tints, light tracks |
-| `--ink` | `#073B4C` | Text, Negotiation stage |
-| `--ink-muted` | `#4F6E78` | Secondary text (4.95:1 on page background) |
-| `--sea-green` | `#06D6A0` | Primary buttons (Midnight text), Won, fills |
+| `--midnight` | `#073B4C` | Brand ink. Negotiation, the summary panel, the open-value chip, the wordmark's mark (white or Sea Mist text). Text on every bright fill |
+| `--midnight-deep` | `#04232E` | Dark page |
+| `--black` | `#000000` | Dark surface |
+| `--white` | `#FFFFFF` | Light surface. Text on Midnight and the `-ink` fills |
+| `--deep-raised` | `#0F3644` | Dark raised surface |
+| `--deep-tint` | `#164556` | Dark hover and selected tint |
+| `--deep-line` | `#16404E` | Dark gridlines and meter tracks |
+| `--mist-50` | `#F0F4F5` | Light page |
+| `--mist-100` | `#E6EDEF` | Light hover and selected tint, light tracks, the tab tray |
+| `--mist-200` | `#DCE5E8` | Light gridlines |
+| `--sea-mist` | `#CDD8DB` | Brand ink on dark. Lost stage (Midnight text), text on the Midnight panel |
+| `--sea-mist-dark` | `#9FB3B9` | Lost stage dot, which needs more weight than Sea Mist on a light track |
+| `--hero-muted` | `#A9BEC4` | Chart axis text on the Midnight panel |
+| `--slate` | `#4F6E78` | Light secondary text |
+| `--slate-light` | `#9DB4BB` | Dark secondary text |
+| `--sea-green` | `#06D6A0` | Primary buttons, Won, fills (Midnight text) |
 | `--sea-green-ink` | `#04805F` | Sea Green text and chart lines on white |
 | `--marigold` | `#FFC145` | Qualified, fills (Midnight text) |
 | `--marigold-ink` | `#9A6700` | Marigold text on white |
 | `--coral` | `#F78C6B` | Proposal, Lost bars (Midnight text) |
 | `--coral-ink` | `#B4432A` | Coral text on white |
+| `--coral-light` | `#FA9A7C` | Coral text on dark |
 | `--cerulean` | `#118AB2` | New, info, focus ring |
-| `--cerulean-ink` | `#0E7CA0` | Cerulean behind small white text |
+| `--cerulean-ink` | `#0E7CA0` | New pills and headers (white text), Cerulean text on white |
+| `--cerulean-light` | `#5CC0E2` | Cerulean text on dark |
 | `--raspberry` | `#EF476F` | Late, overdue, delete |
-| `--raspberry-ink` | `#D63A60` | Raspberry behind small white text, Raspberry text on white |
-| `--raspberry-light` | `#FF8FA8` | "Needs attention" number on the Midnight panel |
-| `--raspberry-deep` | `#B8294F` | Late date on a late card's tint (4.9:1; `--raspberry-ink` is only 4.19:1 there) |
-| `--late-tint` | `#FFF3F5` | Late card background |
-| `--sea-mist` | `#CDD8DB` | Lost stage, text on the Midnight panel, column tint |
-| `--hero-muted` | `#A9BEC4` | Chart axis text on the Midnight panel |
+| `--raspberry-ink` | `#D63A60` | Late pill and delete button (white text), Raspberry text on white |
+| `--raspberry-deep` | `#B8294F` | Late date on the light late tint (4.9:1; `--raspberry-ink` is only 4.19:1 there) |
+| `--raspberry-light` | `#FF8FA8` | Raspberry text on dark, and the "Needs attention" number on the Midnight panel |
+| `--rose-50` | `#FFF3F5` | Light late tint |
+| `--rose-900` | `#2B0F19` | Dark late tint |
+
+**Roles.** Aliases to the palette. Only these change with the mode.
+
+| Role | Light | Dark | Use |
+|---|---|---|---|
+| `--bg` | `--mist-50` | `--midnight-deep` | Page background |
+| `--surface` | `--white` | `--black` | Panels, cards, the active tab |
+| `--raised` | `--white` | `--deep-raised` | Top bar, dialogs, menus, popovers, tooltips, toasts, a dragged card |
+| `--tint` | `--mist-100` | `--deep-tint` | Hover and selected tints, tracks, the tab tray |
+| `--line` | `--mist-200` | `--deep-line` | Chart gridlines, meter tracks |
+| `--overlay` | `rgb(7 59 76 / 0.35)` | `rgb(0 0 0 / 0.6)` | Backdrop behind dialogs |
+| `--text` | `--midnight` | `--sea-mist` | Text |
+| `--text-muted` | `--slate` | `--slate-light` | Secondary text, axis text, checkbox outlines |
+| `--text-green` | `--sea-green-ink` | `--sea-green` | Sea Green text and chart lines |
+| `--text-marigold` | `--marigold-ink` | `--marigold` | Marigold text |
+| `--text-coral` | `--coral-ink` | `--coral-light` | Coral text |
+| `--text-cerulean` | `--cerulean-ink` | `--cerulean-light` | Links and Cerulean text |
+| `--text-raspberry` | `--raspberry-ink` | `--raspberry-light` | Overdue dates and Raspberry text |
+| `--late-tint` | `--rose-50` | `--rose-900` | Late card background |
+| `--text-late` | `--raspberry-deep` | `--raspberry-light` | Late date on a late card |
+| `--shadow` | soft Midnight shadow | `0 1px 2px rgb(0 0 0 / 0.4)` | Panels and cards |
+| `--shadow-lift` | larger Midnight shadow | `0 16px 40px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4)` | A dragged card, and in dark mode every raised surface. In light mode each raised element keeps the shadow it has today |
+
+The rule is: on a fill, text is a palette color; on a surface, text is a role. So a hue like Cerulean has one fill token and one text role, and there's never a second token holding the same value. Overlay and shadows hold their own `rgb()` values because they are transparent.
+
+Dark text on every surface (lowest pair first): `--text-muted` on `--tint` 4.79:1, `--text-raspberry` on `--tint` 4.83:1, `--text-coral` on `--tint` 4.94:1, `--text-cerulean` on `--tint` 5.0:1; every pair on `--surface`, `--bg` and `--raised` is above 5.2:1. The focus ring (Cerulean) is 4.13:1 on the dark page, 5.3:1 on black and 3.25:1 on the raised surface.
 
 #### Shape and depth
 
-Panels are rounded 16px and cards 12px. Neither has an outline. Depth comes from a very soft shadow (`0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05)`). There are no one-edge borders, no rules across the top of the page and no gradients except the line chart's area fill.
+Panels are rounded 16px and cards 12px. Neither has an outline. Depth comes from a very soft shadow (`--shadow`: `0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05)`). In dark mode depth comes from tone (Decision 14): black wells, the Midnight page, and lighter raised layers with a deep black `--shadow-lift`. There are no one-edge borders, no rules across the top of the page and no gradients except the line chart's area fill.
 
 #### Focus and motion
 
-Focus is a 2px Cerulean outline with a 2px offset, on every focusable element. Animations are short (150–200 ms) and turned off under `prefers-reduced-motion`.
+Focus is a 2px Cerulean outline with a 2px offset, on every focusable element. Animations are short (150–200 ms) and turned off under `prefers-reduced-motion`. Switching mode is instant, with no color transition. In dark mode the page also sets `color-scheme: dark`, so scrollbars, date pickers and other native controls match.
 
 #### Text and money
 
@@ -401,7 +444,7 @@ Playwright starts its own backend (`:8100`), frontend (`:5174`) and a production
 
 - **Backend (pytest)**: stage rules (DL5), including a hand-set probability kept until the stage changes and both values set in one edit. Also `move` ordering, including moves within a column, to an empty column and to the end. Delete behavior for each record type (D1). Validation (V1–V4). Every dashboard figure against hand-built data (DB7). Seed counts and spread (S1–S4). Timelines for contact, deal and organization. Data surviving a restart. The list endpoints' JSON format.
 - **Frontend (Vitest)**: money and date formatting, late and overdue helpers, Zod form schemas, table search and sort, the delete dialog, quick search, dashboard figures and panels, and the pipeline's optimistic update and rollback.
-- **End to end (Playwright, installed Chrome)**: the browser clock is fixed to the same "today" as the backend, and every test starts from freshly seeded data. Land on the dashboard with sample data. Add, search, sort, edit and delete in each table, then reload. Filter contacts. Drag a card across columns and within a column, then reload. Use keyboard drag and the "Move to" menu. Add a deal in a column. Log an activity and a follow-up, see them in timelines and on the dashboard, and mark the follow-up done. Win a deal and see the dashboard change. Quick search. A keyboard-only walk through every section. Persistence across a backend restart and `npm run seed`. Every test fails on any console error or warning.
+- **End to end (Playwright, installed Chrome)**: the browser clock is fixed to the same "today" as the backend, and every test starts from freshly seeded data. Land on the dashboard with sample data. Add, search, sort, edit and delete in each table, then reload. Filter contacts. Drag a card across columns and within a column, then reload. Use keyboard drag and the "Move to" menu. Add a deal in a column. Log an activity and a follow-up, see them in timelines and on the dashboard, and mark the follow-up done. Win a deal and see the dashboard change. Quick search. Switch to dark mode from the top bar, see the page change, reload and still be in dark mode, then switch back and reload in light mode (G11). A keyboard-only walk through every section. Persistence across a backend restart and `npm run seed`. Every test fails on any console error or warning.
 - **Performance**: a backend test seeds 3,000 deals, 3,000 contacts and 10,000 activities and checks list, timeline and dashboard endpoints return in under 200 ms. An e2e check, against a production build, loads each screen, scrolls and sorts the large tables, and drags on the large board with the Closed deals filter set to All.
-- **Contrast**: a Vitest test checks every text/background token pair used meets WCAG AA.
+- **Contrast**: a Vitest test resolves the role aliases for each mode and checks every text/background pair in use meets WCAG AA: role pairs in both modes, fill pairs once. It also fails if a hex value appears twice in the palette or anywhere outside it in `tokens.css`.
 - **By hand**: before a change is called done, someone uses every section and action it touches in Chrome, checks each screen by eye against this spec and the brand, and confirms the console is clean.
