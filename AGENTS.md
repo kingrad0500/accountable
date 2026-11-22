@@ -8,6 +8,7 @@ Read `docs/spec.md` first. It describes the whole product as it stands today, an
 
 - `docs/spec.md`: the product: what it does, its rules and its design
 - `docs/TECH_STACK.md`: the stack
+- `docs/STANDARDS.md`: how code is written in this repo. Follow it in every change
 - `docs/STATUS.md`: what's done so far
 - `docs/REVIEW.md`: how changes are reviewed
 - `docs/changes/<branch name>/`: one folder per change, named after its git branch, with its `intent.md` (what the change is for) and `plan.md` (how it gets built)
