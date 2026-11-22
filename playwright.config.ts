@@ -37,7 +37,11 @@ export default defineConfig({
     {
       name: "chrome",
       testIgnore: /performance\.spec\.ts/,
-      use: { ...devices["Desktop Chrome"], channel: "chrome", viewport: { width: 1440, height: 900 } },
+      use: {
+        ...devices["Desktop Chrome"],
+        channel: "chrome",
+        viewport: { width: 1440, height: 900 },
+      },
     },
     {
       name: "performance",

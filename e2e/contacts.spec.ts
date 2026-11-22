@@ -20,7 +20,9 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByText("Showing 40 of 40 contacts")).toBeVisible();
 });
 
-test("add a lead, a qualified contact and a customer, then filter by status (SC2, SC3)", async ({ page }) => {
+test("add a lead, a qualified contact and a customer, then filter by status (SC2, SC3)", async ({
+  page,
+}) => {
   await expect(page.getByLabel("Status")).toContainText("All (40)");
   const leads = await page.getByLabel("Status").locator("option[value=lead]").textContent();
   const before = Number(leads!.match(/\((\d+)\)/)![1]);
@@ -39,7 +41,7 @@ test("add a lead, a qualified contact and a customer, then filter by status (SC2
   await page.getByRole("searchbox", { name: "Search contacts" }).fill("lena");
   await expect(page.getByText("Showing 1 of 43 contacts")).toBeVisible();
   await page.getByLabel("Status").selectOption("customer");
-  await expect(page.getByText("No contacts match \"lena\"")).toBeVisible();
+  await expect(page.getByText('No contacts match "lena"')).toBeVisible();
   await page.getByRole("searchbox", { name: "Search contacts" }).fill("cora");
   await expect(row(page, "Cora Bell")).toContainText("Customer");
 

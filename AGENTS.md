@@ -17,9 +17,22 @@ Only read the folder for the current change, the one named after the branch you'
 
 Update `docs/STATUS.md` when you finish a piece of work
 
+## Checks
+
+Run `npm run check` from the repo root before you call any work done. It runs every check in order, keeps going after a failure, then prints a summary and exits with 1 if any failed:
+
+1. Prettier (`.prettierrc.json`) and ESLint (`eslint.config.mjs`: recommended TypeScript, React Hooks and accessibility rules) for the TypeScript
+2. `ruff format` and `ruff check` for the Python (`pyproject.toml`)
+3. A cyclomatic complexity of at most 15 per function: ESLint's `complexity` rule and ruff's `C901`
+4. `ty` for the Python types (`tsc` runs in `npm test`)
+5. gitleaks over the git history and the working tree (`.gitleaks.toml`; only the git-ignored `.env` files are allowed to hold secrets)
+6. `npm test`, below, where the unit tests also fail under 80% coverage
+
+`npm run check:quick` runs the same without the end-to-end tests, for a fast loop while working. `npm run format` fixes the formatting. Fix what the checks find; don't weaken a rule, skip a test or add a disable comment to get them passing. If a rule doesn't suit the project, ask first.
+
 ## Testing
 
-Run `npm test` from the repo root before you call any work done. It runs every suite in order and fails if any test fails:
+`npm test` runs just the tests. It runs every suite in order and fails if any test fails:
 
 1. Backend unit tests (pytest, `backend/tests/`)
 2. Frontend typecheck (`tsc`)

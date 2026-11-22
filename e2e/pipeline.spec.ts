@@ -4,7 +4,12 @@ import { card, columnEl, drag, names, openPipeline } from "./pipeline-helpers";
 test.beforeEach(async ({ page }) => openPipeline(page));
 
 test("drag a card to another column: stage and probability change (SC4)", async ({ page }) => {
-  await drag(page, card(page, "Data warehouse build"), card(page, "Managed cloud contract"), "above");
+  await drag(
+    page,
+    card(page, "Data warehouse build"),
+    card(page, "Managed cloud contract"),
+    "above",
+  );
   await expect.poll(() => names(page, "negotiation")).toContain("Data warehouse build");
   await expect(card(page, "Data warehouse build")).toContainText("75%");
   await expect(page.getByTestId("count-negotiation")).toHaveText("4 deals");
@@ -17,25 +22,74 @@ test("drag a card to another column: stage and probability change (SC4)", async 
   await expect(row).toContainText("75%");
 });
 
-test("a card dropped higher, lower or mid-column stays there after a reload (SC4)", async ({ page }) => {
-  expect(await names(page, "new")).toEqual(["Customer portal discovery", "Fleet tracking dashboard", "Security review", "Inventory API pilot"]);
+test("a card dropped higher, lower or mid-column stays there after a reload (SC4)", async ({
+  page,
+}) => {
+  expect(await names(page, "new")).toEqual([
+    "Customer portal discovery",
+    "Fleet tracking dashboard",
+    "Security review",
+    "Inventory API pilot",
+  ]);
 
   // Lower in its own column
   await drag(page, card(page, "Customer portal discovery"), card(page, "Security review"), "below");
-  await expect.poll(() => names(page, "new")).toEqual(["Fleet tracking dashboard", "Security review", "Customer portal discovery", "Inventory API pilot"]);
+  await expect
+    .poll(() => names(page, "new"))
+    .toEqual([
+      "Fleet tracking dashboard",
+      "Security review",
+      "Customer portal discovery",
+      "Inventory API pilot",
+    ]);
 
   // Higher in its own column
-  await drag(page, card(page, "Inventory API pilot"), card(page, "Fleet tracking dashboard"), "above");
-  await expect.poll(() => names(page, "new")).toEqual(["Inventory API pilot", "Fleet tracking dashboard", "Security review", "Customer portal discovery"]);
+  await drag(
+    page,
+    card(page, "Inventory API pilot"),
+    card(page, "Fleet tracking dashboard"),
+    "above",
+  );
+  await expect
+    .poll(() => names(page, "new"))
+    .toEqual([
+      "Inventory API pilot",
+      "Fleet tracking dashboard",
+      "Security review",
+      "Customer portal discovery",
+    ]);
 
   // Into the middle of another column
-  await drag(page, card(page, "Security review"), card(page, "Claims workflow automation"), "above");
-  await expect.poll(() => names(page, "qualified")).toEqual(["ERP integration", "Security review", "Claims workflow automation", "Learning platform rollout", "Analytics retainer"]);
+  await drag(
+    page,
+    card(page, "Security review"),
+    card(page, "Claims workflow automation"),
+    "above",
+  );
+  await expect
+    .poll(() => names(page, "qualified"))
+    .toEqual([
+      "ERP integration",
+      "Security review",
+      "Claims workflow automation",
+      "Learning platform rollout",
+      "Analytics retainer",
+    ]);
 
   await page.waitForLoadState("networkidle");
   await reload(page);
-  expect(await names(page, "new")).toEqual(["Inventory API pilot", "Fleet tracking dashboard", "Customer portal discovery"]);
-  expect(await names(page, "qualified")).toEqual(["ERP integration", "Security review", "Claims workflow automation", "Learning platform rollout", "Analytics retainer"]);
+  expect(await names(page, "new")).toEqual([
+    "Inventory API pilot",
+    "Fleet tracking dashboard",
+    "Customer portal discovery",
+  ]);
+  expect(await names(page, "qualified")).toEqual([
+    "ERP integration",
+    "Security review",
+    "Claims workflow automation",
+    "Learning platform rollout",
+    "Analytics retainer",
+  ]);
 });
 
 test("column and board totals change before the server replies (SC4)", async ({ page }) => {
@@ -60,18 +114,29 @@ test("column and board totals change before the server replies (SC4)", async ({ 
 
 test("a refused move goes back and says why (P7)", async ({ page }) => {
   await page.route("**/api/deals/*/move", (route) =>
-    route.fulfill({ status: 404, contentType: "application/json", body: JSON.stringify({ detail: "Deal not found" }) }),
+    route.fulfill({
+      status: 404,
+      contentType: "application/json",
+      body: JSON.stringify({ detail: "Deal not found" }),
+    }),
   );
   // The browser logs failed requests; that's expected here.
   page.removeAllListeners("console");
   await drag(page, card(page, "Robotics telemetry"), columnEl(page, "negotiation"), "into");
-  await expect(page.getByText("Robotics telemetry couldn't move to Negotiation. Deal not found")).toBeVisible();
+  await expect(
+    page.getByText("Robotics telemetry couldn't move to Negotiation. Deal not found"),
+  ).toBeVisible();
   await expect.poll(() => names(page, "proposal")).toContain("Robotics telemetry");
   await expect(page.getByTestId("total-negotiation")).toHaveText("$185,500");
 });
 
 test("dragging to Won sets today's close date and the card stays in view", async ({ page }) => {
-  await drag(page, card(page, "Managed cloud contract"), card(page, "Route planning module"), "above");
+  await drag(
+    page,
+    card(page, "Managed cloud contract"),
+    card(page, "Route planning module"),
+    "above",
+  );
   await expect.poll(() => names(page, "won")).toContain("Managed cloud contract");
   await expect(card(page, "Managed cloud contract")).toContainText("18 Nov");
   await expect(card(page, "Managed cloud contract")).toContainText("$118k");
@@ -110,9 +175,14 @@ test("More details opens the full form with what was typed", async ({ page }) =>
 test("late cards stand out (SC4, DL2)", async ({ page }) => {
   const late = card(page, "Website rebuild");
   await expect(late.getByText("Late", { exact: true })).toBeVisible();
-  const bg = await late.locator("> div > div").first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  const bg = await late
+    .locator("> div > div")
+    .first()
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(bg).toBe("rgb(255, 243, 245)");
-  await expect(card(page, "Data warehouse build").getByText("Late", { exact: true })).toHaveCount(0);
+  await expect(card(page, "Data warehouse build").getByText("Late", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(page.getByTestId("board-late")).toHaveText("3");
 });
 

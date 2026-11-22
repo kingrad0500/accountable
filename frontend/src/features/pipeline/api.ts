@@ -15,7 +15,8 @@ type MoveVars = { id: number; stage: StageKey; index: number };
 export function useMoveDeal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, stage, index }: MoveVars) => api.post<Deal>(`/deals/${id}/move`, { stage, index }),
+    mutationFn: ({ id, stage, index }: MoveVars) =>
+      api.post<Deal>(`/deals/${id}/move`, { stage, index }),
     onMutate: async ({ id, stage, index }) => {
       await qc.cancelQueries({ queryKey: keys.deals });
       const previous = qc.getQueryData<Deal[]>(keys.deals);

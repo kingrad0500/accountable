@@ -11,17 +11,23 @@ test.beforeEach(async ({ page }) => {
 test("quick search finds a deal, a contact and an organization (G10)", async ({ page }) => {
   await box(page).fill("kestrel");
   const results = page.getByRole("listbox", { name: "Search results" });
-  await expect(results.getByRole("group", { name: "Organizations" }).getByRole("option")).toHaveText(/Kestrel Capital/);
+  await expect(
+    results.getByRole("group", { name: "Organizations" }).getByRole("option"),
+  ).toHaveText(/Kestrel Capital/);
   await results.getByRole("option", { name: /Kestrel Capital/ }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Kestrel Capital" })).toBeVisible();
 
   await box(page).fill("hana");
-  await expect(page.getByRole("group", { name: "Contacts" }).getByRole("option")).toHaveText(/Hana Brooks/);
+  await expect(page.getByRole("group", { name: "Contacts" }).getByRole("option")).toHaveText(
+    /Hana Brooks/,
+  );
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Hana Brooks" })).toBeVisible();
 
   await box(page).fill("rebuild");
-  await expect(page.getByRole("group", { name: "Deals" }).getByRole("option")).toHaveText(/Website rebuild/);
+  await expect(page.getByRole("group", { name: "Deals" }).getByRole("option")).toHaveText(
+    /Website rebuild/,
+  );
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Website rebuild" })).toBeVisible();
 });

@@ -10,12 +10,24 @@
     "dev:web": "npm run dev --workspace frontend",
     "seed": "uv run python -m accountable.seed",
     "test": "node scripts/test.mjs",
-    "test:backend": "uv run pytest -q",
+    "test:backend": "uv run pytest -q --cov",
     "test:frontend": "npm run test --workspace frontend",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check": "node scripts/check.mjs",
+    "check:quick": "node scripts/check.mjs --quick",
+    "format": "prettier --write . && uv run ruff format && uv run ruff check --fix-only --select I"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.65.1",
-    "concurrently": "^10.0.7"
+    "concurrently": "^10.0.7",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.73.0"
   }
 }

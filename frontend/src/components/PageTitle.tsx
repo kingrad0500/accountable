@@ -2,7 +2,15 @@ import { useEffect, type ReactNode } from "react";
 import { ChevronDown, ListFilter } from "lucide-react";
 
 /** The page's heading, which also sets the browser tab's title. */
-export function PageTitle({ title, hidden = false, children }: { title: string; hidden?: boolean; children?: ReactNode }) {
+export function PageTitle({
+  title,
+  hidden = false,
+  children,
+}: {
+  title: string;
+  hidden?: boolean;
+  children?: ReactNode;
+}) {
   useEffect(() => {
     document.title = `${title} · Accountable`;
   }, [title]);
@@ -31,7 +39,9 @@ export function FilterSelect<V extends string>({
   options: { value: V; label: string; count?: number }[];
 }) {
   return (
-    <label className={`flex h-9 items-center gap-2 rounded-[10px] pr-1 pl-3 ${onPage ? "bg-panel shadow-soft" : "bg-bg"} text-[13px] font-medium text-ink-muted focus-within:outline-2 focus-within:outline-cerulean`}>
+    <label
+      className={`flex h-9 items-center gap-2 rounded-[10px] pr-1 pl-3 ${onPage ? "bg-panel shadow-soft" : "bg-bg"} text-[13px] font-medium text-ink-muted focus-within:outline-2 focus-within:outline-cerulean`}
+    >
       {onPage && <ListFilter size={15} aria-hidden />}
       {label}
       <select

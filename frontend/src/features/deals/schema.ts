@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { STAGE_KEYS } from "../../lib/stages";
-import { optionalDate, optionalId, requiredId, requiredText, wholeNumber } from "../../lib/validation";
+import {
+  optionalDate,
+  optionalId,
+  requiredId,
+  requiredText,
+  wholeNumber,
+} from "../../lib/validation";
 
 /** The deal form's rules: the same as the backend's (V1, V3). */
 export const dealSchema = z.object({

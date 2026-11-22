@@ -57,7 +57,9 @@ export default function App() {
       <RouterProvider router={router} />
       <Toaster
         position="bottom-right"
-        toastOptions={{ style: { fontFamily: "var(--font-sans)", color: "var(--ink)", borderRadius: 12 } }}
+        toastOptions={{
+          style: { fontFamily: "var(--font-sans)", color: "var(--ink)", borderRadius: 12 },
+        }}
       />
     </QueryClientProvider>
   );

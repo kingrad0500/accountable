@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import type { Contact } from "../../api/types";
+import type { Contact, Organization } from "../../api/types";
 import { Field } from "../../components/Field";
 import { FormDialog } from "../../components/FormDialog";
 import { changedOnly, showServerErrors } from "../../lib/forms";
@@ -23,7 +24,11 @@ const FIELDS = ["name", "email", "phone", "job_title", "organization_id", "statu
 
 export function ContactFormDialog({ open, onOpenChange, contact, initial, onSaved }: Props) {
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title={contact ? `Edit ${contact.name}` : "Add contact"}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={contact ? `Edit ${contact.name}` : "Add contact"}
+    >
       {open && (
         <ContactForm
           contact={contact}
@@ -47,7 +52,7 @@ function ContactForm(props: {
 }) {
   const organizations = useOrganizations();
   if (!organizations.data) return <p className="muted py-6">Loading…</p>;
-  return <ContactFields {...props} />;
+  return <ContactFields {...props} organizations={organizations.data} />;
 }
 
 function ContactFields({
@@ -55,13 +60,14 @@ function ContactFields({
   initial,
   onCancel,
   onSaved,
+  organizations,
 }: {
   contact?: Contact | null;
   initial?: Partial<ContactInput>;
   onCancel: () => void;
   onSaved: (c: Contact) => void;
+  organizations: Organization[];
 }) {
-  const organizations = useOrganizations();
   const save = useSaveContact();
   const defaults: ContactInput = contact
     ? {
@@ -72,20 +78,36 @@ function ContactFields({
         organization_id: contact.organization_id ? String(contact.organization_id) : "",
         status: contact.status,
       }
-    : { name: "", email: "", phone: "", job_title: "", organization_id: "", status: "lead", ...initial };
+    : {
+        name: "",
+        email: "",
+        phone: "",
+        job_title: "",
+        organization_id: "",
+        status: "lead",
+        ...initial,
+      };
 
   const {
     register,
     handleSubmit,
     setError,
+    setFocus,
     formState: { errors, dirtyFields, isSubmitting },
-  } = useForm<ContactInput, unknown, ContactValues>({ resolver: zodResolver(contactSchema), defaultValues: defaults });
+  } = useForm<ContactInput, unknown, ContactValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: defaults,
+  });
+  // The dialog opens with the name field focused.
+  useEffect(() => setFocus("name"), [setFocus]);
 
   const onSubmit = async (values: ContactValues) => {
     const payload = contact ? changedOnly(values, dirtyFields) : values;
     try {
       const saved =
-        contact && Object.keys(payload).length === 0 ? contact : await save.mutateAsync({ id: contact?.id, values: payload });
+        contact && Object.keys(payload).length === 0
+          ? contact
+          : await save.mutateAsync({ id: contact?.id, values: payload });
       toast.success(contact ? "Contact saved" : "Contact added");
       onSaved(saved);
     } catch (error) {
@@ -96,7 +118,7 @@ function ContactFields({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-2 gap-x-4 gap-y-3">
       <Field id="contact-name" label="Name" error={errors.name?.message} className="col-span-2">
-        <input className="input" autoComplete="off" autoFocus {...register("name")} />
+        <input className="input" autoComplete="off" {...register("name")} />
       </Field>
       <Field id="contact-email" label="Email" error={errors.email?.message}>
         <input type="email" className="input" autoComplete="off" {...register("email")} />
@@ -110,7 +132,7 @@ function ContactFields({
       <Field id="contact-organization" label="Organization" error={errors.organization_id?.message}>
         <select className="input" {...register("organization_id")}>
           <option value="">No organization</option>
-          {(organizations.data ?? []).map((o) => (
+          {organizations.map((o) => (
             <option key={o.id} value={o.id}>
               {o.name}
             </option>

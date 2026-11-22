@@ -6,7 +6,13 @@ import { Money } from "./Money";
 import { Pill } from "./Pill";
 
 /** Deals linked to a contact or organization. */
-export function DealList({ deals, showOrganization = false }: { deals: Deal[]; showOrganization?: boolean }) {
+export function DealList({
+  deals,
+  showOrganization = false,
+}: {
+  deals: Deal[];
+  showOrganization?: boolean;
+}) {
   if (!deals.length) return <p className="muted py-2 text-[13px]">No deals.</p>;
   const today = todayISO();
   return (

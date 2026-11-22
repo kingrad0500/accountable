@@ -55,7 +55,9 @@ test("the delete dialog says what happens to linked records (D1)", async ({ page
   await page.getByRole("button", { name: "Delete Northwind Partners" }).click();
   const confirm = page.getByRole("alertdialog");
   await expect(confirm).toContainText("Delete Northwind Partners?");
-  await expect(confirm).toContainText("Its 2 contacts and 3 deals will be kept, with no organization.");
+  await expect(confirm).toContainText(
+    "Its 2 contacts and 3 deals will be kept, with no organization.",
+  );
   await confirm.getByRole("button", { name: "Cancel" }).click();
   await expect(confirm).toBeHidden();
   await expect(page.getByRole("button", { name: "Delete Northwind Partners" })).toBeFocused();
@@ -81,14 +83,22 @@ test("the organization page shows its contacts, deals and timeline (SC3, O2)", a
   await page.getByRole("link", { name: "Solace Insurance", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Solace Insurance" })).toBeVisible();
   const contacts = page.getByRole("region", { name: "Contacts" });
-  for (const name of ["Priya Desai", "George Lindqvist", "Isla Moreno"]) await expect(contacts.getByRole("link", { name })).toBeVisible();
+  for (const name of ["Priya Desai", "George Lindqvist", "Isla Moreno"])
+    await expect(contacts.getByRole("link", { name })).toBeVisible();
   const deals = page.getByRole("region", { name: "Deals" });
-  for (const name of ["Security review", "Claims workflow automation"]) await expect(deals.getByRole("link", { name })).toBeVisible();
+  for (const name of ["Security review", "Claims workflow automation"])
+    await expect(deals.getByRole("link", { name })).toBeVisible();
 
   const timeline = page.getByTestId("timeline-entry");
-  await expect(timeline.filter({ hasText: "Ask for the procurement contact" })).toContainText("George Lindqvist");
-  await expect(timeline.filter({ hasText: "Claims workflow automation moved from New to Qualified" })).toBeVisible();
-  const times = await timeline.locator("time").evaluateAll((els) => els.map((e) => e.getAttribute("datetime")!));
+  await expect(timeline.filter({ hasText: "Ask for the procurement contact" })).toContainText(
+    "George Lindqvist",
+  );
+  await expect(
+    timeline.filter({ hasText: "Claims workflow automation moved from New to Qualified" }),
+  ).toBeVisible();
+  const times = await timeline
+    .locator("time")
+    .evaluateAll((els) => els.map((e) => e.getAttribute("datetime")!));
   expect(times).toEqual([...times].sort().reverse());
 
   // Deleting from the record's page goes back to the table (D3).
@@ -100,10 +110,15 @@ test("the organization page shows its contacts, deals and timeline (SC3, O2)", a
 
 test("add a contact from the organization page", async ({ page }) => {
   await page.getByRole("link", { name: "Bluefin Logistics", exact: true }).click();
-  await page.getByRole("region", { name: "Contacts" }).getByRole("button", { name: "Add contact" }).click();
+  await page
+    .getByRole("region", { name: "Contacts" })
+    .getByRole("button", { name: "Add contact" })
+    .click();
   const dialog = page.getByRole("dialog", { name: "Add contact" });
   await expect(dialog.getByLabel("Organization")).toHaveValue(/\d+/);
   await dialog.getByLabel("Name").fill("Pia Holm");
   await dialog.getByRole("button", { name: "Add contact" }).click();
-  await expect(page.getByRole("region", { name: "Contacts" }).getByRole("link", { name: "Pia Holm" })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Contacts" }).getByRole("link", { name: "Pia Holm" }),
+  ).toBeVisible();
 });

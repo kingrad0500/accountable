@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ColumnDef } from "@tanstack/react-table";
 import { describe, expect, it, vi } from "vitest";
-import { DataTable } from "./DataTable";
+import { DataTable, type TableColumn } from "./DataTable";
 
 type Person = { id: number; name: string; org: string; status: string; value: number };
 
@@ -13,7 +12,7 @@ const PEOPLE: Person[] = [
   { id: 3, name: "Chloe Nguyen", org: "Lumen Retail", status: "lead", value: 200 },
 ];
 
-const columns: ColumnDef<Person, any>[] = [
+const columns: TableColumn<Person>[] = [
   { id: "name", accessorKey: "name", header: "Name" },
   { id: "org", accessorKey: "org", header: "Organization" },
   { id: "value", accessorKey: "value", header: "Value", meta: { align: "right" } },
@@ -43,7 +42,8 @@ function Harness({ onAdd = () => {} }: { onAdd?: () => void }) {
   );
 }
 
-const names = () => screen.getAllByTestId("table-row").map((r) => within(r).getAllByRole("cell")[0].textContent);
+const names = () =>
+  screen.getAllByTestId("table-row").map((r) => within(r).getAllByRole("cell")[0].textContent);
 
 describe("DataTable", () => {
   it("searches every text column, ignoring case (T1)", async () => {

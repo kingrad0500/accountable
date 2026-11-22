@@ -14,12 +14,54 @@ export type Stage = {
 };
 
 export const STAGES: Stage[] = [
-  { key: "new", label: "New", probability: 10, fill: "var(--cerulean-ink)", text: "#ffffff", dot: "var(--cerulean)" },
-  { key: "qualified", label: "Qualified", probability: 25, fill: "var(--marigold)", text: "var(--ink)", dot: "var(--marigold)" },
-  { key: "proposal", label: "Proposal", probability: 50, fill: "var(--coral)", text: "var(--ink)", dot: "var(--coral)" },
-  { key: "negotiation", label: "Negotiation", probability: 75, fill: "var(--ink)", text: "#ffffff", dot: "var(--ink)" },
-  { key: "won", label: "Won", probability: 100, fill: "var(--sea-green)", text: "var(--ink)", dot: "var(--sea-green)" },
-  { key: "lost", label: "Lost", probability: 0, fill: "var(--sea-mist)", text: "var(--ink)", dot: "#9fb3b9" },
+  {
+    key: "new",
+    label: "New",
+    probability: 10,
+    fill: "var(--cerulean-ink)",
+    text: "#ffffff",
+    dot: "var(--cerulean)",
+  },
+  {
+    key: "qualified",
+    label: "Qualified",
+    probability: 25,
+    fill: "var(--marigold)",
+    text: "var(--ink)",
+    dot: "var(--marigold)",
+  },
+  {
+    key: "proposal",
+    label: "Proposal",
+    probability: 50,
+    fill: "var(--coral)",
+    text: "var(--ink)",
+    dot: "var(--coral)",
+  },
+  {
+    key: "negotiation",
+    label: "Negotiation",
+    probability: 75,
+    fill: "var(--ink)",
+    text: "#ffffff",
+    dot: "var(--ink)",
+  },
+  {
+    key: "won",
+    label: "Won",
+    probability: 100,
+    fill: "var(--sea-green)",
+    text: "var(--ink)",
+    dot: "var(--sea-green)",
+  },
+  {
+    key: "lost",
+    label: "Lost",
+    probability: 0,
+    fill: "var(--sea-mist)",
+    text: "var(--ink)",
+    dot: "#9fb3b9",
+  },
 ];
 
 export const STAGE_KEYS = STAGES.map((s) => s.key);
@@ -33,7 +75,7 @@ export function stageOf(key: StageKey): Stage {
 }
 
 export function stageLabel(key: StageKey): string {
-  return byKey[key]?.label ?? key;
+  return byKey[key].label;
 }
 
 export function defaultProbability(key: StageKey): number {
@@ -50,3 +92,12 @@ export const STATUSES = [
   { key: "customer", label: "Customer" },
 ] as const;
 export type StatusKey = (typeof STATUSES)[number]["key"];
+
+const statusLabels = Object.fromEntries(STATUSES.map((s) => [s.key, s.label])) as Record<
+  StatusKey,
+  string
+>;
+
+export function statusLabel(key: StatusKey): string {
+  return statusLabels[key];
+}

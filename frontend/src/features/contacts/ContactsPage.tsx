@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import type { Contact } from "../../api/types";
 import { ConfirmDelete, type DeleteTarget } from "../../components/ConfirmDelete";
-import { DataTable, RowActions } from "../../components/DataTable";
+import { DataTable, RowActions, type TableColumn } from "../../components/DataTable";
 import { FilterSelect, PageTitle } from "../../components/PageTitle";
 import { Pill } from "../../components/Pill";
 import { STATUSES, type StatusKey } from "../../lib/stages";
@@ -22,15 +21,22 @@ export function ContactsPage() {
   const [editing, setEditing] = useState<Contact | null | undefined>(undefined);
   const [deleting, setDeleting] = useState<DeleteTarget | null>(null);
 
-  const all = contacts.data ?? [];
-  const visible = useMemo(() => (status === "all" ? all : all.filter((c) => c.status === status)), [all, status]);
+  const all = useMemo(() => contacts.data ?? [], [contacts.data]);
+  const visible = useMemo(
+    () => (status === "all" ? all : all.filter((c) => c.status === status)),
+    [all, status],
+  );
   // The status filter, with each status's count (C2).
   const options = [
     { value: "all" as StatusFilter, label: "All", count: all.length },
-    ...STATUSES.map((s) => ({ value: s.key as StatusFilter, label: s.label, count: all.filter((c) => c.status === s.key).length })),
+    ...STATUSES.map((s) => ({
+      value: s.key as StatusFilter,
+      label: s.label,
+      count: all.filter((c) => c.status === s.key).length,
+    })),
   ];
 
-  const columns = useMemo<ColumnDef<Contact, any>[]>(
+  const columns = useMemo<TableColumn<Contact>[]>(
     () => [
       {
         id: "name",
@@ -58,26 +64,41 @@ export function ContactsPage() {
             <span className="muted">None</span>
           ),
       },
-      { id: "job_title", accessorFn: (c) => c.job_title ?? undefined, header: "Job title", sortUndefined: "last", meta: { width: "minmax(140px, 1.3fr)" } },
+      {
+        id: "job_title",
+        accessorFn: (c) => c.job_title ?? undefined,
+        header: "Job title",
+        sortUndefined: "last",
+        meta: { width: "minmax(140px, 1.3fr)" },
+      },
       {
         id: "email",
         accessorFn: (c) => c.email ?? undefined,
         header: "Email",
         sortUndefined: "last",
         meta: { width: "minmax(180px, 1.6fr)" },
-        cell: ({ getValue }) =>
-          getValue() ? (
-            <a href={`mailto:${getValue()}`} className="text-cerulean-ink hover:underline">
-              {getValue()}
+        cell: ({ row }) =>
+          row.original.email ? (
+            <a href={`mailto:${row.original.email}`} className="text-cerulean-ink hover:underline">
+              {row.original.email}
             </a>
           ) : null,
       },
-      { id: "phone", accessorFn: (c) => c.phone ?? undefined, header: "Phone", sortUndefined: "last", meta: { width: "140px" }, cell: ({ getValue }) => <span className="mono text-[13px]">{getValue()}</span> },
+      {
+        id: "phone",
+        accessorFn: (c) => c.phone ?? undefined,
+        header: "Phone",
+        sortUndefined: "last",
+        meta: { width: "140px" },
+        cell: ({ row }) => <span className="mono text-[13px]">{row.original.phone}</span>,
+      },
       {
         id: "status",
         accessorFn: (c) => STATUSES.find((s) => s.key === c.status)!.label,
         header: "Status",
-        sortingFn: (a, b) => STATUSES.findIndex((s) => s.key === a.original.status) - STATUSES.findIndex((s) => s.key === b.original.status),
+        sortingFn: (a, b) =>
+          STATUSES.findIndex((s) => s.key === a.original.status) -
+          STATUSES.findIndex((s) => s.key === b.original.status),
         meta: { width: "104px" },
         cell: ({ row }) => <Pill kind="status" value={row.original.status} />,
       },
@@ -90,7 +111,9 @@ export function ContactsPage() {
           <RowActions
             name={row.original.name}
             onEdit={() => setEditing(row.original)}
-            onDelete={() => setDeleting({ kind: "contact", id: row.original.id, name: row.original.name })}
+            onDelete={() =>
+              setDeleting({ kind: "contact", id: row.original.id, name: row.original.name })
+            }
           />
         ),
       },
@@ -119,11 +142,17 @@ export function ContactsPage() {
           />
         }
       />
-      <ContactFormDialog open={editing !== undefined} onOpenChange={(o) => !o && setEditing(undefined)} contact={editing} />
+      <ContactFormDialog
+        open={editing !== undefined}
+        onOpenChange={(o) => !o && setEditing(undefined)}
+        contact={editing}
+      />
       <ConfirmDelete
         target={deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
-        onConfirm={() => remove.mutateAsync(deleting!.id).then(() => toast.success("Contact deleted"))}
+        onConfirm={() =>
+          remove.mutateAsync(deleting!.id).then(() => toast.success("Contact deleted"))
+        }
       />
     </>
   );

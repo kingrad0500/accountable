@@ -4,16 +4,25 @@ import type { Organization, OrganizationDetail } from "../../api/types";
 import type { OrganizationValues } from "./schema";
 
 export const useOrganizations = (enabled = true) =>
-  useQuery({ queryKey: keys.organizations, queryFn: () => api.get<Organization[]>("/organizations"), enabled });
+  useQuery({
+    queryKey: keys.organizations,
+    queryFn: () => api.get<Organization[]>("/organizations"),
+    enabled,
+  });
 
 export const useOrganization = (id: number) =>
-  useQuery({ queryKey: keys.organization(id), queryFn: () => api.get<OrganizationDetail>(`/organizations/${id}`) });
+  useQuery({
+    queryKey: keys.organization(id),
+    queryFn: () => api.get<OrganizationDetail>(`/organizations/${id}`),
+  });
 
 export function useSaveOrganization() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, values }: { id?: number; values: Partial<OrganizationValues> }) =>
-      id ? api.patch<Organization>(`/organizations/${id}`, values) : api.post<Organization>("/organizations", values),
+      id
+        ? api.patch<Organization>(`/organizations/${id}`, values)
+        : api.post<Organization>("/organizations", values),
     onSuccess: () => refreshAfter(qc, "organization"),
   });
 }

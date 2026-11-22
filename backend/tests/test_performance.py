@@ -51,14 +51,23 @@ def _once(client, url):
 
 def test_large_dataset_sizes(large_client):
     with db.get_engine().connect() as conn:
-        count = lambda t: conn.execute(select(func.count()).select_from(t)).scalar_one()  # noqa: E731
+        count = lambda t: conn.execute(select(func.count()).select_from(t)).scalar_one()
         assert count(db.deals) == 3000
         assert count(db.contacts) == 3000
         assert count(db.activities) == 10000
 
 
 @pytest.mark.parametrize(
-    "url", ["/api/deals", "/api/contacts", "/api/organizations", "/api/dashboard", "/api/organizations/1", "/api/contacts/1", "/api/deals/1"]
+    "url",
+    [
+        "/api/deals",
+        "/api/contacts",
+        "/api/organizations",
+        "/api/dashboard",
+        "/api/organizations/1",
+        "/api/contacts/1",
+        "/api/deals/1",
+    ],
 )
 def test_endpoint_is_fast(large_client, url):
     assert timed(large_client, url) < 200, url

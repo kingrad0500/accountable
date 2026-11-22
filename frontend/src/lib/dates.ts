@@ -20,7 +20,10 @@ export function addDays(iso: string, days: number): string {
 }
 
 /** An open deal whose close date is before today (DL2). */
-export function isLate(deal: { stage: StageKey; close_date: string | null }, today: string = todayISO()): boolean {
+export function isLate(
+  deal: { stage: StageKey; close_date: string | null },
+  today: string = todayISO(),
+): boolean {
   return isOpenStage(deal.stage) && !!deal.close_date && deal.close_date < today;
 }
 
@@ -31,10 +34,9 @@ export function followUpGroup(date: string, today: string = todayISO()): FollowU
 }
 
 /** Follow-ups not done, grouped as Overdue, Today and Upcoming, soonest first (DB6). */
-export function groupFollowUps<T extends { follow_up_date: string | null; follow_up_done: boolean }>(
-  items: T[],
-  today: string = todayISO(),
-): Record<FollowUpGroup, T[]> {
+export function groupFollowUps<
+  T extends { follow_up_date: string | null; follow_up_done: boolean },
+>(items: T[], today: string = todayISO()): Record<FollowUpGroup, T[]> {
   const groups: Record<FollowUpGroup, T[]> = { overdue: [], today: [], upcoming: [] };
   const pending = items.filter((i) => i.follow_up_date && !i.follow_up_done);
   pending.sort((a, b) => a.follow_up_date!.localeCompare(b.follow_up_date!));
@@ -43,7 +45,11 @@ export function groupFollowUps<T extends { follow_up_date: string | null; follow
 }
 
 /** Is an ISO date within the last `days` days, counting today. */
-export function withinLastDays(date: string | null, days: number, today: string = todayISO()): boolean {
+export function withinLastDays(
+  date: string | null,
+  days: number,
+  today: string = todayISO(),
+): boolean {
   if (!date) return false;
   return date > addDays(today, -days) && date <= today;
 }

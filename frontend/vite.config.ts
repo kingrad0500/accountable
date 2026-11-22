@@ -21,5 +21,15 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     css: false,
+    // The slowest screen tests take about 1.5 s; the default 5 s limit failed them on a busy
+    // machine. The limit only catches hangs, so leave plenty of room.
+    testTimeout: 15_000,
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/test/**", "src/test-setup.ts", "src/main.tsx"],
+      reporter: ["text-summary", "text"],
+      thresholds: { statements: 80, branches: 80, functions: 80, lines: 80 },
+    },
   },
 });

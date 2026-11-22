@@ -5,22 +5,28 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  type Column,
   type ColumnDef,
   type FilterFn,
-  type RowData,
   type SortingState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, ChevronsUpDown, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 
-declare module "@tanstack/react-table" {
-  interface ColumnMeta<TData extends RowData, TValue> {
-    /** CSS grid track, such as "2fr" or "120px". */
-    width?: string;
-    align?: "right";
-    /** Leave this column out of the search (T1). */
-    search?: false;
-  }
+/** How the shared table lays out and searches a column. */
+export type ColumnLayout = {
+  /** CSS grid track, such as "2fr" or "120px". */
+  width?: string;
+  align?: "right";
+  /** Leave this column out of the search (T1). */
+  search?: false;
+};
+
+/** A column for the shared table; its `meta` is the column's layout. */
+export type TableColumn<T> = ColumnDef<T, unknown> & { meta?: ColumnLayout };
+
+function layoutOf<T>(column: Column<T, unknown>): ColumnLayout {
+  return (column.columnDef.meta ?? {}) as ColumnLayout;
 }
 
 /** Matches any searchable column's text, ignoring case (T1). */
@@ -34,7 +40,7 @@ const ROW_HEIGHT = 48;
 
 type Props<T> = {
   data: T[];
-  columns: ColumnDef<T, any>[];
+  columns: TableColumn<T>[];
   /** Plural noun for the count line and messages, such as "contacts". */
   noun: string;
   /** All records, before any filter, for "Showing 12 of 40 contacts" (T6). */
@@ -84,7 +90,7 @@ export function DataTable<T>({
     onSortingChange: setSorting,
     getRowId,
     globalFilterFn: containsText as FilterFn<T>,
-    getColumnCanGlobalFilter: (column) => column.columnDef.meta?.search !== false && !!column.accessorFn,
+    getColumnCanGlobalFilter: (column) => layoutOf(column).search !== false && !!column.accessorFn,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -101,7 +107,11 @@ export function DataTable<T>({
   });
 
   const template = useMemo(
-    () => table.getVisibleLeafColumns().map((c) => c.columnDef.meta?.width ?? "1fr").join(" "),
+    () =>
+      table
+        .getVisibleLeafColumns()
+        .map((c) => layoutOf(c).width ?? "1fr")
+        .join(" "),
     [table],
   );
 
@@ -142,16 +152,29 @@ export function DataTable<T>({
         style={{ height, minHeight: 280 }}
       >
         <div role="rowgroup" className="sticky top-0 z-10 bg-panel">
-          <div role="row" aria-rowindex={1} className="grid items-center gap-3 px-3" style={{ gridTemplateColumns: template, height: 40 }}>
+          <div
+            role="row"
+            aria-rowindex={1}
+            className="grid items-center gap-3 px-3"
+            style={{ gridTemplateColumns: template, height: 40 }}
+          >
             {table.getHeaderGroups()[0].headers.map((header) => {
               const sorted = header.column.getIsSorted();
-              const right = header.column.columnDef.meta?.align === "right";
+              const right = layoutOf(header.column).align === "right";
               const label = flexRender(header.column.columnDef.header, header.getContext());
               return (
                 <div
                   key={header.id}
                   role="columnheader"
-                  aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : header.column.getCanSort() ? "none" : undefined}
+                  aria-sort={
+                    sorted === "asc"
+                      ? "ascending"
+                      : sorted === "desc"
+                        ? "descending"
+                        : header.column.getCanSort()
+                          ? "none"
+                          : undefined
+                  }
                   className={`text-[13px] font-medium text-ink-muted ${right ? "text-right" : ""}`}
                 >
                   {header.column.getCanSort() ? (
@@ -204,13 +227,17 @@ export function DataTable<T>({
                   aria-rowindex={item.index + 2}
                   data-testid="table-row"
                   className="group absolute left-0 grid w-full items-center gap-3 rounded-[10px] px-3 text-[14px] shadow-[0_-1px_0_var(--tint)] hover:bg-tint/60 focus-within:bg-tint/60"
-                  style={{ gridTemplateColumns: template, height: ROW_HEIGHT, transform: `translateY(${item.start}px)` }}
+                  style={{
+                    gridTemplateColumns: template,
+                    height: ROW_HEIGHT,
+                    transform: `translateY(${item.start}px)`,
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <div
                       key={cell.id}
                       role="cell"
-                      className={`min-w-0 truncate ${cell.column.columnDef.meta?.align === "right" ? "text-right" : ""}`}
+                      className={`min-w-0 truncate ${layoutOf(cell.column).align === "right" ? "text-right" : ""}`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </div>
@@ -230,16 +257,28 @@ export function DataTable<T>({
 }
 
 /** Edit and Delete icon buttons for a row; shown on hover and on focus (T4). */
-export function RowActions({ name, onEdit, onDelete }: { name: string; onEdit: () => void; onDelete: () => void }) {
+export function RowActions({
+  name,
+  onEdit,
+  onDelete,
+}: {
+  name: string;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
   return (
     <span className="flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
       <button type="button" className="icon-btn" aria-label={`Edit ${name}`} onClick={onEdit}>
         <Pencil size={15} aria-hidden />
       </button>
-      <button type="button" className="icon-btn danger" aria-label={`Delete ${name}`} onClick={onDelete}>
+      <button
+        type="button"
+        className="icon-btn danger"
+        aria-label={`Delete ${name}`}
+        onClick={onDelete}
+      >
         <Trash2 size={15} aria-hidden />
       </button>
     </span>
   );
 }
-

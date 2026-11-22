@@ -2,8 +2,9 @@
 
 from collections import defaultdict
 from datetime import date
+from typing import TypedDict
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from sqlalchemy import Connection, and_, func, select
 
 from . import config, db
@@ -28,6 +29,13 @@ def follow_up_group(due: date, today: date) -> str:
     if due == today:
         return "today"
     return "upcoming"
+
+
+class MonthFigures(TypedDict):
+    month: str
+    revenue: int
+    won: int
+    lost: int
 
 
 def furthest_stage(stage: str, history: list[tuple[str, str]]) -> int:
@@ -55,7 +63,9 @@ def compute(conn: Connection) -> dict:
     ):
         history[deal_id].append((from_stage, to_stage))
 
-    by_month = {m: {"month": m.strftime("%Y-%m"), "revenue": 0, "won": 0, "lost": 0} for m in months}
+    by_month: dict[date, MonthFigures] = {
+        m: {"month": m.strftime("%Y-%m"), "revenue": 0, "won": 0, "lost": 0} for m in months
+    }
     open_value = expected = open_count = late = 0
     won_12 = lost_12 = 0
     revenue_prior = 0
@@ -70,7 +80,9 @@ def compute(conn: Connection) -> dict:
             expected += d.value * d.probability / 100
             late += is_late(d.stage, d.close_date, today)
         elif d.close_date is not None:
-            bucket = by_month.get(month_start(d.close_date)) if first <= d.close_date <= today else None
+            bucket = (
+                by_month.get(month_start(d.close_date)) if first <= d.close_date <= today else None
+            )
             if bucket is not None:
                 if d.stage == "won":
                     bucket["revenue"] += d.value
@@ -99,7 +111,9 @@ def compute(conn: Connection) -> dict:
     counts = {"overdue": 0, "today": 0, "upcoming": 0}
     q = (
         activity_query()
-        .where(and_(activities.c.follow_up_date.is_not(None), activities.c.follow_up_done.is_(False)))
+        .where(
+            and_(activities.c.follow_up_date.is_not(None), activities.c.follow_up_done.is_(False))
+        )
         .order_by(activities.c.follow_up_date, activities.c.occurred_at, activities.c.id)
     )
     for r in conn.execute(q):
@@ -126,18 +140,20 @@ def compute(conn: Connection) -> dict:
         "months": list(by_month.values()),
         "funnel": {
             "stages": [
-                {"stage": s, "value": funnel[i], "count": funnel_count[i]} for i, s in enumerate(FUNNEL_STAGES)
+                {"stage": s, "value": funnel[i], "count": funnel_count[i]}
+                for i, s in enumerate(FUNNEL_STAGES)
             ],
             "lost_value": lost_value,
             "lost_count": lost_count,
         },
-        "recent": timeline(conn, activities.c.id.is_not(None), stage_changes.c.id.is_not(None), limit=10),
+        "recent": timeline(
+            conn, activities.c.id.is_not(None), stage_changes.c.id.is_not(None), limit=10
+        ),
         "follow_ups": follow_ups,
         "follow_up_counts": counts,
     }
 
 
 @router.get("/dashboard")
-def dashboard(conn: Connection = Depends(db.get_conn)) -> dict:
+def dashboard(conn: db.Conn) -> dict:
     return compute(conn)
-

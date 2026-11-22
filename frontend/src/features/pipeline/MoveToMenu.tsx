@@ -4,7 +4,13 @@ import type { Deal } from "../../api/types";
 import { STAGES } from "../../lib/stages";
 
 /** The simpler keyboard path for a move: pick the new stage from a menu (P6). */
-export function MoveToMenu({ deal, onMove }: { deal: Deal; onMove: (deal: Deal, stage: Deal["stage"]) => void }) {
+export function MoveToMenu({
+  deal,
+  onMove,
+}: {
+  deal: Deal;
+  onMove: (deal: Deal, stage: Deal["stage"]) => void;
+}) {
   return (
     <DropdownMenu.Root modal={false}>
       <DropdownMenu.Trigger
@@ -22,7 +28,9 @@ export function MoveToMenu({ deal, onMove }: { deal: Deal; onMove: (deal: Deal, 
           className="panel z-50 min-w-[170px] p-1.5 shadow-lift"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <DropdownMenu.Label className="px-2 py-1 text-[12px] font-semibold text-ink-muted">Move to</DropdownMenu.Label>
+          <DropdownMenu.Label className="px-2 py-1 text-[12px] font-semibold text-ink-muted">
+            Move to
+          </DropdownMenu.Label>
           {STAGES.filter((s) => s.key !== deal.stage).map((s) => (
             <DropdownMenu.Item
               key={s.key}

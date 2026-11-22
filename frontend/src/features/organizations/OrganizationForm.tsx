@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -15,11 +16,24 @@ type Props = {
   onSaved?: (organization: Organization) => void;
 };
 
-export const INDUSTRIES = ["Software", "Healthcare", "Logistics", "Retail", "Finance", "Manufacturing", "Education", "Media"];
+export const INDUSTRIES = [
+  "Software",
+  "Healthcare",
+  "Logistics",
+  "Retail",
+  "Finance",
+  "Manufacturing",
+  "Education",
+  "Media",
+];
 
 export function OrganizationFormDialog({ open, onOpenChange, organization, onSaved }: Props) {
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title={organization ? `Edit ${organization.name}` : "Add organization"}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={organization ? `Edit ${organization.name}` : "Add organization"}
+    >
       {open && (
         <OrganizationForm
           organization={organization}
@@ -48,6 +62,7 @@ function OrganizationForm({
     register,
     handleSubmit,
     setError,
+    setFocus,
     formState: { errors, dirtyFields, isSubmitting },
   } = useForm<OrganizationInput, unknown, OrganizationValues>({
     resolver: zodResolver(organizationSchema),
@@ -58,6 +73,8 @@ function OrganizationForm({
       notes: organization?.notes ?? "",
     },
   });
+  // The dialog opens with the name field focused.
+  useEffect(() => setFocus("name"), [setFocus]);
 
   const onSubmit = async (values: OrganizationValues) => {
     const payload = organization ? changedOnly(values, dirtyFields) : values;
@@ -76,10 +93,15 @@ function OrganizationForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-2 gap-x-4 gap-y-3">
       <Field id="org-name" label="Name" error={errors.name?.message} className="col-span-2">
-        <input className="input" autoComplete="off" autoFocus {...register("name")} />
+        <input className="input" autoComplete="off" {...register("name")} />
       </Field>
       <Field id="org-website" label="Website" error={errors.website?.message}>
-        <input className="input" autoComplete="off" placeholder="acme.com" {...register("website")} />
+        <input
+          className="input"
+          autoComplete="off"
+          placeholder="acme.com"
+          {...register("website")}
+        />
       </Field>
       <Field id="org-industry" label="Industry" error={errors.industry?.message}>
         <input className="input" autoComplete="off" list="industries" {...register("industry")} />

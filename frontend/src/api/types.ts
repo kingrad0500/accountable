@@ -78,11 +78,20 @@ export type StageChangeEntry = {
 
 export type TimelineEntry = ActivityEntry | StageChangeEntry;
 
-export type OrganizationDetail = Organization & { contacts: Contact[]; deals: Deal[]; timeline: TimelineEntry[] };
+export type OrganizationDetail = Organization & {
+  contacts: Contact[];
+  deals: Deal[];
+  timeline: TimelineEntry[];
+};
 export type ContactDetail = Contact & { deals: Deal[]; timeline: TimelineEntry[] };
 export type DealDetail = Deal & { timeline: TimelineEntry[] };
 
-export type DeleteImpact = { contacts?: number; deals?: number; activities?: number; stage_changes?: number };
+export type DeleteImpact = {
+  contacts?: number;
+  deals?: number;
+  activities?: number;
+  stage_changes?: number;
+};
 
 export type FollowUp = ActivityEntry & { group: "overdue" | "today" | "upcoming" };
 
@@ -102,7 +111,11 @@ export type Dashboard = {
     needs_attention: number;
   };
   months: { month: string; revenue: number; won: number; lost: number }[];
-  funnel: { stages: { stage: StageKey; value: number; count: number }[]; lost_value: number; lost_count: number };
+  funnel: {
+    stages: { stage: StageKey; value: number; count: number }[];
+    lost_value: number;
+    lost_count: number;
+  };
   recent: TimelineEntry[];
   follow_ups: FollowUp[];
   follow_up_counts: { overdue: number; today: number; upcoming: number };

@@ -14,6 +14,9 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "httpx>=0.27",
+    "ruff>=0.17.6",
+    "ty>=0.0.107",
+    "pytest-cov>=7.1.0",
 ]
 
 [build-system]
@@ -30,3 +33,30 @@ filterwarnings = [
     # Starlette suggests a different HTTP client for its TestClient; httpx works fine.
     "ignore:Using `httpx` with `starlette.testclient` is deprecated",
 ]
+
+[tool.ruff]
+line-length = 100
+src = ["backend"]
+# The course's own material isn't ours to reformat.
+extend-exclude = ["course", "community_contributions"]
+
+[tool.ruff.lint]
+# The default rules plus the complexity limit.
+extend-select = ["C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ty.environment]
+extra-paths = ["backend"]
+
+[tool.ty.src]
+exclude = ["course", "community_contributions"]
+
+[tool.coverage.run]
+source = ["backend/accountable"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true

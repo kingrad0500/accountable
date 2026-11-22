@@ -36,7 +36,10 @@ test("table sorts answer in under 500 ms and scrolling stays virtualized", async
     const button = page.getByRole("columnheader", { name: header }).getByRole("button");
     const start = Date.now();
     await button.click();
-    await expect(page.getByRole("columnheader", { name: header })).not.toHaveAttribute("aria-sort", "none");
+    await expect(page.getByRole("columnheader", { name: header })).not.toHaveAttribute(
+      "aria-sort",
+      "none",
+    );
     const ms = Date.now() - start;
     expect(ms, `sorting ${noun} took ${ms} ms`).toBeLessThan(500);
 
@@ -47,14 +50,20 @@ test("table sorts answer in under 500 ms and scrolling stays virtualized", async
   }
 });
 
-test("a drag on the board with Closed deals set to All answers in under 500 ms", async ({ page }) => {
+test("a drag on the board with Closed deals set to All answers in under 500 ms", async ({
+  page,
+}) => {
   await page.goto("/pipeline");
   await page.getByLabel("Closed deals:").selectOption("all");
   await expect(page.getByTestId("deal-card")).toHaveCount(300); // 50 per column, with "Show more"
   const card = page.getByTestId("column-new").getByTestId("deal-card").first();
   const name = await card.locator("a").textContent();
   const src = (await card.boundingBox())!;
-  const dst = (await page.getByTestId("column-qualified").getByTestId("deal-card").nth(2).boundingBox())!;
+  const dst = (await page
+    .getByTestId("column-qualified")
+    .getByTestId("deal-card")
+    .nth(2)
+    .boundingBox())!;
 
   await page.mouse.move(src.x + 20, src.y + src.height / 2);
   await page.mouse.down();

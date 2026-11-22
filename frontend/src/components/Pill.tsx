@@ -1,5 +1,5 @@
 import type { StageKey, StatusKey } from "../lib/stages";
-import { STATUSES, stageOf } from "../lib/stages";
+import { stageOf, statusLabel } from "../lib/stages";
 
 const STATUS_COLORS: Record<StatusKey, [string, string]> = {
   lead: ["var(--tint)", "var(--ink)"],
@@ -21,7 +21,7 @@ export function Pill(props: Props) {
     const s = stageOf(props.value);
     [label, bg, fg] = [s.label, s.fill, s.text];
   } else if (props.kind === "status") {
-    label = STATUSES.find((s) => s.key === props.value)?.label ?? props.value;
+    label = statusLabel(props.value);
     [bg, fg] = STATUS_COLORS[props.value];
   } else {
     [label, bg, fg] = ["Late", "var(--raspberry-ink)", "#ffffff"];

@@ -5,7 +5,11 @@ export type SearchItem = { kind: SearchKind; id: number; name: string; detail?: 
 export type SearchGroup = { kind: SearchKind; label: string; items: SearchItem[] };
 
 export const MAX_RESULTS = 8;
-const LABELS: Record<SearchKind, string> = { deal: "Deals", contact: "Contacts", organization: "Organizations" };
+const LABELS: Record<SearchKind, string> = {
+  deal: "Deals",
+  contact: "Contacts",
+  organization: "Organizations",
+};
 const ORDER: SearchKind[] = ["deal", "contact", "organization"];
 
 /**
@@ -42,5 +46,9 @@ export function quickSearch(query: string, items: SearchItem[]): SearchGroup[] {
     }
     if (!added) break;
   }
-  return ORDER.filter((k) => chosen.get(k)!.length).map((k) => ({ kind: k, label: LABELS[k], items: chosen.get(k)! }));
+  return ORDER.filter((k) => chosen.get(k)!.length).map((k) => ({
+    kind: k,
+    label: LABELS[k],
+    items: chosen.get(k)!,
+  }));
 }

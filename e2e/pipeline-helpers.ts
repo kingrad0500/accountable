@@ -10,7 +10,12 @@ export async function names(page: Page, stage: string): Promise<string[]> {
 }
 
 /** Drag a card with the mouse and drop it above, below or into a target. */
-export async function drag(page: Page, source: Locator, target: Locator, where: "above" | "below" | "into" = "into") {
+export async function drag(
+  page: Page,
+  source: Locator,
+  target: Locator,
+  where: "above" | "below" | "into" = "into",
+) {
   await source.scrollIntoViewIfNeeded();
   const from = (await source.boundingBox())!;
   // Grab at the card's middle, so the lifted card is centred on the pointer.
@@ -20,7 +25,12 @@ export async function drag(page: Page, source: Locator, target: Locator, where: 
   await page.mouse.down();
   await page.mouse.move(startX + 8, startY + 8, { steps: 4 });
   const to = (await target.boundingBox())!;
-  const y = where === "above" ? to.y + to.height * 0.2 : where === "below" ? to.y + to.height * 0.8 : to.y + to.height / 2;
+  const y =
+    where === "above"
+      ? to.y + to.height * 0.2
+      : where === "below"
+        ? to.y + to.height * 0.8
+        : to.y + to.height / 2;
   await page.mouse.move(to.x + to.width / 2, y, { steps: 20 });
   await page.mouse.move(to.x + to.width / 2, y + 1, { steps: 3 });
   await page.mouse.up();

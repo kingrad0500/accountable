@@ -1,8 +1,25 @@
 // Money and date formatting. Money always shows its currency (USD).
 
-const usdFormat = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+const usdFormat = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const LONG_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const LONG_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 /** "$12,500" */
@@ -31,14 +48,17 @@ export function parseDate(iso: string): Date {
 
 /** "18 Nov 2026" */
 export function formatDate(value: string | Date): string {
-  const d = typeof value === "string" ? (value.length === 10 ? parseDate(value) : new Date(value)) : value;
+  const d =
+    typeof value === "string" ? (value.length === 10 ? parseDate(value) : new Date(value)) : value;
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 /** "12 Nov" this year, "12 Feb 2027" otherwise. */
 export function formatDateShort(value: string, now: Date = new Date()): string {
   const d = value.length === 10 ? parseDate(value) : new Date(value);
-  return d.getFullYear() === now.getFullYear() ? `${d.getDate()} ${MONTHS[d.getMonth()]}` : formatDate(d);
+  return d.getFullYear() === now.getFullYear()
+    ? `${d.getDate()} ${MONTHS[d.getMonth()]}`
+    : formatDate(d);
 }
 
 /** "Wednesday, 18 November 2026" */
@@ -81,7 +101,9 @@ export function monthLabel(month: string): string {
 export function initials(name: string | null | undefined): string {
   if (!name) return "";
   const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
+  return (
+    (parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")
+  ).toUpperCase();
 }
 
 export function plural(n: number, one: string, many = `${one}s`): string {

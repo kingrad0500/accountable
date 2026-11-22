@@ -13,22 +13,35 @@ test("the figures match the API and the database (SC6, DB7)", async ({ page, req
   await expect(page.getByTestId("kpi-open")).toHaveText(usd(f.open_value));
   await expect(page.getByTestId("kpi-expected")).toHaveText(usd(f.expected_revenue));
   await expect(page.getByTestId("kpi-win-rate")).toHaveText(`${Math.round(f.win_rate * 100)}%`);
-  await expect(page.getByTestId("kpi-attention")).toHaveText(String(f.late_deals + f.overdue_follow_ups));
+  await expect(page.getByTestId("kpi-attention")).toHaveText(
+    String(f.late_deals + f.overdue_follow_ups),
+  );
 
   // Cross-check the open figures against the raw deals list.
-  const deals: { stage: string; value: number; probability: number }[] = await (await request.get(`${API}/deals`)).json();
-  const open = deals.filter((x) => ["new", "qualified", "proposal", "negotiation"].includes(x.stage));
+  const deals: { stage: string; value: number; probability: number }[] = await (
+    await request.get(`${API}/deals`)
+  ).json();
+  const open = deals.filter((x) =>
+    ["new", "qualified", "proposal", "negotiation"].includes(x.stage),
+  );
   expect(f.open_value).toBe(open.reduce((s, x) => s + x.value, 0));
-  expect(f.expected_revenue).toBe(Math.round(open.reduce((s, x) => s + (x.value * x.probability) / 100, 0)));
+  expect(f.expected_revenue).toBe(
+    Math.round(open.reduce((s, x) => s + (x.value * x.probability) / 100, 0)),
+  );
   expect(f.open_count).toBe(open.length);
   await expect(page.getByTestId("follow-up-counts")).toHaveText(
     `${d.follow_up_counts.overdue} overdue · ${d.follow_up_counts.today} today · ${d.follow_up_counts.upcoming} upcoming`,
   );
 });
 
-test("marking a deal won changes revenue, win rate and the charts (SC6)", async ({ page, request }) => {
+test("marking a deal won changes revenue, win rate and the charts (SC6)", async ({
+  page,
+  request,
+}) => {
   const before = (await (await request.get(`${API}/dashboard`)).json()).figures;
-  const novBefore = (await page.getByRole("img", { name: /Deals won and lost by month/ }).getAttribute("aria-label"))!.match(/Nov: (\d+) won/)![1];
+  const novBefore = (await page
+    .getByRole("img", { name: /Deals won and lost by month/ })
+    .getAttribute("aria-label"))!.match(/Nov: (\d+) won/)![1];
 
   await page.getByRole("link", { name: "Pipeline", exact: true }).click();
   await page.getByRole("button", { name: "Move Managed cloud contract to" }).click();
@@ -44,10 +57,14 @@ test("marking a deal won changes revenue, win rate and the charts (SC6)", async 
     "aria-label",
     new RegExp(`Nov: ${Number(novBefore) + 1} won`),
   );
-  await expect(page.getByRole("region", { name: "Recent activity" })).toContainText("Managed cloud contract moved from Negotiation to Won");
+  await expect(page.getByRole("region", { name: "Recent activity" })).toContainText(
+    "Managed cloud contract moved from Negotiation to Won",
+  );
 });
 
-test("a new follow-up appears under Upcoming, and marking it done removes it (SC5, SC6)", async ({ page }) => {
+test("a new follow-up appears under Upcoming, and marking it done removes it (SC5, SC6)", async ({
+  page,
+}) => {
   await page.getByRole("link", { name: "Deals", exact: true }).click();
   await page.getByRole("searchbox", { name: "Search deals" }).fill("Mobile app phase 2");
   await page.getByRole("link", { name: "Mobile app phase 2" }).click();
@@ -61,14 +78,18 @@ test("a new follow-up appears under Upcoming, and marking it done removes it (SC
   const followUps = page.getByRole("region", { name: "Follow-ups" });
   const upcoming = followUps.getByRole("rowgroup", { name: "Upcoming" });
   await expect(upcoming).toContainText("Book the design review");
-  await expect(upcoming.getByTestId("follow-up").filter({ hasText: "Book the design review" })).toContainText("23 Nov");
+  await expect(
+    upcoming.getByTestId("follow-up").filter({ hasText: "Book the design review" }),
+  ).toContainText("23 Nov");
   await expect(followUps).toContainText("9 upcoming");
 
   await followUps.getByRole("checkbox", { name: "Mark done: Book the design review" }).check();
   await expect(followUps).not.toContainText("Book the design review");
   await expect(followUps).toContainText("8 upcoming");
   await page.reload();
-  await expect(page.getByRole("region", { name: "Follow-ups" })).not.toContainText("Book the design review");
+  await expect(page.getByRole("region", { name: "Follow-ups" })).not.toContainText(
+    "Book the design review",
+  );
 });
 
 test("the line chart, bar chart and funnel are present (SC7)", async ({ page }) => {
@@ -78,7 +99,8 @@ test("the line chart, bar chart and funnel are present (SC7)", async ({ page }) 
   const bars = page.getByRole("img", { name: /Deals won and lost by month/ });
   expect(await bars.locator(".recharts-bar-rectangle").count()).toBeGreaterThan(12);
   const funnel = page.getByRole("region", { name: "Sales funnel" });
-  for (const stage of ["New", "Qualified", "Proposal", "Negotiation", "Won"]) await expect(funnel).toContainText(stage);
+  for (const stage of ["New", "Qualified", "Proposal", "Negotiation", "Won"])
+    await expect(funnel).toContainText(stage);
   await expect(funnel).toContainText("carried on");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Good afternoon");
   await expect(page.getByText("Wednesday, 18 November 2026 · all figures in USD")).toBeVisible();

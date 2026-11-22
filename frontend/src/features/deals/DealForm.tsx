@@ -1,8 +1,8 @@
-import { useMemo, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useRef } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import type { Deal } from "../../api/types";
+import type { Contact, Deal, Organization } from "../../api/types";
 import { Field } from "../../components/Field";
 import { FormDialog } from "../../components/FormDialog";
 import { changedOnly, showServerErrors } from "../../lib/forms";
@@ -24,7 +24,11 @@ type Props = {
 
 export function DealFormDialog({ open, onOpenChange, deal, initial, onSaved }: Props) {
   return (
-    <FormDialog open={open} onOpenChange={onOpenChange} title={deal ? `Edit ${deal.name}` : "Add deal"}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={deal ? `Edit ${deal.name}` : "Add deal"}
+    >
       {open && (
         <DealForm
           deal={deal}
@@ -40,7 +44,15 @@ export function DealFormDialog({ open, onOpenChange, deal, initial, onSaved }: P
   );
 }
 
-const FIELDS = ["name", "organization_id", "main_contact_id", "stage", "value", "probability", "close_date"];
+const FIELDS = [
+  "name",
+  "organization_id",
+  "main_contact_id",
+  "stage",
+  "value",
+  "probability",
+  "close_date",
+];
 
 function fromDeal(deal: Deal): DealInput {
   return {
@@ -54,17 +66,19 @@ function fromDeal(deal: Deal): DealInput {
   };
 }
 
-function DealForm(props: {
+type FormProps = {
   deal?: Deal | null;
   initial?: Partial<DealInput>;
   onCancel: () => void;
   onSaved: (deal: Deal) => void;
-}) {
+};
+
+function DealForm(props: FormProps) {
   // Selects need their options before they can show the deal's values.
   const organizations = useOrganizations();
   const contacts = useContacts();
   if (!organizations.data || !contacts.data) return <p className="muted py-6">Loading…</p>;
-  return <DealFields {...props} />;
+  return <DealFields {...props} organizations={organizations.data} contacts={contacts.data} />;
 }
 
 function DealFields({
@@ -72,14 +86,9 @@ function DealFields({
   initial,
   onCancel,
   onSaved,
-}: {
-  deal?: Deal | null;
-  initial?: Partial<DealInput>;
-  onCancel: () => void;
-  onSaved: (deal: Deal) => void;
-}) {
-  const organizations = useOrganizations();
-  const contacts = useContacts();
+  organizations,
+  contacts,
+}: FormProps & { organizations: Organization[]; contacts: Contact[] }) {
   const save = useSaveDeal();
   const probabilityTyped = useRef(false);
 
@@ -100,35 +109,46 @@ function DealFields({
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     setError,
+    setFocus,
     formState: { errors, dirtyFields, isSubmitting },
-  } = useForm<DealInput, unknown, DealValues>({ resolver: zodResolver(dealSchema), defaultValues: defaults });
+  } = useForm<DealInput, unknown, DealValues>({
+    resolver: zodResolver(dealSchema),
+    defaultValues: defaults,
+  });
+  // The dialog opens with the name field focused.
+  useEffect(() => setFocus("name"), [setFocus]);
 
-  const orgId = watch("organization_id");
-  const contactId = watch("main_contact_id");
+  const [orgId, contactId] = useWatch({ control, name: ["organization_id", "main_contact_id"] });
   // The main contact list shows contacts at the chosen organization (DL7).
   const contactOptions = useMemo(
     () =>
-      (contacts.data ?? []).filter(
+      contacts.filter(
         (c) => (orgId && String(c.organization_id) === orgId) || String(c.id) === contactId,
       ),
-    [contacts.data, orgId, contactId],
+    [contacts, orgId, contactId],
   );
 
-  const stage = register("stage", {
-    onChange: (e) => {
-      // A new stage brings its usual probability, unless the user typed one (DL5, DL6).
-      if (!probabilityTyped.current) {
-        setValue("probability", String(defaultProbability(e.target.value as StageKey)), { shouldDirty: true });
-      }
-    },
-  });
+  const stage = register("stage");
+  const probability = register("probability");
+  // A new stage brings its usual probability, unless the user typed one (DL5, DL6).
+  const onStageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    stage.onChange(e);
+    if (!probabilityTyped.current) {
+      setValue("probability", String(defaultProbability(e.target.value as StageKey)), {
+        shouldDirty: true,
+      });
+    }
+  };
 
   const onSubmit = async (values: DealValues) => {
     const payload = deal ? changedOnly(values, dirtyFields) : values;
     try {
-      const saved = deal && Object.keys(payload).length === 0 ? deal : await save.mutateAsync({ id: deal?.id, values: payload });
+      const saved =
+        deal && Object.keys(payload).length === 0
+          ? deal
+          : await save.mutateAsync({ id: deal?.id, values: payload });
       toast.success(deal ? "Deal saved" : "Deal added");
       onSaved(saved);
     } catch (error) {
@@ -139,14 +159,14 @@ function DealFields({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid grid-cols-2 gap-x-4 gap-y-3">
       <Field id="deal-name" label="Deal name" error={errors.name?.message} className="col-span-2">
-        <input className="input" autoComplete="off" autoFocus {...register("name")} />
+        <input className="input" autoComplete="off" {...register("name")} />
       </Field>
       <Field id="deal-organization" label="Organization" error={errors.organization_id?.message}>
         <select
           className="input"
           {...register("organization_id", {
             onChange: (e) => {
-              const still = (contacts.data ?? []).some(
+              const still = contacts.some(
                 (c) => String(c.id) === contactId && String(c.organization_id) === e.target.value,
               );
               if (!still) setValue("main_contact_id", "", { shouldDirty: true });
@@ -154,14 +174,18 @@ function DealFields({
           })}
         >
           <option value="">Choose an organization</option>
-          {(organizations.data ?? []).map((o) => (
+          {organizations.map((o) => (
             <option key={o.id} value={o.id}>
               {o.name}
             </option>
           ))}
         </select>
       </Field>
-      <Field id="deal-contact" label="Main contact (optional)" error={errors.main_contact_id?.message}>
+      <Field
+        id="deal-contact"
+        label="Main contact (optional)"
+        error={errors.main_contact_id?.message}
+      >
         <select className="input" {...register("main_contact_id")} disabled={!orgId && !contactId}>
           <option value="">{orgId ? "No main contact" : "Choose an organization first"}</option>
           {contactOptions.map((c) => (
@@ -172,7 +196,7 @@ function DealFields({
         </select>
       </Field>
       <Field id="deal-stage" label="Stage" error={errors.stage?.message}>
-        <select className="input" {...stage}>
+        <select className="input" {...stage} onChange={onStageChange}>
           {STAGES.map((s) => (
             <option key={s.key} value={s.key}>
               {s.label}
@@ -181,14 +205,28 @@ function DealFields({
         </select>
       </Field>
       <Field id="deal-value" label="Value (USD)" error={errors.value?.message}>
-        <input className="input mono" inputMode="numeric" autoComplete="off" placeholder="25000" {...register("value")} />
-      </Field>
-      <Field id="deal-probability" label="Probability of close (%)" error={errors.probability?.message}>
         <input
           className="input mono"
           inputMode="numeric"
           autoComplete="off"
-          {...register("probability", { onChange: () => (probabilityTyped.current = true) })}
+          placeholder="25000"
+          {...register("value")}
+        />
+      </Field>
+      <Field
+        id="deal-probability"
+        label="Probability of close (%)"
+        error={errors.probability?.message}
+      >
+        <input
+          className="input mono"
+          inputMode="numeric"
+          autoComplete="off"
+          {...probability}
+          onChange={(e) => {
+            probabilityTyped.current = true;
+            return probability.onChange(e);
+          }}
         />
       </Field>
       <Field id="deal-close" label="Close date" error={errors.close_date?.message}>

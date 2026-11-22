@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import type { ActivityEntry, ActivityType } from "../../api/types";
@@ -43,18 +43,28 @@ export function ActivityForm({ parent, activity, idPrefix, onDone, onCancel }: P
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     setError,
     formState: { errors, dirtyFields, isSubmitting },
-  } = useForm<ActivityInput, unknown, ActivityValues>({ resolver: zodResolver(activitySchema), defaultValues: defaults });
-  const type = watch("type");
+  } = useForm<ActivityInput, unknown, ActivityValues>({
+    resolver: zodResolver(activitySchema),
+    defaultValues: defaults,
+  });
+  const type = useWatch({ control, name: "type" });
 
   const onSubmit = async (values: ActivityValues) => {
     const payload = activity ? changedOnly(values, dirtyFields) : values;
     try {
-      if (!activity || Object.keys(payload).length) await save.mutateAsync({ id: activity?.id, values: payload, parent });
+      if (!activity || Object.keys(payload).length)
+        await save.mutateAsync({ id: activity?.id, values: payload, parent });
       toast.success(activity ? "Activity saved" : "Activity logged");
-      if (!activity) reset({ type: "note", description: "", occurred_at: toLocalInput(new Date()), follow_up_date: "" });
+      if (!activity)
+        reset({
+          type: "note",
+          description: "",
+          occurred_at: toLocalInput(new Date()),
+          follow_up_date: "",
+        });
       onDone?.();
     } catch (error) {
       showServerErrors(error, setError, FIELDS);
@@ -80,13 +90,26 @@ export function ActivityForm({ parent, activity, idPrefix, onDone, onCancel }: P
         ))}
       </fieldset>
       <Field id={id("description")} label="What happened" error={errors.description?.message}>
-        <textarea className="input" rows={2} placeholder="Called about the renewal…" {...register("description")} />
+        <textarea
+          className="input"
+          rows={2}
+          placeholder="Called about the renewal…"
+          {...register("description")}
+        />
       </Field>
       <div className="flex flex-wrap items-end gap-3">
         <Field id={id("when")} label="When" error={errors.occurred_at?.message}>
-          <input type="datetime-local" className="input mono w-[210px]" {...register("occurred_at")} />
+          <input
+            type="datetime-local"
+            className="input mono w-[210px]"
+            {...register("occurred_at")}
+          />
         </Field>
-        <Field id={id("follow-up")} label="Follow-up date (optional)" error={errors.follow_up_date?.message}>
+        <Field
+          id={id("follow-up")}
+          label="Follow-up date (optional)"
+          error={errors.follow_up_date?.message}
+        >
           <input type="date" className="input mono w-[170px]" {...register("follow_up_date")} />
         </Field>
         <div className="ml-auto flex gap-2">
@@ -104,10 +127,28 @@ export function ActivityForm({ parent, activity, idPrefix, onDone, onCancel }: P
   );
 }
 
-export function ActivityFormDialog({ activity, onClose }: { activity: ActivityEntry | null; onClose: () => void }) {
+export function ActivityFormDialog({
+  activity,
+  onClose,
+}: {
+  activity: ActivityEntry | null;
+  onClose: () => void;
+}) {
   return (
-    <FormDialog open={!!activity} onOpenChange={(o) => !o && onClose()} title="Edit activity" width={600}>
-      {activity && <ActivityForm activity={activity} idPrefix="edit-activity" onDone={onClose} onCancel={onClose} />}
+    <FormDialog
+      open={!!activity}
+      onOpenChange={(o) => !o && onClose()}
+      title="Edit activity"
+      width={600}
+    >
+      {activity && (
+        <ActivityForm
+          activity={activity}
+          idPrefix="edit-activity"
+          onDone={onClose}
+          onCancel={onClose}
+        />
+      )}
     </FormDialog>
   );
 }

@@ -14,6 +14,7 @@ describe("money", () => {
     expect(usdShort(2_170_000)).toBe("$2.17M");
     expect(usdShort(800)).toBe("$800");
     expect(usdShort(999_999)).toBe("$1M");
+    expect(usdShort(-59000)).toBe("-$59k");
   });
 });
 
@@ -32,6 +33,8 @@ describe("dates", () => {
     expect(relativeTime(new Date(2026, 10, 15, 9, 0).toISOString(), now)).toBe("3 days ago");
     expect(relativeTime(new Date(2026, 10, 17, 20, 0).toISOString(), now)).toBe("Yesterday");
     expect(relativeTime(new Date(2026, 10, 18, 12, 0).toISOString(), now)).toBe("2 hours ago");
+    expect(relativeTime(new Date(2026, 10, 18, 13, 0).toISOString(), now)).toBe("1 hour ago");
+    expect(relativeTime(new Date(2026, 10, 18, 13, 59).toISOString(), now)).toBe("1 minute ago");
     expect(relativeTime(new Date(2026, 10, 18, 13, 55).toISOString(), now)).toBe("5 minutes ago");
     expect(relativeTime(new Date(2026, 10, 18, 14, 0).toISOString(), now)).toBe("Just now");
     expect(relativeTime(new Date(2026, 10, 1, 9, 0).toISOString(), now)).toBe("1 Nov");
@@ -42,4 +45,5 @@ it("makes initials", () => {
   expect(initials("Ana Ruiz")).toBe("AR");
   expect(initials("Cher")).toBe("C");
   expect(initials(null)).toBe("");
+  expect(initials("   ")).toBe("");
 });

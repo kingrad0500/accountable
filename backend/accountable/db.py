@@ -8,9 +8,8 @@ from collections.abc import Iterator
 from datetime import UTC, date, datetime
 from typing import Annotated, Any
 
-from fastapi import HTTPException, Response
+from fastapi import Depends, HTTPException, Response
 from pydantic import AfterValidator, BeforeValidator
-
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -114,9 +113,7 @@ activities = Table(
     Column("follow_up_date", Date),
     Column("follow_up_done", Boolean, nullable=False, default=False),
     *_timestamps(),
-    CheckConstraint(
-        "(contact_id IS NULL) != (deal_id IS NULL)", name="activity_one_parent"
-    ),
+    CheckConstraint("(contact_id IS NULL) != (deal_id IS NULL)", name="activity_one_parent"),
     CheckConstraint("type IN ('note', 'call', 'email')", name="activity_type"),
     Index("ix_activities_contact_id", "contact_id"),
     Index("ix_activities_deal_id", "deal_id"),
@@ -155,9 +152,7 @@ def get_engine() -> Engine:
     if _engine is None:
         path = config.db_path()
         path.parent.mkdir(parents=True, exist_ok=True)
-        _engine = create_engine(
-            f"sqlite:///{path}", connect_args={"check_same_thread": False}
-        )
+        _engine = create_engine(f"sqlite:///{path}", connect_args={"check_same_thread": False})
         event.listen(_engine, "connect", _set_pragmas)
     return _engine
 
@@ -178,6 +173,9 @@ def get_conn() -> Iterator[Connection]:
     """One connection per request. Routes that write call conn.commit()."""
     with get_engine().connect() as conn:
         yield conn
+
+
+Conn = Annotated[Connection, Depends(get_conn)]
 
 
 def as_utc(value: datetime | None) -> datetime | None:
@@ -211,16 +209,24 @@ def json_response(data: Any) -> Response:
     FastAPI's default checks and converts every field of every row, which costs about
     100 ms for 3,000 deals. The output is the same: ISO dates, and UTC times ending in Z.
     """
-    return Response(json.dumps(data, default=_json_default, separators=(",", ":")), media_type="application/json")
+    return Response(
+        json.dumps(data, default=_json_default, separators=(",", ":")),
+        media_type="application/json",
+    )
 
 
 def field_error(field: str, msg: str, status: int = 422) -> HTTPException:
     """An error in FastAPI's standard validation shape, for one body field."""
-    return HTTPException(status, detail=[{"loc": ["body", field], "msg": msg, "type": "value_error"}])
+    return HTTPException(
+        status, detail=[{"loc": ["body", field], "msg": msg, "type": "value_error"}]
+    )
 
 
 def check_exists(conn: Connection, table: Table, id_: int | None, field: str, label: str) -> None:
-    if id_ is not None and conn.execute(select(table.c.id).where(table.c.id == id_)).first() is None:
+    if (
+        id_ is not None
+        and conn.execute(select(table.c.id).where(table.c.id == id_)).first() is None
+    ):
         raise field_error(field, f"No such {label}")
 
 

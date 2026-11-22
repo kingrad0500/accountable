@@ -1,7 +1,12 @@
 import { expect, it } from "vitest";
 import { activitySchema } from "./schema";
 
-const valid = { type: "call", description: "Spoke to Ana", occurred_at: "2026-11-18T14:30", follow_up_date: "" };
+const valid = {
+  type: "call",
+  description: "Spoke to Ana",
+  occurred_at: "2026-11-18T14:30",
+  follow_up_date: "",
+};
 const errors = (input: Partial<typeof valid>) => {
   const r = activitySchema.safeParse({ ...valid, ...input });
   return r.success ? {} : Object.fromEntries(r.error.issues.map((i) => [i.path[0], i.message]));

@@ -32,7 +32,8 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
       <div className="mb-3.5 flex items-baseline justify-between">
         <h2 className="text-[15px]">Follow-ups</h2>
         <small className="text-[12.5px] text-ink-muted" data-testid="follow-up-counts">
-          {groups.overdue.length} overdue · {groups.today.length} today · {groups.upcoming.length} upcoming
+          {groups.overdue.length} overdue · {groups.today.length} today · {groups.upcoming.length}{" "}
+          upcoming
         </small>
       </div>
       {items.length === 0 ? (
@@ -54,7 +55,11 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
             {GROUPS.filter((g) => groups[g.key].length).map((g) => (
               <tbody key={g.key} aria-label={g.label}>
                 <tr>
-                  <th colSpan={5} scope="colgroup" className="px-2 pt-3 pb-1 text-left text-[11.5px] font-semibold tracking-wide text-ink-muted uppercase">
+                  <th
+                    colSpan={5}
+                    scope="colgroup"
+                    className="px-2 pt-3 pb-1 text-left text-[11.5px] font-semibold tracking-wide text-ink-muted uppercase"
+                  >
                     {g.label}
                   </th>
                 </tr>
@@ -64,7 +69,11 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
                     ? { to: `/deals/${f.deal_id}`, name: f.deal_name }
                     : { to: `/contacts/${f.contact_id}`, name: f.contact_name };
                   return (
-                    <tr key={f.id} className={`shadow-[0_-1px_0_var(--tint)] ${isDone ? "opacity-50" : ""}`} data-testid="follow-up">
+                    <tr
+                      key={f.id}
+                      className={`shadow-[0_-1px_0_var(--tint)] ${isDone ? "opacity-50" : ""}`}
+                      data-testid="follow-up"
+                    >
                       <td className="px-2 py-2.5 align-middle">
                         <input
                           type="checkbox"
@@ -80,16 +89,24 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
                       >
                         {g.key === "today" ? "Today" : formatDateShort(f.follow_up_date!)}
                       </td>
-                      <td className={`px-2 py-2.5 font-medium ${isDone ? "line-through" : ""}`}>{f.description}</td>
+                      <td className={`px-2 py-2.5 font-medium ${isDone ? "line-through" : ""}`}>
+                        {f.description}
+                      </td>
                       <td className="px-2 py-2.5">
-                        <Link to={related.to} className="inline-flex items-center gap-1.5 text-ink-muted hover:text-ink hover:underline">
+                        <Link
+                          to={related.to}
+                          className="inline-flex items-center gap-1.5 text-ink-muted hover:text-ink hover:underline"
+                        >
                           <TypeIcon type={f.type} size={14} bare />
                           {related.name}
                         </Link>
                       </td>
                       <td className="px-2 py-2.5 text-ink-muted">
                         {f.organization_id ? (
-                          <Link to={`/organizations/${f.organization_id}`} className="hover:text-ink hover:underline">
+                          <Link
+                            to={`/organizations/${f.organization_id}`}
+                            className="hover:text-ink hover:underline"
+                          >
                             {f.organization_name}
                           </Link>
                         ) : null}

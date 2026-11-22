@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import type { Deal } from "../../api/types";
 import { ConfirmDelete, type DeleteTarget } from "../../components/ConfirmDelete";
-import { DataTable, RowActions } from "../../components/DataTable";
+import { DataTable, RowActions, type TableColumn } from "../../components/DataTable";
 import { Money } from "../../components/Money";
 import { FilterSelect, PageTitle } from "../../components/PageTitle";
 import { Pill } from "../../components/Pill";
@@ -38,16 +37,23 @@ export function DealsPage() {
   const remove = useDeleteDeal();
   const [params, setParams] = useSearchParams();
   const filterParam = params.get("filter") as DealFilter | null;
-  const filter: DealFilter = filterParam && FILTERS.some((f) => f.value === filterParam) ? filterParam : "all";
+  const filter: DealFilter =
+    filterParam && FILTERS.some((f) => f.value === filterParam) ? filterParam : "all";
   const [editing, setEditing] = useState<Deal | null | undefined>(undefined);
   const [deleting, setDeleting] = useState<DeleteTarget | null>(null);
   const today = todayISO();
 
-  const all = deals.data ?? [];
-  const visible = useMemo(() => all.filter((d) => dealMatches(filter, d, today)), [all, filter, today]);
-  const options = FILTERS.map((f) => ({ ...f, count: all.filter((d) => dealMatches(f.value, d, today)).length }));
+  const all = useMemo(() => deals.data ?? [], [deals.data]);
+  const visible = useMemo(
+    () => all.filter((d) => dealMatches(filter, d, today)),
+    [all, filter, today],
+  );
+  const options = FILTERS.map((f) => ({
+    ...f,
+    count: all.filter((d) => dealMatches(f.value, d, today)).length,
+  }));
 
-  const columns = useMemo<ColumnDef<Deal, any>[]>(
+  const columns = useMemo<TableColumn<Deal>[]>(
     () => [
       {
         id: "name",
@@ -94,7 +100,8 @@ export function DealsPage() {
         id: "stage",
         accessorFn: (d) => STAGES.find((s) => s.key === d.stage)!.label,
         header: "Stage",
-        sortingFn: (a, b) => STAGE_KEYS.indexOf(a.original.stage) - STAGE_KEYS.indexOf(b.original.stage),
+        sortingFn: (a, b) =>
+          STAGE_KEYS.indexOf(a.original.stage) - STAGE_KEYS.indexOf(b.original.stage),
         meta: { width: "112px" },
         cell: ({ row }) => <Pill kind="stage" value={row.original.stage} />,
       },
@@ -103,21 +110,21 @@ export function DealsPage() {
         accessorKey: "value",
         header: "Value (USD)",
         meta: { width: "116px", align: "right" },
-        cell: ({ getValue }) => <Money value={getValue()} />,
+        cell: ({ row }) => <Money value={row.original.value} />,
       },
       {
         id: "probability",
         accessorKey: "probability",
         header: "Probability",
         meta: { width: "96px", align: "right", search: false },
-        cell: ({ getValue }) => <span className="mono">{getValue()}%</span>,
+        cell: ({ row }) => <span className="mono">{row.original.probability}%</span>,
       },
       {
         id: "expected",
         accessorFn: (d) => (d.value * d.probability) / 100,
         header: "Expected (USD)",
         meta: { width: "124px", align: "right", search: false },
-        cell: ({ getValue }) => <Money value={getValue()} />,
+        cell: ({ getValue }) => <Money value={getValue<number>()} />,
       },
       {
         id: "close_date",
@@ -128,7 +135,9 @@ export function DealsPage() {
         cell: ({ row }) =>
           row.original.close_date ? (
             <span className="flex items-center gap-2">
-              <span className={`mono text-[13px] ${isLate(row.original, today) ? "font-semibold text-raspberry-ink" : ""}`}>
+              <span
+                className={`mono text-[13px] ${isLate(row.original, today) ? "font-semibold text-raspberry-ink" : ""}`}
+              >
                 {formatDate(row.original.close_date)}
               </span>
               {isLate(row.original, today) && <Pill kind="late" />}
@@ -146,7 +155,9 @@ export function DealsPage() {
           <RowActions
             name={row.original.name}
             onEdit={() => setEditing(row.original)}
-            onDelete={() => setDeleting({ kind: "deal", id: row.original.id, name: row.original.name })}
+            onDelete={() =>
+              setDeleting({ kind: "deal", id: row.original.id, name: row.original.name })
+            }
           />
         ),
       },
@@ -175,7 +186,11 @@ export function DealsPage() {
           />
         }
       />
-      <DealFormDialog open={editing !== undefined} onOpenChange={(o) => !o && setEditing(undefined)} deal={editing} />
+      <DealFormDialog
+        open={editing !== undefined}
+        onOpenChange={(o) => !o && setEditing(undefined)}
+        deal={editing}
+      />
       <ConfirmDelete
         target={deleting}
         onOpenChange={(o) => !o && setDeleting(null)}

@@ -10,7 +10,9 @@ export function needsAttention(f: Dashboard["figures"]): number {
 /** "+18% on the 12 months before", or nothing when there's no earlier revenue to compare with. */
 export function changeOnPrior(f: Dashboard["figures"]): string | null {
   if (!f.revenue_won_prior_12m) return null;
-  const pct = Math.round(((f.revenue_won_12m - f.revenue_won_prior_12m) / f.revenue_won_prior_12m) * 100);
+  const pct = Math.round(
+    ((f.revenue_won_12m - f.revenue_won_prior_12m) / f.revenue_won_prior_12m) * 100,
+  );
   return `${pct >= 0 ? "+" : ""}${pct}% on the 12 months before`;
 }
 
@@ -20,11 +22,18 @@ export function funnelRows(stages: Dashboard["funnel"]["stages"]) {
   return stages.map((s, i) => ({
     ...s,
     width: top ? (s.value / top) * 100 : 0,
-    carriedOn: i > 0 && stages[i - 1].value ? Math.round((s.value / stages[i - 1].value) * 100) : null,
+    carriedOn:
+      i > 0 && stages[i - 1].value ? Math.round((s.value / stages[i - 1].value) * 100) : null,
   }));
 }
 
-export type MonthPoint = { month: string; label: string; revenue: number; won: number; lost: number };
+export type MonthPoint = {
+  month: string;
+  label: string;
+  revenue: number;
+  won: number;
+  lost: number;
+};
 
 export function monthPoints(months: Dashboard["months"]): MonthPoint[] {
   return months.map((m) => ({ ...m, label: monthLabel(m.month) }));

@@ -15,8 +15,15 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
       ) : (
         <ol>
           {entries.map((e) => (
-            <li key={`${e.kind}${e.id}`} className="grid grid-cols-[84px_1fr] gap-3 py-[9px] shadow-[0_-1px_0_var(--tint)] first:shadow-none">
-              <time dateTime={e.at} title={formatDateTime(e.at)} className="pt-px text-[12px] text-ink-muted">
+            <li
+              key={`${e.kind}${e.id}`}
+              className="grid grid-cols-[84px_1fr] gap-3 py-[9px] shadow-[0_-1px_0_var(--tint)] first:shadow-none"
+            >
+              <time
+                dateTime={e.at}
+                title={formatDateTime(e.at)}
+                className="pt-px text-[12px] text-ink-muted"
+              >
                 {relativeTime(e.at)}
               </time>
               {e.kind === "stage_change" ? (
@@ -26,7 +33,11 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
                       {e.deal_name}
                     </Link>{" "}
                     moved from {stageLabel(e.from_stage)} to{" "}
-                    <Pill kind="stage" value={e.to_stage} className="!px-[7px] !text-[11.5px] !leading-4" />
+                    <Pill
+                      kind="stage"
+                      value={e.to_stage}
+                      className="!px-[7px] !text-[11.5px] !leading-4"
+                    />
                   </p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-muted">
                     <TypeIcon type="stage_change" size={12} bare />
@@ -40,7 +51,10 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
                   <p className="text-[13px] leading-snug">{e.description}</p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-muted">
                     <TypeIcon type={e.type} size={12} bare />
-                    <Link to={e.deal_id ? `/deals/${e.deal_id}` : `/contacts/${e.contact_id}`} className="hover:text-ink hover:underline">
+                    <Link
+                      to={e.deal_id ? `/deals/${e.deal_id}` : `/contacts/${e.contact_id}`}
+                      className="hover:text-ink hover:underline"
+                    >
                       {e.deal_name ?? e.contact_name}
                     </Link>
                     {e.organization_name && <span aria-hidden>·</span>}

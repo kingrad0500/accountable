@@ -16,8 +16,13 @@ function activities(n: number): string {
   return n === 1 ? "1 activity or follow-up" : `${n} activities and follow-ups`;
 }
 
+type RecordTarget = Extract<Target, { kind: "organization" | "contact" | "deal" }>;
+
 /** The dialog's title and what happens to linked records, with counts (D1). */
-export function deleteMessage(target: Target, impact: DeleteImpact | undefined): { title: string; body: string } {
+export function deleteMessage(
+  target: Target,
+  impact: DeleteImpact | undefined,
+): { title: string; body: string } {
   if (target.kind === "activity") {
     return {
       title: `Delete this ${TYPE_NAMES[target.type]} from ${formatDate(target.occurredAt)}?`,
@@ -25,26 +30,36 @@ export function deleteMessage(target: Target, impact: DeleteImpact | undefined):
     };
   }
   const title = `Delete ${target.name}?`;
-  if (!impact) return { title, body: "Checking linked records…" };
-  if (target.kind === "organization") {
-    const c = impact.contacts ?? 0;
-    const d = impact.deals ?? 0;
-    if (!c && !d) return { title, body: "It has no contacts or deals." };
-    const parts = [c && plural(c, "contact"), d && plural(d, "deal")].filter(Boolean).join(" and ");
-    return { title, body: `Its ${parts} will be kept, with no organization.` };
-  }
-  if (target.kind === "contact") {
-    const a = impact.activities ?? 0;
-    const d = impact.deals ?? 0;
-    const first = a ? `${target.name}'s ${activities(a)} will be deleted.` : `${target.name} has no activities.`;
-    const second = d ? ` Their ${plural(d, "deal")} ${d === 1 ? "stays" : "stay"}, with no main contact.` : "";
-    return { title, body: first + second };
-  }
-  const a = impact.activities ?? 0;
-  return {
-    title,
-    body: a ? `Its ${activities(a)} and its stage history will be deleted.` : "Its stage history will be deleted.",
-  };
+  return { title, body: impact ? impactMessage(target, impact) : "Checking linked records…" };
+}
+
+function impactMessage(target: RecordTarget, impact: DeleteImpact): string {
+  if (target.kind === "organization") return organizationImpact(impact);
+  if (target.kind === "contact") return contactImpact(target.name, impact);
+  return dealImpact(impact);
+}
+
+function organizationImpact(impact: DeleteImpact): string {
+  const { contacts: c, deals: d } = impact;
+  if (!c && !d) return "It has no contacts or deals.";
+  const parts = [c && plural(c, "contact"), d && plural(d, "deal")].filter(Boolean).join(" and ");
+  return `Its ${parts} will be kept, with no organization.`;
+}
+
+function contactImpact(name: string, impact: DeleteImpact): string {
+  const { activities: a, deals: d } = impact;
+  const first = a ? `${name}'s ${activities(a)} will be deleted.` : `${name} has no activities.`;
+  const second = d
+    ? ` Their ${plural(d, "deal")} ${d === 1 ? "stays" : "stay"}, with no main contact.`
+    : "";
+  return first + second;
+}
+
+function dealImpact(impact: DeleteImpact): string {
+  const a = impact.activities;
+  return a
+    ? `Its ${activities(a)} and its stage history will be deleted.`
+    : "Its stage history will be deleted.";
 }
 
 type Props = {
@@ -60,7 +75,10 @@ export function ConfirmDelete({ target, onOpenChange, onConfirm }: Props) {
   const needsImpact = !!target && target.kind !== "activity";
   const impact = useQuery({
     queryKey: ["delete-impact", target?.kind, target?.id],
-    queryFn: () => api.get<DeleteImpact>(`/${target!.kind === "organization" ? "organizations" : `${target!.kind}s`}/${target!.id}/delete-impact`),
+    queryFn: () =>
+      api.get<DeleteImpact>(
+        `/${target!.kind === "organization" ? "organizations" : `${target!.kind}s`}/${target!.id}/delete-impact`,
+      ),
     enabled: needsImpact,
     staleTime: 0,
     gcTime: 0,

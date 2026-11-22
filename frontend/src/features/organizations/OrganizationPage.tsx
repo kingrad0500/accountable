@@ -6,7 +6,13 @@ import { ConfirmDelete, type DeleteTarget } from "../../components/ConfirmDelete
 import { DealList } from "../../components/DealList";
 import { Money } from "../../components/Money";
 import { Pill } from "../../components/Pill";
-import { LinkedPanel, LinkedRow, Loading, RecordHeader, RecordMissing } from "../../components/RecordPage";
+import {
+  LinkedPanel,
+  LinkedRow,
+  Loading,
+  RecordHeader,
+  RecordMissing,
+} from "../../components/RecordPage";
 import { Timeline } from "../activities/Timeline";
 import { ContactFormDialog } from "../contacts/ContactForm";
 import { DealFormDialog } from "../deals/DealForm";
@@ -41,7 +47,12 @@ export function OrganizationPage() {
           {
             label: "Website",
             value: o.website ? (
-              <a href={websiteHref(o.website)} target="_blank" rel="noreferrer" className="text-cerulean-ink hover:underline">
+              <a
+                href={websiteHref(o.website)}
+                target="_blank"
+                rel="noreferrer"
+                className="text-cerulean-ink hover:underline"
+              >
                 {o.website}
               </a>
             ) : null,
@@ -53,7 +64,11 @@ export function OrganizationPage() {
         onEdit={() => setEditing(true)}
         onDelete={() => setDeleting({ kind: "organization", id: o.id, name: o.name })}
       >
-        {o.notes && <p className="mt-4 max-w-3xl text-[13.5px] whitespace-pre-line text-ink-muted">{o.notes}</p>}
+        {o.notes && (
+          <p className="mt-4 max-w-3xl text-[13.5px] whitespace-pre-line text-ink-muted">
+            {o.notes}
+          </p>
+        )}
       </RecordHeader>
       <div className="grid grid-cols-[minmax(0,1fr)_380px] items-start gap-[18px]">
         <Timeline entries={o.timeline} hereKind="organization" />
@@ -62,7 +77,11 @@ export function OrganizationPage() {
             title="Contacts"
             count={o.contacts.length}
             action={
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAdding("contact")}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setAdding("contact")}
+              >
                 <Plus size={14} aria-hidden /> Add contact
               </button>
             }
@@ -87,7 +106,11 @@ export function OrganizationPage() {
             title="Deals"
             count={o.deals.length}
             action={
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setAdding("deal")}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setAdding("deal")}
+              >
                 <Plus size={14} aria-hidden /> Add deal
               </button>
             }
@@ -102,7 +125,11 @@ export function OrganizationPage() {
         onOpenChange={(v) => !v && setAdding(null)}
         initial={{ organization_id: String(o.id) }}
       />
-      <DealFormDialog open={adding === "deal"} onOpenChange={(v) => !v && setAdding(null)} initial={{ organization_id: String(o.id) }} />
+      <DealFormDialog
+        open={adding === "deal"}
+        onOpenChange={(v) => !v && setAdding(null)}
+        initial={{ organization_id: String(o.id) }}
+      />
       <ConfirmDelete
         target={deleting}
         onOpenChange={(v) => !v && setDeleting(null)}

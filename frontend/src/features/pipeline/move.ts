@@ -32,7 +32,13 @@ export function isVisible(deal: Deal, window: ClosedWindow, today: string): bool
  * The deals list after moving `id` to `index` in `stage`'s column, as the server will
  * answer: stage rules applied (DL5) and both columns renumbered 0..n-1 (P2).
  */
-export function applyMove(deals: Deal[], id: number, stage: StageKey, index: number, today: string): Deal[] {
+export function applyMove(
+  deals: Deal[],
+  id: number,
+  stage: StageKey,
+  index: number,
+  today: string,
+): Deal[] {
   const moving = deals.find((d) => d.id === id);
   if (!moving) return deals;
   const changed = moving.stage !== stage;
@@ -49,7 +55,10 @@ export function applyMove(deals: Deal[], id: number, stage: StageKey, index: num
   const target = column(deals, stage).filter((d) => d.id !== id);
   target.splice(Math.max(0, Math.min(index, target.length)), 0, updated);
   const positions = new Map<number, number>(target.map((d, i) => [d.id, i]));
-  if (changed) column(deals, moving.stage).filter((d) => d.id !== id).forEach((d, i) => positions.set(d.id, i));
+  if (changed)
+    column(deals, moving.stage)
+      .filter((d) => d.id !== id)
+      .forEach((d, i) => positions.set(d.id, i));
 
   return deals.map((d) => {
     const base = d.id === id ? updated : d;
@@ -64,7 +73,8 @@ export function applyMove(deals: Deal[], id: number, stage: StageKey, index: num
  */
 export function fullIndex(columnIds: number[], visibleIds: number[], visibleIndex: number): number {
   if (visibleIds.length === 0) return 0;
-  if (visibleIndex < visibleIds.length) return Math.max(0, columnIds.indexOf(visibleIds[visibleIndex]));
+  if (visibleIndex < visibleIds.length)
+    return Math.max(0, columnIds.indexOf(visibleIds[visibleIndex]));
   return columnIds.indexOf(visibleIds[visibleIds.length - 1]) + 1;
 }
 
@@ -72,7 +82,11 @@ export type Totals = { count: number; value: number; expected: number };
 
 export function totals(deals: Deal[]): Totals {
   return deals.reduce(
-    (t, d) => ({ count: t.count + 1, value: t.value + d.value, expected: t.expected + (d.value * d.probability) / 100 }),
+    (t, d) => ({
+      count: t.count + 1,
+      value: t.value + d.value,
+      expected: t.expected + (d.value * d.probability) / 100,
+    }),
     { count: 0, value: 0, expected: 0 },
   );
 }

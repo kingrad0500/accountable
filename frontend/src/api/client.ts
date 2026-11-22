@@ -34,7 +34,10 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
       for (const e of detail) fields[String(e.loc[e.loc.length - 1])] = e.msg;
       throw new ApiError(response.status, detail.map((e) => e.msg).join(". "), fields);
     }
-    throw new ApiError(response.status, typeof detail === "string" ? detail : `Request failed (${response.status})`);
+    throw new ApiError(
+      response.status,
+      typeof detail === "string" ? detail : `Request failed (${response.status})`,
+    );
   }
   return data as T;
 }
@@ -65,7 +68,15 @@ type Area = "organization" | "contact" | "deal" | "activity";
  * and every record page shows a timeline.
  */
 const TOUCHES: Record<Area, string[]> = {
-  organization: ["organizations", "organization", "contacts", "contact", "deals", "deal", "dashboard"],
+  organization: [
+    "organizations",
+    "organization",
+    "contacts",
+    "contact",
+    "deals",
+    "deal",
+    "dashboard",
+  ],
   contact: ["contacts", "contact", "organizations", "organization", "deals", "deal", "dashboard"],
   deal: ["deals", "deal", "organizations", "organization", "contact", "dashboard"],
   activity: ["organization", "contact", "deal", "dashboard"],
@@ -76,7 +87,9 @@ export function refreshAfter(qc: QueryClient, area: Area, deleted?: readonly unk
     void qc.invalidateQueries({
       queryKey: [key],
       // Don't refetch a record that was just deleted: its page is on its way out (D3).
-      predicate: deleted ? (q) => !(q.queryKey[0] === deleted[0] && q.queryKey[1] === deleted[1]) : undefined,
+      predicate: deleted
+        ? (q) => !(q.queryKey[0] === deleted[0] && q.queryKey[1] === deleted[1])
+        : undefined,
     });
   }
 }

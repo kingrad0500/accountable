@@ -4,11 +4,31 @@ import { applyMove, boardTotals, column, fullIndex, isVisible, totals } from "./
 
 const TODAY = "2026-11-18";
 let nextId = 1;
-function deal(stage: Deal["stage"], position: number, value = 1000, extra: Partial<Deal> = {}): Deal {
-  const probability = { new: 10, qualified: 25, proposal: 50, negotiation: 75, won: 100, lost: 0 }[stage];
+function deal(
+  stage: Deal["stage"],
+  position: number,
+  value = 1000,
+  extra: Partial<Deal> = {},
+): Deal {
+  const probability = { new: 10, qualified: 25, proposal: 50, negotiation: 75, won: 100, lost: 0 }[
+    stage
+  ];
   return {
-    id: nextId++, name: `D${nextId}`, organization_id: 1, organization_name: "Acme", main_contact_id: null, main_contact_name: null,
-    stage, value, probability, close_date: "2026-12-01", position, is_late: false, created_at: "", updated_at: "", ...extra,
+    id: nextId++,
+    name: `D${nextId}`,
+    organization_id: 1,
+    organization_name: "Acme",
+    main_contact_id: null,
+    main_contact_name: null,
+    stage,
+    value,
+    probability,
+    close_date: "2026-12-01",
+    position,
+    is_late: false,
+    created_at: "",
+    updated_at: "",
+    ...extra,
   };
 }
 
@@ -29,9 +49,17 @@ describe("the optimistic move (P2, P3)", () => {
     const a = deal("proposal", 0, 10000);
     const x = deal("negotiation", 0, 5000);
     const before = [a, x];
-    expect(totals(column(before, "negotiation"))).toEqual({ count: 1, value: 5000, expected: 3750 });
+    expect(totals(column(before, "negotiation"))).toEqual({
+      count: 1,
+      value: 5000,
+      expected: 3750,
+    });
     const after = applyMove(before, a.id, "negotiation", 0, TODAY);
-    expect(totals(column(after, "negotiation"))).toEqual({ count: 2, value: 15000, expected: 11250 });
+    expect(totals(column(after, "negotiation"))).toEqual({
+      count: 2,
+      value: 15000,
+      expected: 11250,
+    });
     expect(totals(column(after, "proposal"))).toEqual({ count: 0, value: 0, expected: 0 });
     expect(boardTotals(before, TODAY).expected).toBe(8750);
     expect(boardTotals(after, TODAY).expected).toBe(11250);
@@ -57,12 +85,29 @@ describe("the optimistic move (P2, P3)", () => {
     const a = deal("won", 0, 1000, { close_date: "2026-10-01" });
     expect(applyMove([a], a.id, "proposal", 0, TODAY)[0].is_late).toBe(true);
   });
+
+  it("leaves the list as it is for a deal that isn't in it", () => {
+    const deals = [deal("new", 0)];
+    expect(applyMove(deals, 999, "won", 0, TODAY)).toBe(deals);
+  });
+
+  it("orders cards that share a position by id", () => {
+    const later = deal("new", 0);
+    const earlier = { ...deal("new", 0), id: later.id - 100 };
+    expect(column([later, earlier], "new").map((d) => d.id)).toEqual([earlier.id, later.id]);
+  });
 });
 
 describe("the Closed deals filter (P1a)", () => {
   const recent = deal("won", 0, 1000, { close_date: "2026-11-01" });
   const old = deal("won", 1, 1000, { close_date: "2026-05-01" });
   const openOld = deal("new", 0, 1000, { close_date: "2025-01-01" });
+
+  it("hides a Won or Lost card with no close date, unless showing all", () => {
+    const undated = deal("lost", 0, 1000, { close_date: null });
+    expect(isVisible(undated, "90", TODAY)).toBe(false);
+    expect(isVisible(undated, "all", TODAY)).toBe(true);
+  });
 
   it("hides only Won and Lost cards closed before the window", () => {
     expect(isVisible(recent, "90", TODAY)).toBe(true);
@@ -73,7 +118,12 @@ describe("the Closed deals filter (P1a)", () => {
   });
 
   it("doesn't change the open totals", () => {
-    expect(boardTotals([recent, old, openOld], TODAY)).toEqual({ count: 1, value: 1000, expected: 100, late: 1 });
+    expect(boardTotals([recent, old, openOld], TODAY)).toEqual({
+      count: 1,
+      value: 1000,
+      expected: 100,
+      late: 1,
+    });
   });
 
   it("maps a drop among visible cards to its place in the whole column", () => {

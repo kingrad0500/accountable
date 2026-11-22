@@ -2,7 +2,8 @@ import { test, expect, reload } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 const rows = (page: Page) => page.getByTestId("table-row");
-const row = (page: Page, name: string) => rows(page).filter({ has: page.getByRole("link", { name, exact: true }) });
+const row = (page: Page, name: string) =>
+  rows(page).filter({ has: page.getByRole("link", { name, exact: true }) });
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/deals");
@@ -95,7 +96,10 @@ test("late deals show the Late label (DL2)", async ({ page }) => {
   await expect(row(page, "Data warehouse build").getByText("Late", { exact: true })).toHaveCount(0);
 });
 
-test("the No organization filter finds deals whose organization was deleted", async ({ page, request }) => {
+test("the No organization filter finds deals whose organization was deleted", async ({
+  page,
+  request,
+}) => {
   const orgs = await (await request.get("http://127.0.0.1:8100/api/organizations")).json();
   const halcyon = orgs.find((o: { name: string }) => o.name === "Halcyon Studios");
   await request.delete(`http://127.0.0.1:8100/api/organizations/${halcyon.id}`);
@@ -140,9 +144,16 @@ test("the Deals table works from the keyboard (SC8)", async ({ page }) => {
   await page.keyboard.press("Tab");
   await expect(page.getByRole("columnheader", { name: /Name/ }).getByRole("button")).toBeFocused();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("columnheader", { name: /Name/ })).toHaveAttribute("aria-sort", "descending");
+  await expect(page.getByRole("columnheader", { name: /Name/ })).toHaveAttribute(
+    "aria-sort",
+    "descending",
+  );
   const editButton = page.getByRole("button", { name: "Edit Security review" });
-  for (let i = 0; i < 12 && !(await editButton.evaluate((el) => el === document.activeElement)); i++) {
+  for (
+    let i = 0;
+    i < 12 && !(await editButton.evaluate((el) => el === document.activeElement));
+    i++
+  ) {
     await page.keyboard.press("Tab");
   }
   await expect(editButton).toBeFocused();
@@ -164,10 +175,14 @@ test("the deal page shows details, links and timeline (DL3)", async ({ page }) =
   await expect(header).toContainText("$32,000");
   await expect(page.getByRole("link", { name: "Halcyon Studios" }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Grace Fischer" }).first()).toBeVisible();
-  await expect(page.getByTestId("timeline-entry").filter({ hasText: "Moved from Qualified to Proposal" })).toBeVisible();
+  await expect(
+    page.getByTestId("timeline-entry").filter({ hasText: "Moved from Qualified to Proposal" }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Delete", exact: true }).click();
-  await expect(page.getByRole("alertdialog")).toContainText("and its stage history will be deleted.");
+  await expect(page.getByRole("alertdialog")).toContainText(
+    "and its stage history will be deleted.",
+  );
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete" }).click();
   await expect(page).toHaveURL(/\/deals$/);
   await expect(page.getByText("Showing 33 of 33 deals")).toBeVisible();

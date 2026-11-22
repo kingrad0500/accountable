@@ -1,0 +1,8 @@
+# gitleaks: the default rules, plus one allowance. Local `.env` files hold real keys by design;
+# `.gitignore` keeps them out of git, so the working-tree scan may skip them.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Git-ignored local environment files"
+paths = ['''(^|/)\.env$''']

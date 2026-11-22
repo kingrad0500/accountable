@@ -11,7 +11,10 @@ async function expectFocusVisible(page: Page) {
     }
     return false;
   });
-  expect(visible, `focus ring on ${await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 80))}`).toBe(true);
+  expect(
+    visible,
+    `focus ring on ${await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 80))}`,
+  ).toBe(true);
 }
 
 async function tabTo(page: Page, name: RegExp | string, max = 40) {
@@ -19,7 +22,12 @@ async function tabTo(page: Page, name: RegExp | string, max = 40) {
     await page.keyboard.press("Tab");
     const label = await page.evaluate(() => {
       const el = document.activeElement as HTMLInputElement;
-      return (el.getAttribute("aria-label") || el.labels?.[0]?.textContent || el.textContent || "").trim();
+      return (
+        el.getAttribute("aria-label") ||
+        el.labels?.[0]?.textContent ||
+        el.textContent ||
+        ""
+      ).trim();
     });
     if (typeof name === "string" ? label === name : name.test(label)) {
       await expectFocusVisible(page);
@@ -49,7 +57,9 @@ test("every action works from the keyboard, with a visible focus (SC8)", async (
   await page.keyboard.type("keyboard.co");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toBeHidden();
-  await expect(page.getByRole("banner").getByRole("button", { name: "Add organization" })).toBeFocused();
+  await expect(
+    page.getByRole("banner").getByRole("button", { name: "Add organization" }),
+  ).toBeFocused();
 
   // Tables: search, sort, open a row.
   await tabTo(page, "Search organizations");
@@ -57,7 +67,10 @@ test("every action works from the keyboard, with a visible focus (SC8)", async (
   await expect(page.getByText("Showing 1 of 16 organizations")).toBeVisible();
   await tabTo(page, /^Name/);
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("columnheader", { name: /Name/ })).toHaveAttribute("aria-sort", "descending");
+  await expect(page.getByRole("columnheader", { name: /Name/ })).toHaveAttribute(
+    "aria-sort",
+    "descending",
+  );
   await tabTo(page, "Keyboard Co");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Keyboard Co" })).toBeVisible();
@@ -80,7 +93,9 @@ test("every action works from the keyboard, with a visible focus (SC8)", async (
   await page.keyboard.type("Called from the keyboard");
   await tabTo(page, "Log activity");
   await page.keyboard.press("Enter");
-  await expect(page.getByTestId("timeline-entry").first()).toContainText("Called from the keyboard");
+  await expect(page.getByTestId("timeline-entry").first()).toContainText(
+    "Called from the keyboard",
+  );
 
   // Delete the contact: Cancel has focus, so Tab to Delete.
   await tabTo(page, "Delete");

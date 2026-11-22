@@ -64,7 +64,9 @@ export function DealPage() {
           {
             label: "Close date",
             value: d.close_date ? (
-              <span className={`mono ${late ? "font-semibold text-raspberry-ink" : ""}`}>{formatDate(d.close_date)}</span>
+              <span className={`mono ${late ? "font-semibold text-raspberry-ink" : ""}`}>
+                {formatDate(d.close_date)}
+              </span>
             ) : null,
           },
         ]}
@@ -78,7 +80,10 @@ export function DealPage() {
             <li>
               <span className="muted block text-[12px]">Organization</span>
               {d.organization_id ? (
-                <Link to={`/organizations/${d.organization_id}`} className="font-semibold hover:underline">
+                <Link
+                  to={`/organizations/${d.organization_id}`}
+                  className="font-semibold hover:underline"
+                >
                   {d.organization_name}
                 </Link>
               ) : (
@@ -88,7 +93,10 @@ export function DealPage() {
             <li>
               <span className="muted block text-[12px]">Main contact</span>
               {d.main_contact_id ? (
-                <Link to={`/contacts/${d.main_contact_id}`} className="font-semibold hover:underline">
+                <Link
+                  to={`/contacts/${d.main_contact_id}`}
+                  className="font-semibold hover:underline"
+                >
                   {d.main_contact_name}
                 </Link>
               ) : (

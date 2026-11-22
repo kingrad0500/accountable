@@ -26,5 +26,10 @@ it("uses the spec's stage colors", () => {
 });
 
 it("knows which stages are open", () => {
-  expect(STAGES.filter((s) => isOpenStage(s.key)).map((s) => s.key)).toEqual(["new", "qualified", "proposal", "negotiation"]);
+  expect(STAGES.filter((s) => isOpenStage(s.key)).map((s) => s.key)).toEqual([
+    "new",
+    "qualified",
+    "proposal",
+    "negotiation",
+  ]);
 });

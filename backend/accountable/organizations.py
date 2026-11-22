@@ -3,14 +3,23 @@
 import re
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Response
 from pydantic import AfterValidator, BaseModel
 from sqlalchemy import Connection, delete, func, insert, or_, select, update
 
 from . import db
 from .activities import timeline
 from .contacts import contact_rows
-from .db import OPEN_STAGES, OptionalText, RequiredText, activities, contacts, deals, organizations, stage_changes
+from .db import (
+    OPEN_STAGES,
+    OptionalText,
+    RequiredText,
+    activities,
+    contacts,
+    deals,
+    organizations,
+    stage_changes,
+)
 from .deals import deal_rows
 
 router = APIRouter(tags=["organizations"])
@@ -68,8 +77,9 @@ def organization_rows(conn: Connection, where=None) -> list[dict]:
             func.coalesce(open_deals.c.value, 0).label("open_value"),
         )
         .select_from(
-            organizations.outerjoin(contact_counts, contact_counts.c.organization_id == organizations.c.id)
-            .outerjoin(open_deals, open_deals.c.organization_id == organizations.c.id)
+            organizations.outerjoin(
+                contact_counts, contact_counts.c.organization_id == organizations.c.id
+            ).outerjoin(open_deals, open_deals.c.organization_id == organizations.c.id)
         )
         .order_by(organizations.c.name, organizations.c.id)
     )
@@ -97,19 +107,21 @@ def organization_timeline(conn: Connection, org_id: int) -> list[dict]:
 
 
 @router.get("/organizations")
-def list_organizations(conn: Connection = Depends(db.get_conn)) -> Response:
+def list_organizations(conn: db.Conn) -> Response:
     return db.json_response(organization_rows(conn))
 
 
 @router.post("/organizations", status_code=201)
-def create_organization(body: OrganizationIn, conn: Connection = Depends(db.get_conn)) -> dict:
-    new_id = conn.execute(insert(organizations).values(**body.model_dump())).inserted_primary_key[0]
+def create_organization(body: OrganizationIn, conn: db.Conn) -> dict:
+    new_id = conn.execute(
+        insert(organizations).values(**body.model_dump()).returning(organizations.c.id)
+    ).scalar_one()
     conn.commit()
     return get_organization(conn, new_id)
 
 
 @router.get("/organizations/{org_id}")
-def read_organization(org_id: int, conn: Connection = Depends(db.get_conn)) -> dict:
+def read_organization(org_id: int, conn: db.Conn) -> dict:
     org = get_organization(conn, org_id)
     org["contacts"] = contact_rows(conn, contacts.c.organization_id == org_id)
     org["deals"] = deal_rows(conn, deals.c.organization_id == org_id)
@@ -118,7 +130,7 @@ def read_organization(org_id: int, conn: Connection = Depends(db.get_conn)) -> d
 
 
 @router.patch("/organizations/{org_id}")
-def update_organization(org_id: int, body: OrganizationPatch, conn: Connection = Depends(db.get_conn)) -> dict:
+def update_organization(org_id: int, body: OrganizationPatch, conn: db.Conn) -> dict:
     get_organization(conn, org_id)
     fields = body.model_dump(exclude_unset=True)
     if "name" in fields and fields["name"] is None:
@@ -130,15 +142,19 @@ def update_organization(org_id: int, body: OrganizationPatch, conn: Connection =
 
 
 @router.get("/organizations/{org_id}/delete-impact")
-def organization_delete_impact(org_id: int, conn: Connection = Depends(db.get_conn)) -> dict:
+def organization_delete_impact(org_id: int, conn: db.Conn) -> dict:
     get_organization(conn, org_id)
-    n_contacts = conn.execute(select(func.count()).where(contacts.c.organization_id == org_id)).scalar_one()
-    n_deals = conn.execute(select(func.count()).where(deals.c.organization_id == org_id)).scalar_one()
+    n_contacts = conn.execute(
+        select(func.count()).where(contacts.c.organization_id == org_id)
+    ).scalar_one()
+    n_deals = conn.execute(
+        select(func.count()).where(deals.c.organization_id == org_id)
+    ).scalar_one()
     return {"contacts": n_contacts, "deals": n_deals}
 
 
 @router.delete("/organizations/{org_id}", status_code=204)
-def delete_organization(org_id: int, conn: Connection = Depends(db.get_conn)) -> Response:
+def delete_organization(org_id: int, conn: db.Conn) -> Response:
     get_organization(conn, org_id)
     # Contacts and deals stay, with no organization (D1).
     conn.execute(delete(organizations).where(organizations.c.id == org_id))

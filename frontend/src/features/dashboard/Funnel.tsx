@@ -24,13 +24,23 @@ export function Funnel({ funnel }: { funnel: Dashboard["funnel"] }) {
               )}
               <div className="grid h-10 grid-cols-[96px_1fr_84px] items-center gap-3">
                 <span className="flex items-center gap-2 text-[13px] font-medium">
-                  <span className="size-[9px] rounded-full" style={{ background: s.dot }} aria-hidden />
+                  <span
+                    className="size-[9px] rounded-full"
+                    style={{ background: s.dot }}
+                    aria-hidden
+                  />
                   {s.label}
                 </span>
                 <div className="h-[26px] overflow-hidden rounded-lg bg-bg">
-                  <div className="h-full rounded-lg" style={{ width: `${r.width}%`, background: s.dot }} />
+                  <div
+                    className="h-full rounded-lg"
+                    style={{ width: `${r.width}%`, background: s.dot }}
+                  />
                 </div>
-                <span className="mono text-right text-[13px] font-semibold" title={`${usd(r.value)} USD, ${r.count} deals`}>
+                <span
+                  className="mono text-right text-[13px] font-semibold"
+                  title={`${usd(r.value)} USD, ${r.count} deals`}
+                >
                   {usdShort(r.value)}
                 </span>
               </div>
@@ -39,8 +49,8 @@ export function Funnel({ funnel }: { funnel: Dashboard["funnel"] }) {
         })}
       </ol>
       <p className="mt-3 text-[12.5px] text-ink-muted" data-testid="funnel-lost">
-        Lost along the way: <span className="mono">{usd(funnel.lost_value)}</span> across {funnel.lost_count}{" "}
-        {funnel.lost_count === 1 ? "deal" : "deals"}
+        Lost along the way: <span className="mono">{usd(funnel.lost_value)}</span> across{" "}
+        {funnel.lost_count} {funnel.lost_count === 1 ? "deal" : "deals"}
       </p>
     </section>
   );

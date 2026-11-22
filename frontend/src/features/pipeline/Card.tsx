@@ -67,7 +67,15 @@ export const SortableCard = memo(function SortableCard({
   late: boolean;
   onMove: (deal: Deal, stage: Deal["stage"]) => void;
 }) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
     id: deal.id,
     data: { stage: deal.stage },
   });
@@ -87,13 +95,17 @@ export const SortableCard = memo(function SortableCard({
   );
   const label = `${deal.name}, ${usd(deal.value)}, ${deal.organization_name ?? "no organization"}${late ? ", late" : ""}`;
   return (
-    <article
+    <div
       ref={ref}
       {...attributes}
+      // dnd-kit's attributes make the card a focusable button; spelled out so lint can see them.
+      role="button"
+      tabIndex={attributes.tabIndex}
       {...listeners}
       onKeyDown={(e) => {
         // Enter opens the deal; Space picks the card up (P6).
-        if (e.key === "Enter" && e.target === e.currentTarget && !isDragging) navigate(`/deals/${deal.id}`);
+        if (e.key === "Enter" && e.target === e.currentTarget && !isDragging)
+          navigate(`/deals/${deal.id}`);
         else listeners?.onKeyDown?.(e);
       }}
       aria-label={label}
@@ -103,7 +115,9 @@ export const SortableCard = memo(function SortableCard({
       className={`group/card relative cursor-grab touch-none rounded-xl ${isDragging ? "z-0" : ""}`}
     >
       <div className={isDragging ? "invisible" : ""}>{view}</div>
-      {isDragging && <div aria-hidden className="absolute inset-0 rounded-xl bg-[rgb(7_59_76/0.07)]" />}
-    </article>
+      {isDragging && (
+        <div aria-hidden className="absolute inset-0 rounded-xl bg-[rgb(7_59_76/0.07)]" />
+      )}
+    </div>
   );
 });

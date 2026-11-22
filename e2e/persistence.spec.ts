@@ -8,14 +8,22 @@ import { test, expect } from "./fixtures";
 // stop and restart it. The browser's /api calls are routed to it.
 const PORT = 8101;
 const ROOT = resolve(__dirname, "..");
-const PYTHON = join(ROOT, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
+const PYTHON = join(
+  ROOT,
+  ".venv",
+  process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
+);
 
 let dir: string;
 let env: NodeJS.ProcessEnv;
 let server: ChildProcess | null = null;
 
 async function start() {
-  server = spawn(PYTHON, ["-m", "uvicorn", "accountable.main:app", "--port", String(PORT)], { cwd: ROOT, env, stdio: "ignore" });
+  server = spawn(PYTHON, ["-m", "uvicorn", "accountable.main:app", "--port", String(PORT)], {
+    cwd: ROOT,
+    env,
+    stdio: "ignore",
+  });
   for (let i = 0; i < 100; i++) {
     try {
       if ((await fetch(`http://127.0.0.1:${PORT}/api/health`)).ok) return;
@@ -37,7 +45,11 @@ async function stop() {
 
 test.beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), "accountable-persist-"));
-  env = { ...process.env, ACCOUNTABLE_DB: join(dir, "persist.db"), ACCOUNTABLE_TODAY: "2026-11-18" };
+  env = {
+    ...process.env,
+    ACCOUNTABLE_DB: join(dir, "persist.db"),
+    ACCOUNTABLE_TODAY: "2026-11-18",
+  };
 });
 
 test.afterAll(async () => {
@@ -46,11 +58,16 @@ test.afterAll(async () => {
 });
 
 test.beforeEach(async ({ page }) => {
-  await page.route((url) => url.pathname.startsWith("/api/"), async (route) => {
-    const url = new URL(route.request().url());
-    const response = await route.fetch({ url: `http://127.0.0.1:${PORT}${url.pathname}${url.search}` });
-    await route.fulfill({ response });
-  });
+  await page.route(
+    (url) => url.pathname.startsWith("/api/"),
+    async (route) => {
+      const url = new URL(route.request().url());
+      const response = await route.fetch({
+        url: `http://127.0.0.1:${PORT}${url.pathname}${url.search}`,
+      });
+      await route.fulfill({ response });
+    },
+  );
 });
 
 test("changes are still there after a restart and a reload (SC2, G4)", async ({ page }) => {

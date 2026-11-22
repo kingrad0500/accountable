@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Response
 from pydantic import BaseModel, model_validator
 from sqlalchemy import ColumnElement, Connection, delete, func, insert, select, update
 
@@ -81,7 +81,9 @@ def stage_change_entry(row) -> dict:
 
 
 def _newest_first(entries: list[dict]) -> list[dict]:
-    return sorted(entries, key=lambda e: (e["at"], e["kind"] == "stage_change", e["id"]), reverse=True)
+    return sorted(
+        entries, key=lambda e: (e["at"], e["kind"] == "stage_change", e["id"]), reverse=True
+    )
 
 
 def timeline(
@@ -96,7 +98,11 @@ def timeline(
         q = q.limit(limit)
     entries = [activity_entry(r) for r in conn.execute(q)]
     if stage_change_where is not None:
-        sq = stage_change_query().where(stage_change_where).order_by(stage_changes.c.changed_at.desc())
+        sq = (
+            stage_change_query()
+            .where(stage_change_where)
+            .order_by(stage_changes.c.changed_at.desc())
+        )
         if limit:
             sq = sq.limit(limit)
         entries += [stage_change_entry(r) for r in conn.execute(sq)]
@@ -140,18 +146,20 @@ def get_activity(conn: Connection, activity_id: int) -> dict:
 
 
 @router.post("/activities", status_code=201)
-def create_activity(body: ActivityIn, conn: Connection = Depends(db.get_conn)) -> dict:
+def create_activity(body: ActivityIn, conn: db.Conn) -> dict:
     db.check_exists(conn, contacts, body.contact_id, "contact_id", "contact")
     db.check_exists(conn, deals, body.deal_id, "deal_id", "deal")
     values = body.model_dump()
     values["occurred_at"] = db.to_storage(body.occurred_at)
-    new_id = conn.execute(insert(activities).values(**values)).inserted_primary_key[0]
+    new_id = conn.execute(
+        insert(activities).values(**values).returning(activities.c.id)
+    ).scalar_one()
     conn.commit()
     return get_activity(conn, new_id)
 
 
 @router.patch("/activities/{activity_id}")
-def update_activity(activity_id: int, body: ActivityPatch, conn: Connection = Depends(db.get_conn)) -> dict:
+def update_activity(activity_id: int, body: ActivityPatch, conn: db.Conn) -> dict:
     get_activity(conn, activity_id)
     values = body.model_dump(exclude_unset=True)
     for required in ("type", "description", "occurred_at", "follow_up_done"):
@@ -168,7 +176,7 @@ def update_activity(activity_id: int, body: ActivityPatch, conn: Connection = De
 
 
 @router.delete("/activities/{activity_id}", status_code=204)
-def delete_activity(activity_id: int, conn: Connection = Depends(db.get_conn)) -> Response:
+def delete_activity(activity_id: int, conn: db.Conn) -> Response:
     get_activity(conn, activity_id)
     conn.execute(delete(activities).where(activities.c.id == activity_id))
     conn.commit()

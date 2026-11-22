@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   closestCorners,
   DndContext,
@@ -14,19 +14,29 @@ import {
   type KeyboardCoordinateGetter,
   type UniqueIdentifier,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
 import type { Deal } from "../../api/types";
 import { Money } from "../../components/Money";
 import { FilterSelect, PageTitle } from "../../components/PageTitle";
 import { isLate, todayISO } from "../../lib/dates";
-import { STAGES, stageLabel, type StageKey } from "../../lib/stages";
+import { STAGES, type StageKey } from "../../lib/stages";
 import { useDeals } from "../deals/api";
 import { useMoveDeal } from "./api";
 import { CardView } from "./Card";
 import { Column } from "./Column";
-import { boardTotals, CLOSED_WINDOWS, column, fullIndex, isVisible, totals, type ClosedWindow } from "./move";
+import {
+  announce,
+  ARROW_KEYS,
+  arrowTarget,
+  listsWhileOver,
+  planDrop,
+  shownIds,
+  columnOf,
+  type Lists,
+} from "./drag";
+import { boardTotals, CLOSED_WINDOWS, column, isVisible, totals, type ClosedWindow } from "./move";
 
-type Lists = Record<StageKey, number[]>;
+/** The board's own copy of the lists during a drag, and the lists it was copied from. */
+type DragCopy = { lists: Lists; from: Lists };
 
 const STORAGE_KEY = "accountable.pipeline.closedDeals";
 
@@ -51,8 +61,6 @@ function saveWindow(v: ClosedWindow) {
 /** Cards shown per column before "Show more", so a huge board stays quick (G7). */
 export const CARDS_PER_PAGE = 50;
 
-const isColumnId = (id: UniqueIdentifier) => typeof id === "string" && id.startsWith("column:");
-
 export function PipelinePage() {
   const deals = useDeals();
   const { mutate: moveDeal } = useMoveDeal();
@@ -64,58 +72,38 @@ export function PipelinePage() {
   // Card order per column, from the server's positions, hiding older closed deals.
   const derived = useMemo(() => {
     const lists = {} as Lists;
-    for (const s of STAGES) lists[s.key] = column(all, s.key).filter((d) => isVisible(d, closedWindow, today)).map((d) => d.id);
+    for (const s of STAGES)
+      lists[s.key] = column(all, s.key)
+        .filter((d) => isVisible(d, closedWindow, today))
+        .map((d) => d.id);
     return lists;
   }, [all, closedWindow, today]);
 
   // While dragging, the board shows its own copy of the lists so cards can move between columns.
-  const [dragLists, setDragLists] = useState<Lists | null>(null);
+  // After the drop it keeps showing it until the cache has the moved card (or the move is undone).
+  // Every drag starts by setting it, so the later drag handlers can count on it.
+  const [dragCopy, setDragCopy] = useState<DragCopy | null>(null);
   const [limits, setLimits] = useState<Partial<Record<StageKey, number>>>({});
   const [activeId, setActiveId] = useState<number | null>(null);
-  const lists = dragLists ?? derived;
+  const showDragCopy = dragCopy !== null && (activeId !== null || dragCopy.from === derived);
+  const lists = showDragCopy ? dragCopy.lists : derived;
+  // The drag handlers and announcements read the latest lists without being rebuilt.
   const listsRef = useRef(lists);
-  listsRef.current = lists;
+  useLayoutEffect(() => {
+    listsRef.current = lists;
+  }, [lists]);
   const startStage = useRef<StageKey | null>(null);
 
-  // Once the cache has the moved card (or the move is undone), drop the drag copy.
-  useEffect(() => {
-    if (activeId === null) setDragLists(null);
-  }, [all, activeId]);
-
-  const findStage = useCallback((id: UniqueIdentifier | undefined, from: Lists = listsRef.current): StageKey | null => {
-    if (id === undefined) return null;
-    if (isColumnId(id)) return String(id).slice(7) as StageKey;
-    return (STAGES.find((s) => from[s.key].includes(Number(id)))?.key ?? null) as StageKey | null;
-  }, []);
-
-  /**
-   * Arrow keys on the board (P6): Up and Down step through the cards in the column,
-   * Left and Right go to the same place in the next column. Returns where the lifted
-   * card's top-left corner should go: onto the card (or empty column) it moves to.
-   */
+  /** Arrow keys on the board (P6): the lifted card's top-left corner goes onto its target. */
   const boardKeys = useCallback<KeyboardCoordinateGetter>(
     (event, { context: { active, over, droppableRects } }) => {
-      const keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-      if (!keys.includes(event.code) || !active) return undefined;
+      if (!ARROW_KEYS.includes(event.code) || !active) return undefined;
       event.preventDefault();
-      const at = over?.id ?? active.id;
-      const stage = findStage(at);
-      if (!stage) return undefined;
-      const list = listsRef.current[stage];
-      const index = isColumnId(at) ? list.length : list.indexOf(Number(at));
-      let target: UniqueIdentifier | undefined;
-      if (event.code === "ArrowDown") target = list[index + 1];
-      else if (event.code === "ArrowUp") target = index > 0 ? list[index - 1] : undefined;
-      else {
-        const next = STAGES[STAGES.findIndex((s) => s.key === stage) + (event.code === "ArrowRight" ? 1 : -1)];
-        if (!next) return undefined;
-        const others = listsRef.current[next.key].filter((id) => id !== Number(active.id));
-        target = others.length ? others[Math.min(index, others.length - 1)] : `column:${next.key}`;
-      }
-      const rect = target !== undefined ? droppableRects.get(target) : undefined;
+      const target = arrowTarget(listsRef.current, event.code, over?.id, Number(active.id));
+      const rect = target === undefined ? undefined : droppableRects.get(target);
       return rect ? { x: rect.left, y: rect.top } : undefined;
     },
-    [findStage],
+    [],
   );
 
   const sensors = useSensors(
@@ -127,7 +115,8 @@ export function PipelinePage() {
   );
 
   const showMore = useCallback(
-    (stage: StageKey) => setLimits((l) => ({ ...l, [stage]: (l[stage] ?? CARDS_PER_PAGE) + CARDS_PER_PAGE })),
+    (stage: StageKey) =>
+      setLimits((l) => ({ ...l, [stage]: (l[stage] ?? CARDS_PER_PAGE) + CARDS_PER_PAGE })),
     [],
   );
 
@@ -138,85 +127,57 @@ export function PipelinePage() {
 
   const onDragStart = ({ active }: DragStartEvent) => {
     setActiveId(Number(active.id));
-    startStage.current = findStage(active.id, derived);
-    setDragLists(derived);
+    startStage.current = columnOf(derived, active.id);
+    setDragCopy({ lists: derived, from: derived });
   };
 
   const onDragOver = ({ active, over }: DragOverEvent) => {
-    const from = findStage(active.id);
-    const to = findStage(over?.id);
-    if (!from || !to || from === to || !over) return;
-    setDragLists((prev) => {
-      const current = prev ?? derived;
-      const target = current[to].filter((id) => id !== Number(active.id));
-      let index = target.length;
-      if (!isColumnId(over.id)) {
-        const overIndex = target.indexOf(Number(over.id));
-        const below =
-          active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height / 2;
-        index = overIndex < 0 ? target.length : overIndex + (below ? 1 : 0);
-      }
-      target.splice(index, 0, Number(active.id));
-      return { ...current, [from]: current[from].filter((id) => id !== Number(active.id)), [to]: target };
+    const dragged = active.rect.current.translated;
+    const below = !!over && !!dragged && dragged.top > over.rect.top + over.rect.height / 2;
+    setDragCopy((prev) => {
+      const copy = prev!;
+      const lists = listsWhileOver(copy.lists, Number(active.id), over?.id, below);
+      return lists === copy.lists ? copy : { ...copy, lists };
     });
+  };
+
+  const dropDragCopy = () => {
+    setActiveId(null);
+    setDragCopy(null);
   };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     const id = Number(active.id);
-    const to = findStage(over?.id);
-    const deal = byId.get(id);
-    if (!over || !to || !deal) {
-      setActiveId(null);
-      return;
-    }
-    let list = listsRef.current[to];
-    const from = list.indexOf(id);
-    const overIndex = isColumnId(over.id) ? list.length - 1 : list.indexOf(Number(over.id));
-    if (from >= 0 && overIndex >= 0 && from !== overIndex) list = arrayMove(list, from, overIndex);
-    setDragLists((prev) => ({ ...(prev ?? derived), [to]: list }));
-
-    // Place it in the whole column, between the same cards the user saw (hidden closed deals included).
-    const columnIds = column(all, to).map((d) => d.id).filter((x) => x !== id);
-    const index = fullIndex(columnIds, list.filter((x) => x !== id), list.indexOf(id));
-    const unchanged = deal.stage === to && column(all, to).findIndex((d) => d.id === id) === index;
-    if (!unchanged) moveDeal({ id, stage: to, index });
+    const drop = planDrop(listsRef.current, all, id, over?.id);
+    if (!drop) return dropDragCopy();
+    // The board keeps the card where it was dropped until the cache has it there too.
+    setDragCopy((prev) => ({ ...prev!, lists: { ...prev!.lists, [drop.stage]: drop.list } }));
+    moveDeal({ id, stage: drop.stage, index: drop.index });
     setActiveId(null);
-  };
-
-  const onDragCancel = () => {
-    setActiveId(null);
-    setDragLists(null);
   };
 
   const byIdRef = useRef(byId);
-  byIdRef.current = byId;
+  useLayoutEffect(() => {
+    byIdRef.current = byId;
+  }, [byId]);
   const announcements = useMemo<Announcements>(() => {
-    const byId = { get: (id: number) => byIdRef.current.get(id) };
+    const nameOf = (id: UniqueIdentifier) => byIdRef.current.get(Number(id))?.name;
     return {
-    onDragStart: ({ active }) => {
-      const stage = findStage(active.id);
-      const list = stage ? listsRef.current[stage] : [];
-      return `Picked up ${byId.get(Number(active.id))?.name}. ${stage ? stageLabel(stage) : ""}, position ${list.indexOf(Number(active.id)) + 1} of ${list.length}.`;
-    },
-    onDragOver: ({ active, over }) => {
-      // Over itself where it started: keep the "Picked up" message.
-      if (over?.id === active.id && findStage(active.id) === startStage.current) return undefined;
-      const name = byId.get(Number(active.id))?.name;
-      const stage = findStage(over?.id);
-      if (!stage) return `${name} is not over a column.`;
-      const list = listsRef.current[stage];
-      const position = isColumnId(over!.id) ? list.length : list.indexOf(Number(over!.id)) + 1;
-      return `${name} is over ${stageLabel(stage)}, position ${Math.max(position, 1)} of ${list.length}.`;
-    },
-    onDragEnd: ({ active, over }) => {
-      const name = byId.get(Number(active.id))?.name;
-      const stage = findStage(over?.id);
-      return stage ? `Dropped ${name} in ${stageLabel(stage)}.` : `${name} was dropped outside the board and went back.`;
-    },
-    onDragCancel: ({ active }) =>
-      `Cancelled. ${byId.get(Number(active.id))?.name} went back to ${startStage.current ? stageLabel(startStage.current) : "its column"}.`,
+      onDragStart: ({ active }) =>
+        announce.pickedUp(listsRef.current, Number(active.id), nameOf(active.id)),
+      onDragOver: ({ active, over }) =>
+        announce.over(
+          listsRef.current,
+          Number(active.id),
+          over?.id,
+          nameOf(active.id),
+          startStage.current,
+        ),
+      onDragEnd: ({ active, over }) =>
+        announce.dropped(listsRef.current, over?.id, nameOf(active.id)),
+      onDragCancel: ({ active }) => announce.cancelled(nameOf(active.id), startStage.current),
     };
-  }, [findStage]);
+  }, []);
 
   // Per column: the cards shown and the figures counted, rebuilt only when they change.
   const columns = useMemo(
@@ -224,9 +185,7 @@ export function PipelinePage() {
       STAGES.map((s) => {
         const closed = s.key === "won" || s.key === "lost";
         const everyDeal = column(all, s.key);
-        const limit = limits[s.key] ?? CARDS_PER_PAGE;
-        const ids = lists[s.key].slice(0, limit);
-        if (activeId !== null && lists[s.key].includes(activeId) && !ids.includes(activeId)) ids.push(activeId);
+        const ids = shownIds(lists[s.key], limits[s.key] ?? CARDS_PER_PAGE, activeId);
         return {
           stage: s.key,
           cards: ids.map((id) => byId.get(id)!).filter(Boolean),
@@ -239,7 +198,10 @@ export function PipelinePage() {
     [all, lists, derived, byId, limits, activeId],
   );
   const board = boardTotals(all, today);
-  const lateIds = useMemo(() => new Set(all.filter((d) => isLate(d, today)).map((d) => d.id)), [all, today]);
+  const lateIds = useMemo(
+    () => new Set(all.filter((d) => isLate(d, today)).map((d) => d.id)),
+    [all, today],
+  );
   const caption = CLOSED_WINDOWS.find((w) => w.value === closedWindow)!.caption;
   const active = activeId !== null ? byId.get(activeId) : undefined;
 
@@ -247,7 +209,11 @@ export function PipelinePage() {
     <>
       <PageTitle title="Pipeline" hidden />
       <div className="mb-4 flex items-center gap-3">
-        <div className="panel flex items-center gap-1.5 p-1.5" aria-label="Open pipeline" role="group">
+        <div
+          className="panel flex items-center gap-1.5 p-1.5"
+          aria-label="Open pipeline"
+          role="group"
+        >
           <Figure label="Open value (USD)" dark testId="board-open-value">
             <Money value={board.value} />
           </Figure>
@@ -281,7 +247,7 @@ export function PipelinePage() {
         onDragStart={onDragStart}
         onDragOver={onDragOver}
         onDragEnd={onDragEnd}
-        onDragCancel={onDragCancel}
+        onDragCancel={dropDragCopy}
         accessibility={{
           announcements,
           screenReaderInstructions: {
@@ -321,10 +287,24 @@ export function PipelinePage() {
   );
 }
 
-function Figure({ label, dark = false, testId, children }: { label: string; dark?: boolean; testId: string; children: React.ReactNode }) {
+function Figure({
+  label,
+  dark = false,
+  testId,
+  children,
+}: {
+  label: string;
+  dark?: boolean;
+  testId: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className={`rounded-[10px] px-3.5 py-1.5 ${dark ? "bg-ink text-white" : ""}`}>
-      <span className={`block text-[11.5px] font-medium ${dark ? "text-sea-mist" : "text-ink-muted"}`}>{label}</span>
+      <span
+        className={`block text-[11.5px] font-medium ${dark ? "text-sea-mist" : "text-ink-muted"}`}
+      >
+        {label}
+      </span>
       <b className="text-[17px] font-semibold" data-testid={testId}>
         {children}
       </b>

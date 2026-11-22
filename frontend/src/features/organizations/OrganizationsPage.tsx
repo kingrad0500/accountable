@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import type { Organization } from "../../api/types";
 import { ConfirmDelete, type DeleteTarget } from "../../components/ConfirmDelete";
-import { DataTable, RowActions } from "../../components/DataTable";
+import { DataTable, RowActions, type TableColumn } from "../../components/DataTable";
 import { Money } from "../../components/Money";
 import { PageTitle } from "../../components/PageTitle";
 import { useDeleteOrganization, useOrganizations } from "./api";
@@ -21,7 +20,7 @@ export function OrganizationsPage() {
   const [deleting, setDeleting] = useState<DeleteTarget | null>(null);
   const all = organizations.data ?? [];
 
-  const columns = useMemo<ColumnDef<Organization, any>[]>(
+  const columns = useMemo<TableColumn<Organization>[]>(
     () => [
       {
         id: "name",
@@ -34,23 +33,52 @@ export function OrganizationsPage() {
           </Link>
         ),
       },
-      { id: "industry", accessorFn: (o) => o.industry ?? undefined, header: "Industry", sortUndefined: "last", meta: { width: "minmax(120px, 1fr)" } },
+      {
+        id: "industry",
+        accessorFn: (o) => o.industry ?? undefined,
+        header: "Industry",
+        sortUndefined: "last",
+        meta: { width: "minmax(120px, 1fr)" },
+      },
       {
         id: "website",
         accessorFn: (o) => o.website ?? undefined,
         header: "Website",
         sortUndefined: "last",
         meta: { width: "minmax(160px, 1.3fr)" },
-        cell: ({ getValue }) =>
-          getValue() ? (
-            <a href={websiteHref(getValue())} target="_blank" rel="noreferrer" className="text-cerulean-ink hover:underline">
-              {getValue()}
+        cell: ({ row }) =>
+          row.original.website ? (
+            <a
+              href={websiteHref(row.original.website)}
+              target="_blank"
+              rel="noreferrer"
+              className="text-cerulean-ink hover:underline"
+            >
+              {row.original.website}
             </a>
           ) : null,
       },
-      { id: "contacts", accessorKey: "contact_count", header: "Contacts", meta: { width: "96px", align: "right", search: false }, cell: ({ getValue }) => <span className="mono">{getValue()}</span> },
-      { id: "open_deals", accessorKey: "open_deal_count", header: "Open deals", meta: { width: "104px", align: "right", search: false }, cell: ({ getValue }) => <span className="mono">{getValue()}</span> },
-      { id: "open_value", accessorKey: "open_value", header: "Open value (USD)", meta: { width: "140px", align: "right", search: false }, cell: ({ getValue }) => <Money value={getValue()} /> },
+      {
+        id: "contacts",
+        accessorKey: "contact_count",
+        header: "Contacts",
+        meta: { width: "96px", align: "right", search: false },
+        cell: ({ row }) => <span className="mono">{row.original.contact_count}</span>,
+      },
+      {
+        id: "open_deals",
+        accessorKey: "open_deal_count",
+        header: "Open deals",
+        meta: { width: "104px", align: "right", search: false },
+        cell: ({ row }) => <span className="mono">{row.original.open_deal_count}</span>,
+      },
+      {
+        id: "open_value",
+        accessorKey: "open_value",
+        header: "Open value (USD)",
+        meta: { width: "140px", align: "right", search: false },
+        cell: ({ row }) => <Money value={row.original.open_value} />,
+      },
       {
         id: "actions",
         header: () => <span className="sr-only">Actions</span>,
@@ -60,7 +88,9 @@ export function OrganizationsPage() {
           <RowActions
             name={row.original.name}
             onEdit={() => setEditing(row.original)}
-            onDelete={() => setDeleting({ kind: "organization", id: row.original.id, name: row.original.name })}
+            onDelete={() =>
+              setDeleting({ kind: "organization", id: row.original.id, name: row.original.name })
+            }
           />
         ),
       },
@@ -80,11 +110,17 @@ export function OrganizationsPage() {
         addLabel="Add organization"
         onAdd={() => setEditing(null)}
       />
-      <OrganizationFormDialog open={editing !== undefined} onOpenChange={(o) => !o && setEditing(undefined)} organization={editing} />
+      <OrganizationFormDialog
+        open={editing !== undefined}
+        onOpenChange={(o) => !o && setEditing(undefined)}
+        organization={editing}
+      />
       <ConfirmDelete
         target={deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
-        onConfirm={() => remove.mutateAsync(deleting!.id).then(() => toast.success("Organization deleted"))}
+        onConfirm={() =>
+          remove.mutateAsync(deleting!.id).then(() => toast.success("Organization deleted"))
+        }
       />
     </>
   );

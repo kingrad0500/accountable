@@ -23,14 +23,45 @@ export function WonLostChart({ months }: { months: Dashboard["months"] }) {
         role="img"
         aria-label={`Deals won and lost by month. ${points.map((p) => `${p.label}: ${p.won} won, ${p.lost} lost`).join(", ")}`}
       >
-        <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 700, height: 272 }}>
-          <BarChart data={points} barGap={3} barCategoryGap="22%" margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          initialDimension={{ width: 700, height: 272 }}
+        >
+          <BarChart
+            data={points}
+            barGap={3}
+            barCategoryGap="22%"
+            margin={{ top: 4, right: 4, bottom: 0, left: -18 }}
+          >
             <CartesianGrid vertical={false} stroke="#DCE5E8" strokeDasharray="4 4" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "#4F6E78", fontSize: 12 }} />
-            <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={{ fill: "#4F6E78", fontSize: 11.5 }} />
+            <XAxis
+              dataKey="label"
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "#4F6E78", fontSize: 12 }}
+            />
+            <YAxis
+              allowDecimals={false}
+              tickLine={false}
+              axisLine={false}
+              tick={{ fill: "#4F6E78", fontSize: 11.5 }}
+            />
             <Tooltip cursor={{ fill: "rgb(7 59 76 / 0.04)" }} content={<WonLostTooltip />} />
-            <Bar dataKey="won" name="Won" fill="#06D6A0" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-            <Bar dataKey="lost" name="Lost" fill="#F78C6B" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            <Bar
+              dataKey="won"
+              name="Won"
+              fill="#06D6A0"
+              radius={[4, 4, 0, 0]}
+              isAnimationActive={false}
+            />
+            <Bar
+              dataKey="lost"
+              name="Lost"
+              fill="#F78C6B"
+              radius={[4, 4, 0, 0]}
+              isAnimationActive={false}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -38,10 +69,29 @@ export function WonLostChart({ months }: { months: Dashboard["months"] }) {
   );
 }
 
-const LONG_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const LONG_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 /** The brand's tooltip: Midnight text, with colored keys rather than colored words. */
-function WonLostTooltip({ active, payload }: { active?: boolean; payload?: { payload: MonthPoint }[] }) {
+function WonLostTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: MonthPoint }[];
+}) {
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (

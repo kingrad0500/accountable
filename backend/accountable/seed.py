@@ -8,6 +8,7 @@ seeding twice gives the same data and every screen looks alive whenever it's see
 import argparse
 import random
 from datetime import date, datetime, time, timedelta
+from itertools import pairwise
 
 from sqlalchemy import Connection, delete, insert
 
@@ -17,20 +18,45 @@ from .db import activities, contacts, deals, organizations, stage_changes
 
 ORGANIZATIONS = [
     # name, website, industry, notes
-    ("Meridian Clinics", "meridianclinics.com", "Healthcare", "Twelve outpatient clinics across the north-west."),
+    (
+        "Meridian Clinics",
+        "meridianclinics.com",
+        "Healthcare",
+        "Twelve outpatient clinics across the north-west.",
+    ),
     ("Oakline Freight", "oaklinefreight.com", "Logistics", "Regional haulage, 180 trucks."),
-    ("Solace Insurance", "solaceinsurance.com", "Finance", "Mid-sized insurer. Slow procurement, big budgets."),
+    (
+        "Solace Insurance",
+        "solaceinsurance.com",
+        "Finance",
+        "Mid-sized insurer. Slow procurement, big budgets.",
+    ),
     ("Brightwater Foods", "brightwaterfoods.com", "Retail", "Grocery chain with 40 stores."),
-    ("Ironbridge Manufacturing", "ironbridgemfg.com", "Manufacturing", "Steel fabrication. Moving off an old ERP."),
+    (
+        "Ironbridge Manufacturing",
+        "ironbridgemfg.com",
+        "Manufacturing",
+        "Steel fabrication. Moving off an old ERP.",
+    ),
     ("Pinecrest Schools", "pinecrestschools.org", "Education", "Group of six independent schools."),
     ("Lumen Retail", "lumenretail.com", "Retail", "Fashion retailer, strong online arm."),
-    ("Kestrel Capital", "kestrelcapital.com", "Finance", "Investment firm. Wants everything in writing."),
+    (
+        "Kestrel Capital",
+        "kestrelcapital.com",
+        "Finance",
+        "Investment firm. Wants everything in writing.",
+    ),
     ("Vantage Robotics", "vantagerobotics.io", "Manufacturing", "Warehouse robots. Fast-growing."),
     ("Halcyon Studios", "halcyonstudios.co", "Media", "Design and video studio."),
     ("Quarry Software", "quarrysoftware.com", "Software", "B2B SaaS, about 300 staff."),
     ("Cedar Health Group", "cedarhealth.org", "Healthcare", "Private hospital group."),
     ("Northwind Partners", "northwindpartners.com", "Finance", "Accounting and advisory firm."),
-    ("Bluefin Logistics", "bluefinlogistics.com", "Logistics", "Freight forwarding and warehousing."),
+    (
+        "Bluefin Logistics",
+        "bluefinlogistics.com",
+        "Logistics",
+        "Freight forwarding and warehousing.",
+    ),
     ("Tallow & Finch", "tallowandfinch.com", "Retail", "Homeware brand with 12 shops."),
 ]
 
@@ -198,8 +224,10 @@ def seed(conn: Connection, large: bool = False) -> None:
     for name, website, industry, notes in ORGANIZATIONS:
         org_ids.append(
             conn.execute(
-                insert(organizations).values(name=name, website=website, industry=industry, notes=notes)
-            ).inserted_primary_key[0]
+                insert(organizations)
+                .values(name=name, website=website, industry=industry, notes=notes)
+                .returning(organizations.c.id)
+            ).scalar_one()
         )
 
     contact_ids: dict[str, int] = {}
@@ -207,7 +235,8 @@ def seed(conn: Connection, large: bool = False) -> None:
         first, last = name.lower().split(" ", 1)
         domain = ORGANIZATIONS[org][1] if org is not None else "fastmail.com"
         contact_ids[name] = conn.execute(
-            insert(contacts).values(
+            insert(contacts)
+            .values(
                 name=name,
                 email=f"{first}.{last.replace(' ', '')}@{domain}",
                 phone=f"+1 555 {rng.randint(100, 999)} {rng.randint(1000, 9999)}",
@@ -215,7 +244,8 @@ def seed(conn: Connection, large: bool = False) -> None:
                 organization_id=org_ids[org] if org is not None else None,
                 status=status,
             )
-        ).inserted_primary_key[0]
+            .returning(contacts.c.id)
+        ).scalar_one()
 
     deal_ids: dict[str, int] = {}
     positions: dict[str, int] = {}
@@ -225,7 +255,8 @@ def seed(conn: Connection, large: bool = False) -> None:
         position = positions.get(stage, 0)
         positions[stage] = position + 1
         deal_id = conn.execute(
-            insert(deals).values(
+            insert(deals)
+            .values(
                 name=name,
                 organization_id=org_ids[org],
                 main_contact_id=contact_ids[contact],
@@ -235,14 +266,15 @@ def seed(conn: Connection, large: bool = False) -> None:
                 close_date=close_date,
                 position=position,
             )
-        ).inserted_primary_key[0]
+            .returning(deals.c.id)
+        ).scalar_one()
         deal_ids[name] = deal_id
         return deal_id
 
     def add_history(deal_id: int, path: list[str], last_day: date) -> None:
         """Stage changes along `path`, the last one on `last_day`, earlier ones weeks before (S4)."""
         day = last_day
-        steps = list(zip(path, path[1:]))
+        steps = list(pairwise(path))
         for from_stage, to_stage in reversed(steps):
             changes.append(
                 {
@@ -255,7 +287,9 @@ def seed(conn: Connection, large: bool = False) -> None:
             day -= timedelta(days=rng.randint(6, 18))
 
     for name, org, contact, stage, value, probability, days in OPEN_DEALS:
-        deal_id = add_deal(name, org, contact, stage, value, probability, today + timedelta(days=days))
+        deal_id = add_deal(
+            name, org, contact, stage, value, probability, today + timedelta(days=days)
+        )
         path = list(OPEN_PATH[: OPEN_PATH.index(stage) + 1])
         add_history(deal_id, path, today - timedelta(days=rng.randint(1, 12)))
 
@@ -279,7 +313,9 @@ def seed(conn: Connection, large: bool = False) -> None:
                 {
                     "type": kind,
                     "description": texts[kind][(i * 2 + j) % len(texts[kind])],
-                    "occurred_at": _at(today - timedelta(days=rng.randint(1, 140)), rng.uniform(8, 17)),
+                    "occurred_at": _at(
+                        today - timedelta(days=rng.randint(1, 140)), rng.uniform(8, 17)
+                    ),
                     "contact_id": None,
                     "deal_id": deal_ids[name],
                     "follow_up_date": None,
@@ -304,7 +340,9 @@ def seed(conn: Connection, large: bool = False) -> None:
         row["follow_up_date"] = row["occurred_at"].date() + timedelta(days=7)
         row["follow_up_done"] = True
     for text, kind, days, (target, name) in FOLLOW_UPS:
-        logged = today - timedelta(days=max(1, -days + rng.randint(2, 6)) if days < 0 else rng.randint(1, 5))
+        logged = today - timedelta(
+            days=max(1, -days + rng.randint(2, 6)) if days < 0 else rng.randint(1, 5)
+        )
         rows.append(
             {
                 "type": kind,
@@ -324,19 +362,117 @@ def seed(conn: Connection, large: bool = False) -> None:
 
 # ---- Large dataset ----------------------------------------------------------
 
-FIRST = "Ada Ben Cara Dan Eve Finn Gia Hal Ivy Jon Kai Lea Max Nia Oto Pia Quin Ray Sia Ted Uma Vic Wes Xia Yan Zoe".split()
-LAST = "Adler Baker Chen Dias Evans Ford Gray Hale Ito Jones Khan Lopez Mills Nash Olsen Park Quinn Ross Stone Tate Usher Vale Wolfe Young Zhou".split()
-WORDS = "Atlas Beacon Cobalt Delta Ember Falcon Granite Harbor Indigo Juniper Keystone Lantern Maple Nimbus Orchid Pioneer Quartz Redwood Summit Tidal".split()
-KINDS = "Systems Labs Group Partners Logistics Health Retail Capital Foods Works".split()
+FIRST = [
+    "Ada",
+    "Ben",
+    "Cara",
+    "Dan",
+    "Eve",
+    "Finn",
+    "Gia",
+    "Hal",
+    "Ivy",
+    "Jon",
+    "Kai",
+    "Lea",
+    "Max",
+    "Nia",
+    "Oto",
+    "Pia",
+    "Quin",
+    "Ray",
+    "Sia",
+    "Ted",
+    "Uma",
+    "Vic",
+    "Wes",
+    "Xia",
+    "Yan",
+    "Zoe",
+]
+LAST = [
+    "Adler",
+    "Baker",
+    "Chen",
+    "Dias",
+    "Evans",
+    "Ford",
+    "Gray",
+    "Hale",
+    "Ito",
+    "Jones",
+    "Khan",
+    "Lopez",
+    "Mills",
+    "Nash",
+    "Olsen",
+    "Park",
+    "Quinn",
+    "Ross",
+    "Stone",
+    "Tate",
+    "Usher",
+    "Vale",
+    "Wolfe",
+    "Young",
+    "Zhou",
+]
+WORDS = [
+    "Atlas",
+    "Beacon",
+    "Cobalt",
+    "Delta",
+    "Ember",
+    "Falcon",
+    "Granite",
+    "Harbor",
+    "Indigo",
+    "Juniper",
+    "Keystone",
+    "Lantern",
+    "Maple",
+    "Nimbus",
+    "Orchid",
+    "Pioneer",
+    "Quartz",
+    "Redwood",
+    "Summit",
+    "Tidal",
+]
+KINDS = [
+    "Systems",
+    "Labs",
+    "Group",
+    "Partners",
+    "Logistics",
+    "Health",
+    "Retail",
+    "Capital",
+    "Foods",
+    "Works",
+]
 INDUSTRIES = ["Software", "Healthcare", "Logistics", "Retail", "Finance", "Manufacturing"]
-TOPICS = "portal migration rollout integration renewal pilot dashboard upgrade audit automation".split()
+TOPICS = [
+    "portal",
+    "migration",
+    "rollout",
+    "integration",
+    "renewal",
+    "pilot",
+    "dashboard",
+    "upgrade",
+    "audit",
+    "automation",
+]
 
 
 def seed_large(conn: Connection, rng: random.Random, today: date) -> None:
     """Thousands more records: 3,000 deals, 3,000 contacts and 10,000 activities in all (G7)."""
     n_orgs, n_contacts, n_deals, n_activities = 300, 3000, 3000, 10000
     existing = {t.name: conn.execute(t.select()).fetchall() for t in (contacts, deals, activities)}
-    first_org = conn.execute(insert(organizations).values(name="Large data org")).inserted_primary_key[0]
+    first_org = conn.execute(
+        insert(organizations).values(name="Large data org").returning(organizations.c.id)
+    ).scalar_one()
     org_rows = [
         {
             "name": f"{WORDS[i % 20]} {KINDS[(i // 20) % 10]} {i}",
@@ -372,7 +508,11 @@ def seed_large(conn: Connection, rng: random.Random, today: date) -> None:
     for i in range(n_deals - len(existing["deals"])):
         stage = rng.choice(db.STAGES)
         closed = stage in db.CLOSED_STAGES
-        close = today - timedelta(days=rng.randint(0, 700)) if closed else today + timedelta(days=rng.randint(-30, 200))
+        close = (
+            today - timedelta(days=rng.randint(0, 700))
+            if closed
+            else today + timedelta(days=rng.randint(-30, 200))
+        )
         deal_rows.append(
             {
                 "name": f"{WORDS[i % 20]} {TOPICS[(i // 20) % 10]} {i}",
@@ -380,7 +520,14 @@ def seed_large(conn: Connection, rng: random.Random, today: date) -> None:
                 "main_contact_id": rng.choice(contact_ids),
                 "stage": stage,
                 "value": rng.randrange(5000, 150000, 500),
-                "probability": {"new": 10, "qualified": 25, "proposal": 50, "negotiation": 75, "won": 100, "lost": 0}[stage],
+                "probability": {
+                    "new": 10,
+                    "qualified": 25,
+                    "proposal": 50,
+                    "negotiation": 75,
+                    "won": 100,
+                    "lost": 0,
+                }[stage],
                 "close_date": close,
                 "position": positions[stage],
             }
@@ -420,12 +567,16 @@ def seed_large(conn: Connection, rng: random.Random, today: date) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Reset the database to the sample data.")
-    parser.add_argument("--large", action="store_true", help="also load thousands of records for speed checks")
+    parser.add_argument(
+        "--large", action="store_true", help="also load thousands of records for speed checks"
+    )
     args = parser.parse_args()
     db.create_schema()
     with db.get_engine().begin() as conn:
         seed(conn, large=args.large)
-    print(f"Sample data loaded into {config.db_path()}" + (" (large dataset)" if args.large else ""))
+    print(
+        f"Sample data loaded into {config.db_path()}" + (" (large dataset)" if args.large else "")
+    )
 
 
 if __name__ == "__main__":

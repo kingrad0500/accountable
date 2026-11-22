@@ -20,10 +20,14 @@ export function DashboardPage() {
     <>
       <div className="mx-1 mb-4 flex items-baseline justify-between">
         <h1 className="text-[26px] tracking-[-0.02em]">{greeting(now)}</h1>
-        <span className="text-[13.5px] text-ink-muted">{formatLongDate(now)} · all figures in USD</span>
+        <span className="text-[13.5px] text-ink-muted">
+          {formatLongDate(now)} · all figures in USD
+        </span>
       </div>
       {!dashboard.data ? (
-        <p className="muted p-6">{dashboard.isError ? "The dashboard couldn't load. Is the server running?" : "Loading…"}</p>
+        <p className="muted p-6">
+          {dashboard.isError ? "The dashboard couldn't load. Is the server running?" : "Loading…"}
+        </p>
       ) : (
         <div className="grid grid-cols-12 gap-[18px]">
           <SummaryPanel data={dashboard.data} />

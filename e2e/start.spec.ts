@@ -6,7 +6,10 @@ test("the app opens on the dashboard", async ({ page }) => {
   for (const tab of ["Dashboard", "Pipeline", "Deals", "Contacts", "Organizations"]) {
     await expect(nav.getByRole("link", { name: tab })).toBeVisible();
   }
-  await expect(nav.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
+  await expect(nav.getByRole("link", { name: "Dashboard" })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
   await expect(page.getByRole("region", { name: "How sales are going" })).toBeVisible();
 });
 

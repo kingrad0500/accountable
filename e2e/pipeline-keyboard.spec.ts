@@ -15,7 +15,14 @@ test("move a card with Space and the arrow keys (P6)", async ({ page }) => {
   await expect(live).toHaveText("Customer portal discovery is over New, position 2 of 4.");
   await page.keyboard.press("Space");
   await expect(live).toHaveText("Dropped Customer portal discovery in New.");
-  await expect.poll(() => names(page, "new")).toEqual(["Fleet tracking dashboard", "Customer portal discovery", "Security review", "Inventory API pilot"]);
+  await expect
+    .poll(() => names(page, "new"))
+    .toEqual([
+      "Fleet tracking dashboard",
+      "Customer portal discovery",
+      "Security review",
+      "Inventory API pilot",
+    ]);
 
   // To the next column
   await card(page, "Customer portal discovery").focus();
@@ -48,7 +55,13 @@ test("move a card with the Move to menu (P6)", async ({ page }) => {
   await expect(trigger).toBeFocused();
   await page.keyboard.press("Enter");
   const menu = page.getByRole("menu");
-  await expect(menu.getByRole("menuitem")).toHaveText(["New", "Proposal", "Negotiation", "Won", "Lost"]);
+  await expect(menu.getByRole("menuitem")).toHaveText([
+    "New",
+    "Proposal",
+    "Negotiation",
+    "Won",
+    "Lost",
+  ]);
   // Opening from the keyboard focuses the first stage; one step down is Proposal.
   await expect(menu.getByRole("menuitem", { name: "New" })).toBeFocused();
   await page.keyboard.press("ArrowDown");
@@ -61,7 +74,9 @@ test("move a card with the Move to menu (P6)", async ({ page }) => {
 test("Enter opens the deal, and focus is visible throughout (SC8)", async ({ page }) => {
   const c = card(page, "Security review");
   await c.focus();
-  const outline = await c.evaluate((el) => getComputedStyle(el).outlineStyle + " " + getComputedStyle(el).outlineWidth);
+  const outline = await c.evaluate(
+    (el) => getComputedStyle(el).outlineStyle + " " + getComputedStyle(el).outlineWidth,
+  );
   expect(outline).toBe("solid 2px");
   await page.keyboard.press("Tab");
   const trigger = page.getByRole("button", { name: "Move Security review to" });

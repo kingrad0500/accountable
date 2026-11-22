@@ -15,8 +15,6 @@ from accountable import config, db
 TODAY = date(2026, 11, 18)
 
 
-
-
 @pytest.fixture(autouse=True)
 def isolated_db(tmp_path, monkeypatch) -> Iterator:
     path = tmp_path / "test.db"
@@ -62,14 +60,25 @@ def make_contact(client: TestClient, **fields) -> dict:
 
 
 def make_deal(client: TestClient, organization_id: int, **fields) -> dict:
-    body = {"name": "Website rebuild", "organization_id": organization_id, "stage": "new", "value": 10000, **fields}
+    body = {
+        "name": "Website rebuild",
+        "organization_id": organization_id,
+        "stage": "new",
+        "value": 10000,
+        **fields,
+    }
     r = client.post("/api/deals", json=body)
     assert r.status_code == 201, r.text
     return r.json()
 
 
 def make_activity(client: TestClient, **fields) -> dict:
-    body = {"type": "note", "description": "Spoke to them", "occurred_at": "2026-11-10T10:00:00Z", **fields}
+    body = {
+        "type": "note",
+        "description": "Spoke to them",
+        "occurred_at": "2026-11-10T10:00:00Z",
+        **fields,
+    }
     r = client.post("/api/activities", json=body)
     assert r.status_code == 201, r.text
     return r.json()

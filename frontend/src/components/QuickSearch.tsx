@@ -7,7 +7,11 @@ import { useOrganizations } from "../features/organizations/api";
 import { quickSearch, type SearchItem, type SearchKind } from "./searchMatches";
 
 const ICONS = { deal: Briefcase, contact: User, organization: Building };
-const PATHS: Record<SearchKind, string> = { deal: "/deals", contact: "/contacts", organization: "/organizations" };
+const PATHS: Record<SearchKind, string> = {
+  deal: "/deals",
+  contact: "/contacts",
+  organization: "/organizations",
+};
 
 /** The top bar's search: finds deals, contacts and organizations by name; "/" focuses it (G10). */
 export function QuickSearch() {
@@ -25,9 +29,24 @@ export function QuickSearch() {
 
   const items = useMemo<SearchItem[]>(
     () => [
-      ...(deals.data ?? []).map((d) => ({ kind: "deal" as const, id: d.id, name: d.name, detail: d.organization_name })),
-      ...(contacts.data ?? []).map((c) => ({ kind: "contact" as const, id: c.id, name: c.name, detail: c.organization_name })),
-      ...(organizations.data ?? []).map((o) => ({ kind: "organization" as const, id: o.id, name: o.name, detail: o.industry })),
+      ...(deals.data ?? []).map((d) => ({
+        kind: "deal" as const,
+        id: d.id,
+        name: d.name,
+        detail: d.organization_name,
+      })),
+      ...(contacts.data ?? []).map((c) => ({
+        kind: "contact" as const,
+        id: c.id,
+        name: c.name,
+        detail: c.organization_name,
+      })),
+      ...(organizations.data ?? []).map((o) => ({
+        kind: "organization" as const,
+        id: o.id,
+        name: o.name,
+        detail: o.industry,
+      })),
     ],
     [deals.data, contacts.data, organizations.data],
   );
@@ -113,27 +132,39 @@ export function QuickSearch() {
             )}
             {groups.map((g) => (
               <li key={g.kind} role="presentation">
-                <p className="px-3 pt-2 pb-1 text-[11.5px] font-semibold tracking-wide text-ink-muted uppercase" aria-hidden>
+                <p
+                  className="px-3 pt-2 pb-1 text-[11.5px] font-semibold tracking-wide text-ink-muted uppercase"
+                  aria-hidden
+                >
                   {g.label}
                 </p>
                 <ul role="group" aria-label={g.label}>
                   {g.items.map((item) => {
                     const i = flat.indexOf(item);
                     const Icon = ICONS[item.kind];
+                    // The box keeps focus and handles the keys; options are only clicked,
+                    // so they stay out of the tab order.
                     return (
-                      <li
-                        key={`${item.kind}${item.id}`}
-                        id={optionId(i)}
-                        role="option"
-                        aria-selected={i === active}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => go(item)}
-                        onMouseEnter={() => setActive(i)}
-                        className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 ${i === active ? "bg-tint" : ""}`}
-                      >
-                        <Icon size={15} className="flex-none text-ink-muted" aria-hidden />
-                        <span className="truncate font-medium">{item.name}</span>
-                        {item.detail && <span className="ml-auto truncate text-[12px] text-ink-muted">{item.detail}</span>}
+                      <li key={`${item.kind}${item.id}`} role="presentation">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          id={optionId(i)}
+                          role="option"
+                          aria-selected={i === active}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => go(item)}
+                          onMouseEnter={() => setActive(i)}
+                          className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left ${i === active ? "bg-tint" : ""}`}
+                        >
+                          <Icon size={15} className="flex-none text-ink-muted" aria-hidden />
+                          <span className="truncate font-medium">{item.name}</span>
+                          {item.detail && (
+                            <span className="ml-auto truncate text-[12px] text-ink-muted">
+                              {item.detail}
+                            </span>
+                          )}
+                        </button>
                       </li>
                     );
                   })}

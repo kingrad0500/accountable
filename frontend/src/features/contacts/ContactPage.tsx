@@ -59,7 +59,10 @@ export function ContactPage() {
         <div className="flex flex-col gap-[18px]">
           <LinkedPanel title="Organization">
             {c.organization_id ? (
-              <Link to={`/organizations/${c.organization_id}`} className="font-semibold hover:underline">
+              <Link
+                to={`/organizations/${c.organization_id}`}
+                className="font-semibold hover:underline"
+              >
                 {c.organization_name}
               </Link>
             ) : (

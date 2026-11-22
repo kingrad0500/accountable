@@ -13,6 +13,8 @@ Commands are npm scripts in a `package.json` at the repo root, with `frontend/` 
 
 - `npm run dev` starts the backend and the frontend together
 - `npm test` runs all the tests and fails if any test fails
+- `npm run check` runs the formatters' checks, linters, type checkers, a secrets scan and all the tests, and fails if any of them fails (`npm run check:quick` leaves out the end-to-end tests)
+- `npm run format` fixes the formatting
 - `npm run seed` resets the database to the sample data
 
 `docs/STATUS.md` says how to run the app. `README.md` is the course's own guide, so leave it as it is.
@@ -61,6 +63,12 @@ Brand colors are defined once as CSS variables in `frontend/src/styles/tokens.cs
 
 React Router, TanStack Query, TanStack Table with TanStack Virtual, dnd-kit, Recharts, React Hook Form with Zod, Radix UI primitives, Tailwind CSS v4, lucide-react, date-fns and sonner on the frontend. FastAPI, Pydantic v2, SQLAlchemy Core and uvicorn on the backend. `concurrently` runs both for `npm run dev`.
 
+### Code checks
+
+Prettier and ESLint for the TypeScript; ruff (format and lint) and ty for the Python; gitleaks for secrets. Functions stay at a cyclomatic complexity of 15 or less, and the unit tests cover at least 80% of the code on each side.
+
+ESLint lives at the repo root with TypeScript 6 beside it, because typescript-eslint needs TypeScript's JavaScript API, which TypeScript 7 doesn't have yet. The frontend's `tsc` is TypeScript 7. When typescript-eslint supports TypeScript 7, the root copy can go.
+
 ### Installing and running
 
-`npm install` once, then `npm run dev`. `npm run dev` runs `uv sync` first, so Python needs no separate step. Node, uv and Google Chrome (for the tests) must already be installed. After that, nothing needs the internet.
+`npm install` once, then `npm run dev`. `npm run dev` runs `uv sync` first, so Python needs no separate step. Node, uv, Google Chrome (for the tests) and [gitleaks](https://github.com/gitleaks/gitleaks) (for `npm run check`) must already be installed. After that, nothing needs the internet.

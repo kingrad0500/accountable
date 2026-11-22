@@ -22,17 +22,26 @@ function actionFor(path: string): Action {
   return "deal";
 }
 
-const ACTION_LABELS: Record<Action, string> = { deal: "Add deal", contact: "Add contact", organization: "Add organization" };
+const ACTION_LABELS: Record<Action, string> = {
+  deal: "Add deal",
+  contact: "Add contact",
+  organization: "Add organization",
+};
 
 /** The floating top bar: wordmark, tabs, quick search and the page's main action. */
 export function TopBar() {
   const location = useLocation();
   const action = actionFor(location.pathname);
   const [open, setOpen] = useState<Action | null>(null);
+  // The action button opens a form, so its dialog only ever reports closing.
+  const close = () => setOpen(null);
 
   return (
     <header className="panel mb-5 flex items-center gap-6 py-2.5 pr-3 pl-4">
-      <NavLink to="/" className="flex items-center gap-2.5 rounded-lg text-[17px] font-bold tracking-[-0.01em]">
+      <NavLink
+        to="/"
+        className="flex items-center gap-2.5 rounded-lg text-[17px] font-bold tracking-[-0.01em]"
+      >
         <span
           aria-hidden
           className="grid size-[30px] place-items-center rounded-[9px] bg-ink font-serif text-[21px] font-normal text-sea-green"
@@ -49,7 +58,9 @@ export function TopBar() {
             end={end}
             className={({ isActive }) =>
               `flex h-[34px] items-center gap-2 rounded-[9px] px-3.5 font-medium transition-colors ${
-                isActive ? "bg-panel font-semibold text-ink shadow-soft" : "text-ink-muted hover:text-ink"
+                isActive
+                  ? "bg-panel font-semibold text-ink shadow-soft"
+                  : "text-ink-muted hover:text-ink"
               }`
             }
           >
@@ -65,9 +76,9 @@ export function TopBar() {
           {ACTION_LABELS[action]}
         </button>
       </div>
-      <DealFormDialog open={open === "deal"} onOpenChange={(o) => setOpen(o ? "deal" : null)} />
-      <ContactFormDialog open={open === "contact"} onOpenChange={(o) => setOpen(o ? "contact" : null)} />
-      <OrganizationFormDialog open={open === "organization"} onOpenChange={(o) => setOpen(o ? "organization" : null)} />
+      <DealFormDialog open={open === "deal"} onOpenChange={close} />
+      <ContactFormDialog open={open === "contact"} onOpenChange={close} />
+      <OrganizationFormDialog open={open === "organization"} onOpenChange={close} />
     </header>
   );
 }

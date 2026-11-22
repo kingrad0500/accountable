@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { dealSchema } from "./schema";
 
-const valid = { name: "Website rebuild", organization_id: "3", main_contact_id: "", stage: "new", value: "12500", probability: "10", close_date: "" };
+const valid = {
+  name: "Website rebuild",
+  organization_id: "3",
+  main_contact_id: "",
+  stage: "new",
+  value: "12500",
+  probability: "10",
+  close_date: "",
+};
 
 function errors(input: Partial<typeof valid>) {
   const r = dealSchema.safeParse({ ...valid, ...input });

@@ -3,19 +3,35 @@
 from datetime import date
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import Connection, Row, bindparam, delete, func, insert, select, update
 
 from . import config, db
 from .activities import timeline
-from .db import CLOSED_STAGES, OPEN_STAGES, RequiredText, activities, contacts, deals, organizations, stage_changes
+from .db import (
+    CLOSED_STAGES,
+    OPEN_STAGES,
+    RequiredText,
+    activities,
+    contacts,
+    deals,
+    organizations,
+    stage_changes,
+)
 
 router = APIRouter(tags=["deals"])
 
 Stage = Literal["new", "qualified", "proposal", "negotiation", "won", "lost"]
 
-DEFAULT_PROBABILITY = {"new": 10, "qualified": 25, "proposal": 50, "negotiation": 75, "won": 100, "lost": 0}
+DEFAULT_PROBABILITY = {
+    "new": 10,
+    "qualified": 25,
+    "proposal": 50,
+    "negotiation": 75,
+    "won": 100,
+    "lost": 0,
+}
 
 
 # ---- Rules ------------------------------------------------------------------
@@ -60,11 +76,15 @@ def _renumber(conn: Connection, ids: list[int]) -> None:
     """Set positions 0..n-1 in the given order, writing only the rows that changed."""
     if not ids:
         return
-    current = dict(conn.execute(select(deals.c.id, deals.c.position).where(deals.c.id.in_(ids))).all())
+    current = dict(
+        conn.execute(select(deals.c.id, deals.c.position).where(deals.c.id.in_(ids))).all()
+    )
     changes = [{"b_id": i, "b_pos": pos} for pos, i in enumerate(ids) if current.get(i) != pos]
     if changes:
         conn.execute(
-            update(deals).where(deals.c.id == bindparam("b_id")).values(position=bindparam("b_pos")),
+            update(deals)
+            .where(deals.c.id == bindparam("b_id"))
+            .values(position=bindparam("b_pos")),
             changes,
         )
 
@@ -168,12 +188,12 @@ class MoveIn(BaseModel):
 
 
 @router.get("/deals")
-def list_deals(conn: Connection = Depends(db.get_conn)) -> Response:
+def list_deals(conn: db.Conn) -> Response:
     return db.json_response(deal_rows(conn))
 
 
 @router.post("/deals", status_code=201)
-def create_deal(body: DealIn, conn: Connection = Depends(db.get_conn)) -> dict:
+def create_deal(body: DealIn, conn: db.Conn) -> dict:
     db.check_exists(conn, organizations, body.organization_id, "organization_id", "organization")
     db.check_exists(conn, contacts, body.main_contact_id, "main_contact_id", "contact")
     values = body.model_dump()
@@ -182,21 +202,27 @@ def create_deal(body: DealIn, conn: Connection = Depends(db.get_conn)) -> dict:
     if body.stage in CLOSED_STAGES and values["close_date"] is None:
         values["close_date"] = config.today()
     # New deals go to the top of their column (P4).
-    conn.execute(update(deals).where(deals.c.stage == body.stage).values(position=deals.c.position + 1))
-    new_id = conn.execute(insert(deals).values(**values, position=0)).inserted_primary_key[0]
+    conn.execute(
+        update(deals).where(deals.c.stage == body.stage).values(position=deals.c.position + 1)
+    )
+    new_id = conn.execute(
+        insert(deals).values(**values, position=0).returning(deals.c.id)
+    ).scalar_one()
     conn.commit()
     return get_deal(conn, new_id)
 
 
 @router.get("/deals/{deal_id}")
-def read_deal(deal_id: int, conn: Connection = Depends(db.get_conn)) -> dict:
+def read_deal(deal_id: int, conn: db.Conn) -> dict:
     deal = get_deal(conn, deal_id)
-    deal["timeline"] = timeline(conn, activities.c.deal_id == deal_id, stage_changes.c.deal_id == deal_id)
+    deal["timeline"] = timeline(
+        conn, activities.c.deal_id == deal_id, stage_changes.c.deal_id == deal_id
+    )
     return deal
 
 
 @router.patch("/deals/{deal_id}")
-def update_deal(deal_id: int, body: DealPatch, conn: Connection = Depends(db.get_conn)) -> dict:
+def update_deal(deal_id: int, body: DealPatch, conn: db.Conn) -> dict:
     deal = _get_row(conn, deal_id)
     fields = body.model_dump(exclude_unset=True)
     for required in ("name", "stage", "value", "probability"):
@@ -205,13 +231,19 @@ def update_deal(deal_id: int, body: DealPatch, conn: Connection = Depends(db.get
     # Saving from the edit form needs an organization, even for a deal that lost its own (concern 3).
     if fields.get("organization_id", deal.organization_id) is None:
         raise db.field_error("organization_id", "Required")
-    db.check_exists(conn, organizations, fields.get("organization_id"), "organization_id", "organization")
+    db.check_exists(
+        conn, organizations, fields.get("organization_id"), "organization_id", "organization"
+    )
     db.check_exists(conn, contacts, fields.get("main_contact_id"), "main_contact_id", "contact")
 
     new_stage = fields.pop("stage", deal.stage)
     if new_stage != deal.stage:
         # A value the user changed in the same edit wins over the stage's default.
-        chosen = {k: fields.pop(k) for k in ("probability", "close_date") if k in fields and fields[k] != getattr(deal, k)}
+        chosen = {
+            k: fields.pop(k)
+            for k in ("probability", "close_date")
+            if k in fields and fields[k] != getattr(deal, k)
+        }
         fields.pop("probability", None)
         fields.pop("close_date", None)
         fields.update(change_stage(conn, deal, new_stage, chosen))
@@ -224,21 +256,23 @@ def update_deal(deal_id: int, body: DealPatch, conn: Connection = Depends(db.get
 
 
 @router.post("/deals/{deal_id}/move")
-def move_deal(deal_id: int, body: MoveIn, conn: Connection = Depends(db.get_conn)) -> dict:
+def move_deal(deal_id: int, body: MoveIn, conn: db.Conn) -> dict:
     move(conn, deal_id, body.stage, body.index)
     conn.commit()
     return get_deal(conn, deal_id)
 
 
 @router.get("/deals/{deal_id}/delete-impact")
-def deal_delete_impact(deal_id: int, conn: Connection = Depends(db.get_conn)) -> dict:
+def deal_delete_impact(deal_id: int, conn: db.Conn) -> dict:
     _get_row(conn, deal_id)
-    count = lambda table: conn.execute(select(func.count()).where(table.c.deal_id == deal_id)).scalar_one()  # noqa: E731
+    count = lambda table: conn.execute(
+        select(func.count()).where(table.c.deal_id == deal_id)
+    ).scalar_one()
     return {"activities": count(activities), "stage_changes": count(stage_changes)}
 
 
 @router.delete("/deals/{deal_id}", status_code=204)
-def delete_deal(deal_id: int, conn: Connection = Depends(db.get_conn)) -> Response:
+def delete_deal(deal_id: int, conn: db.Conn) -> Response:
     deal = _get_row(conn, deal_id)
     conn.execute(delete(deals).where(deals.c.id == deal_id))  # activities and stage history cascade
     _renumber(conn, _column_ids(conn, deal.stage))

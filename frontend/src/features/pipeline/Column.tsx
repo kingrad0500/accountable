@@ -8,6 +8,7 @@ import { plural } from "../../lib/format";
 import { CLOSED_STAGES, stageOf, type StageKey } from "../../lib/stages";
 import { AddDealInColumn } from "./AddDealInColumn";
 import { SortableCard } from "./Card";
+import { columnId } from "./drag";
 import type { Totals } from "./move";
 
 type Props = {
@@ -40,19 +41,25 @@ export const Column = memo(function Column({
 }: Props) {
   const s = stageOf(stage);
   const closed = CLOSED_STAGES.includes(stage);
-  const { setNodeRef } = useDroppable({ id: `column:${stage}`, data: { stage } });
+  const { setNodeRef } = useDroppable({ id: columnId(stage), data: { stage } });
   const share = openValue ? (totals.value / openValue) * 100 : 0;
 
   return (
     <section aria-label={`${s.label} column`} className="flex min-w-0 flex-col">
-      <header className="mb-2.5 rounded-[14px] px-3.5 py-3" style={{ background: s.fill, color: s.text }}>
+      <header
+        className="mb-2.5 rounded-[14px] px-3.5 py-3"
+        style={{ background: s.fill, color: s.text }}
+      >
         <div className="flex items-center justify-between font-semibold">
           <h2 className="text-[14px]">{s.label}</h2>
           <span className="mono text-[12px] opacity-85" data-testid={`count-${stage}`}>
             {plural(totals.count, "deal")}
           </span>
         </div>
-        <div className="mt-1.5 text-[20px] font-semibold tracking-[-0.03em]" data-testid={`total-${stage}`}>
+        <div
+          className="mt-1.5 text-[20px] font-semibold tracking-[-0.03em]"
+          data-testid={`total-${stage}`}
+        >
           <Money value={totals.value} />
         </div>
         {closed ? (
@@ -76,8 +83,16 @@ export const Column = memo(function Column({
         )}
       </header>
       <AddDealInColumn stage={stage} />
-      <SortableContext id={stage} items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
-        <div ref={setNodeRef} className="mt-1.5 flex min-h-24 flex-col gap-1.5 pb-4" data-testid={`column-${stage}`}>
+      <SortableContext
+        id={stage}
+        items={deals.map((d) => d.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          ref={setNodeRef}
+          className="mt-1.5 flex min-h-24 flex-col gap-1.5 pb-4"
+          data-testid={`column-${stage}`}
+        >
           {deals.map((deal) => (
             <SortableCard key={deal.id} deal={deal} late={lateIds.has(deal.id)} onMove={onMove} />
           ))}
@@ -93,7 +108,10 @@ export const Column = memo(function Column({
           {closed && hiddenCount > 0 && (
             <p className="px-1 py-2 text-[12px] text-ink-muted">
               {hiddenCount} more closed earlier.{" "}
-              <Link to={`/deals?filter=${stage}`} className="font-semibold text-cerulean-ink hover:underline">
+              <Link
+                to={`/deals?filter=${stage}`}
+                className="font-semibold text-cerulean-ink hover:underline"
+              >
                 See in Deals
               </Link>
             </p>

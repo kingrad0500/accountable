@@ -13,7 +13,14 @@ type Props = {
 };
 
 /** A dialog that holds a form. Focus returns to whatever opened it. */
-export function FormDialog({ open, onOpenChange, title, description, children, width = 560 }: Props) {
+export function FormDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  width = 560,
+}: Props) {
   const returnFocus = useReturnFocus(open);
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -28,7 +35,11 @@ export function FormDialog({ open, onOpenChange, title, description, children, w
           <div className="mb-4 flex items-start justify-between gap-4">
             <div>
               <Dialog.Title className="text-xl">{title}</Dialog.Title>
-              {description && <Dialog.Description className="muted mt-1 text-[13px]">{description}</Dialog.Description>}
+              {description && (
+                <Dialog.Description className="muted mt-1 text-[13px]">
+                  {description}
+                </Dialog.Description>
+              )}
             </div>
             <Dialog.Close className="icon-btn" aria-label="Close">
               <X size={18} />

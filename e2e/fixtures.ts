@@ -16,13 +16,16 @@ type Fixtures = {
 export const test = base.extend<Fixtures>({
   largeData: [false, { option: true }],
   page: async ({ page, request, largeData }, use) => {
-    const reset = await request.post(`${API}/test/reset${largeData ? "?large=true" : ""}`, { timeout: 60_000 });
+    const reset = await request.post(`${API}/test/reset${largeData ? "?large=true" : ""}`, {
+      timeout: 60_000,
+    });
     expect(reset.ok()).toBeTruthy();
     await page.clock.install({ time: TODAY });
 
     const problems: string[] = [];
     page.on("console", (msg) => {
-      if (msg.type() === "error" || msg.type() === "warning") problems.push(`${msg.type()}: ${msg.text()}`);
+      if (msg.type() === "error" || msg.type() === "warning")
+        problems.push(`${msg.type()}: ${msg.text()}`);
     });
     page.on("pageerror", (err) => problems.push(`pageerror: ${err.message}`));
 

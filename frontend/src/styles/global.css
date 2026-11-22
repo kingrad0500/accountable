@@ -81,7 +81,9 @@
     font-weight: 600;
     font-size: 14px;
     white-space: nowrap;
-    transition: background-color 150ms, box-shadow 150ms;
+    transition:
+      background-color 150ms,
+      box-shadow 150ms;
   }
   .btn-sm {
     height: 30px;

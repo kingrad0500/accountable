@@ -8,8 +8,18 @@ type Parent = { contact_id: number } | { deal_id: number };
 export function useSaveActivity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, values, parent }: { id?: number; values: Partial<ActivityValues>; parent?: Parent }) =>
-      id ? api.patch<ActivityEntry>(`/activities/${id}`, values) : api.post<ActivityEntry>("/activities", { ...values, ...parent }),
+    mutationFn: ({
+      id,
+      values,
+      parent,
+    }: {
+      id?: number;
+      values: Partial<ActivityValues>;
+      parent?: Parent;
+    }) =>
+      id
+        ? api.patch<ActivityEntry>(`/activities/${id}`, values)
+        : api.post<ActivityEntry>("/activities", { ...values, ...parent }),
     onSuccess: () => refreshAfter(qc, "activity"),
   });
 }

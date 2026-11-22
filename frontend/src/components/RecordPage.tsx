@@ -29,7 +29,10 @@ export function RecordHeader({
   }, [title]);
   return (
     <header className="panel mb-[18px] px-6 py-5">
-      <Link to={back.to} className="inline-flex items-center gap-1.5 rounded text-[13px] font-medium text-ink-muted hover:text-ink">
+      <Link
+        to={back.to}
+        className="inline-flex items-center gap-1.5 rounded text-[13px] font-medium text-ink-muted hover:text-ink"
+      >
         <ArrowLeft size={14} aria-hidden /> {back.label}
       </Link>
       <div className="mt-2 flex items-start gap-4">
@@ -44,7 +47,11 @@ export function RecordHeader({
           <button type="button" className="btn btn-quiet" onClick={onEdit}>
             <Pencil size={15} aria-hidden /> Edit
           </button>
-          <button type="button" className="btn btn-quiet hover:!text-raspberry-ink" onClick={onDelete}>
+          <button
+            type="button"
+            className="btn btn-quiet hover:!text-raspberry-ink"
+            onClick={onDelete}
+          >
             <Trash2 size={15} aria-hidden /> Delete
           </button>
         </div>
@@ -53,7 +60,9 @@ export function RecordHeader({
         {facts.map((f) => (
           <div key={f.label}>
             <dt className="text-[12px] font-medium text-ink-muted">{f.label}</dt>
-            <dd className="mt-0.5 font-medium">{f.value ?? <span className="muted font-normal">None</span>}</dd>
+            <dd className="mt-0.5 font-medium">
+              {f.value ?? <span className="muted font-normal">None</span>}
+            </dd>
           </div>
         ))}
       </dl>
@@ -63,13 +72,25 @@ export function RecordHeader({
 }
 
 /** A side panel listing linked records. */
-export function LinkedPanel({ title, count, action, children }: { title: string; count?: number; action?: ReactNode; children: ReactNode }) {
+export function LinkedPanel({
+  title,
+  count,
+  action,
+  children,
+}: {
+  title: string;
+  count?: number;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <section className="panel p-5" aria-label={title}>
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className="text-[15px]">
           {title}
-          {count !== undefined && <span className="mono ml-2 text-[12px] text-ink-muted">{count}</span>}
+          {count !== undefined && (
+            <span className="mono ml-2 text-[12px] text-ink-muted">{count}</span>
+          )}
         </h2>
         {action}
       </div>
@@ -78,7 +99,17 @@ export function LinkedPanel({ title, count, action, children }: { title: string;
   );
 }
 
-export function LinkedRow({ to, title, sub, right }: { to: string; title: string; sub?: ReactNode; right?: ReactNode }) {
+export function LinkedRow({
+  to,
+  title,
+  sub,
+  right,
+}: {
+  to: string;
+  title: string;
+  sub?: ReactNode;
+  right?: ReactNode;
+}) {
   return (
     <li className="flex items-center gap-3 py-2.5 shadow-[0_-1px_0_var(--tint)] first:shadow-none">
       <div className="min-w-0 flex-1">
@@ -92,7 +123,13 @@ export function LinkedRow({ to, title, sub, right }: { to: string; title: string
   );
 }
 
-export function RecordMissing({ what, back }: { what: string; back: { to: string; label: string } }) {
+export function RecordMissing({
+  what,
+  back,
+}: {
+  what: string;
+  back: { to: string; label: string };
+}) {
   return (
     <div className="panel p-10 text-center">
       <h1 className="text-xl">This {what} doesn't exist</h1>

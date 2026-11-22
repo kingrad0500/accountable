@@ -1,0 +1,19 @@
+# Generated, vendored or not ours to format
+package-lock.json
+uv.lock
+frontend/dist/
+coverage/
+playwright-report/
+test-results/
+data/
+course/
+community_contributions/
+.impeccable/
+.playwright-mcp/
+.claude/
+README.md
+.mcp.json
+# Prose and design mockups are written by hand
+*.md
+docs/
+backend/

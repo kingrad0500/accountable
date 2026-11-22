@@ -10,22 +10,55 @@ def data(client):
     org = make_org(client)
     o = org["id"]
     ids = {}
-    ids["won_nov"] = make_deal(client, o, name="Won Nov", stage="won", value=10000, close_date="2026-11-05")["id"]
-    ids["won_jun"] = make_deal(client, o, name="Won Jun", stage="won", value=20000, close_date="2026-06-10")["id"]
-    ids["won_old"] = make_deal(client, o, name="Won old", stage="won", value=5000, close_date="2025-10-01")["id"]
+    ids["won_nov"] = make_deal(
+        client, o, name="Won Nov", stage="won", value=10000, close_date="2026-11-05"
+    )["id"]
+    ids["won_jun"] = make_deal(
+        client, o, name="Won Jun", stage="won", value=20000, close_date="2026-06-10"
+    )["id"]
+    ids["won_old"] = make_deal(
+        client, o, name="Won old", stage="won", value=5000, close_date="2025-10-01"
+    )["id"]
     lost = make_deal(client, o, name="Lost Sep", stage="new", value=8000)["id"]
     client.post(f"/api/deals/{lost}/move", json={"stage": "qualified", "index": 0})
     client.post(f"/api/deals/{lost}/move", json={"stage": "lost", "index": 0})
     client.patch(f"/api/deals/{lost}", json={"close_date": "2026-09-01"})
-    ids["late"] = make_deal(client, o, name="Late", stage="proposal", value=30000, close_date="2026-11-10")["id"]
-    ids["new"] = make_deal(client, o, name="Fresh", stage="new", value=4000, close_date="2027-01-01")["id"]
+    ids["late"] = make_deal(
+        client, o, name="Late", stage="proposal", value=30000, close_date="2026-11-10"
+    )["id"]
+    ids["new"] = make_deal(
+        client, o, name="Fresh", stage="new", value=4000, close_date="2027-01-01"
+    )["id"]
 
     contact = make_contact(client, organization_id=o)
-    make_activity(client, contact_id=contact["id"], description="Overdue", follow_up_date="2026-11-15", occurred_at="2026-11-01T10:00:00Z")
-    make_activity(client, deal_id=ids["late"], description="Due today", follow_up_date="2026-11-18", occurred_at="2026-11-02T10:00:00Z")
-    make_activity(client, contact_id=contact["id"], description="Upcoming", follow_up_date="2026-11-25", occurred_at="2026-11-03T10:00:00Z")
     make_activity(
-        client, contact_id=contact["id"], description="Done", follow_up_date="2026-11-01", follow_up_done=True, occurred_at="2026-10-01T10:00:00Z"
+        client,
+        contact_id=contact["id"],
+        description="Overdue",
+        follow_up_date="2026-11-15",
+        occurred_at="2026-11-01T10:00:00Z",
+    )
+    make_activity(
+        client,
+        deal_id=ids["late"],
+        description="Due today",
+        follow_up_date="2026-11-18",
+        occurred_at="2026-11-02T10:00:00Z",
+    )
+    make_activity(
+        client,
+        contact_id=contact["id"],
+        description="Upcoming",
+        follow_up_date="2026-11-25",
+        occurred_at="2026-11-03T10:00:00Z",
+    )
+    make_activity(
+        client,
+        contact_id=contact["id"],
+        description="Done",
+        follow_up_date="2026-11-01",
+        follow_up_done=True,
+        occurred_at="2026-10-01T10:00:00Z",
     )
     return ids
 
@@ -37,7 +70,7 @@ def dashboard(client):
 def test_revenue_won_by_month(client, data):
     d = dashboard(client)
     months = {m["month"]: m for m in d["months"]}
-    assert list(months)[0] == "2025-12" and list(months)[-1] == "2026-11"
+    assert next(iter(months)) == "2025-12" and list(months)[-1] == "2026-11"
     assert months["2026-11"]["revenue"] == 10000
     assert months["2026-06"]["revenue"] == 20000
     assert sum(m["revenue"] for m in d["months"]) == d["figures"]["revenue_won_12m"] == 30000
@@ -47,7 +80,11 @@ def test_revenue_won_by_month(client, data):
 def test_won_and_lost_counts(client, data):
     d = dashboard(client)
     months = {m["month"]: m for m in d["months"]}
-    assert (months["2026-11"]["won"], months["2026-06"]["won"], months["2026-09"]["lost"]) == (1, 1, 1)
+    assert (months["2026-11"]["won"], months["2026-06"]["won"], months["2026-09"]["lost"]) == (
+        1,
+        1,
+        1,
+    )
     assert (d["figures"]["won_12m"], d["figures"]["lost_12m"]) == (2, 1)
 
 
@@ -100,7 +137,9 @@ def test_follow_ups_are_grouped(client, data):
 
 def test_winning_a_deal_and_adding_a_follow_up_change_figures_at_once(client, data):
     client.post(f"/api/deals/{data['late']}/move", json={"stage": "won", "index": 0})
-    make_activity(client, deal_id=data["new"], description="Call next week", follow_up_date="2026-11-24")
+    make_activity(
+        client, deal_id=data["new"], description="Call next week", follow_up_date="2026-11-24"
+    )
     d = dashboard(client)
     f = d["figures"]
     assert f["revenue_won_12m"] == 60000

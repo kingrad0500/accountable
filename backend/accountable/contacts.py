@@ -3,7 +3,7 @@
 import re
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Response
 from pydantic import AfterValidator, BaseModel
 from sqlalchemy import Connection, delete, func, insert, or_, select, update
 
@@ -49,7 +49,9 @@ def contact_query():
     return select(
         contacts,
         organizations.c.name.label("organization_name"),
-    ).select_from(contacts.outerjoin(organizations, organizations.c.id == contacts.c.organization_id))
+    ).select_from(
+        contacts.outerjoin(organizations, organizations.c.id == contacts.c.organization_id)
+    )
 
 
 def contact_rows(conn: Connection, where=None) -> list[dict]:
@@ -73,20 +75,22 @@ def contact_timeline_where(contact_id: int):
 
 
 @router.get("/contacts")
-def list_contacts(conn: Connection = Depends(db.get_conn)) -> Response:
+def list_contacts(conn: db.Conn) -> Response:
     return db.json_response(contact_rows(conn))
 
 
 @router.post("/contacts", status_code=201)
-def create_contact(body: ContactIn, conn: Connection = Depends(db.get_conn)) -> dict:
+def create_contact(body: ContactIn, conn: db.Conn) -> dict:
     db.check_exists(conn, organizations, body.organization_id, "organization_id", "organization")
-    new_id = conn.execute(insert(contacts).values(**body.model_dump())).inserted_primary_key[0]
+    new_id = conn.execute(
+        insert(contacts).values(**body.model_dump()).returning(contacts.c.id)
+    ).scalar_one()
     conn.commit()
     return get_contact(conn, new_id)
 
 
 @router.get("/contacts/{contact_id}")
-def read_contact(contact_id: int, conn: Connection = Depends(db.get_conn)) -> dict:
+def read_contact(contact_id: int, conn: db.Conn) -> dict:
     contact = get_contact(conn, contact_id)
     contact["deals"] = deal_rows(conn, deals.c.main_contact_id == contact_id)
     contact["timeline"] = timeline(conn, contact_timeline_where(contact_id))
@@ -94,13 +98,15 @@ def read_contact(contact_id: int, conn: Connection = Depends(db.get_conn)) -> di
 
 
 @router.patch("/contacts/{contact_id}")
-def update_contact(contact_id: int, body: ContactPatch, conn: Connection = Depends(db.get_conn)) -> dict:
+def update_contact(contact_id: int, body: ContactPatch, conn: db.Conn) -> dict:
     get_contact(conn, contact_id)
     fields = body.model_dump(exclude_unset=True)
     for required in ("name", "status"):
         if required in fields and fields[required] is None:
             raise db.field_error(required, "Required")
-    db.check_exists(conn, organizations, fields.get("organization_id"), "organization_id", "organization")
+    db.check_exists(
+        conn, organizations, fields.get("organization_id"), "organization_id", "organization"
+    )
     if fields:
         conn.execute(update(contacts).where(contacts.c.id == contact_id).values(**fields))
         conn.commit()
@@ -108,15 +114,19 @@ def update_contact(contact_id: int, body: ContactPatch, conn: Connection = Depen
 
 
 @router.get("/contacts/{contact_id}/delete-impact")
-def contact_delete_impact(contact_id: int, conn: Connection = Depends(db.get_conn)) -> dict:
+def contact_delete_impact(contact_id: int, conn: db.Conn) -> dict:
     get_contact(conn, contact_id)
-    n_activities = conn.execute(select(func.count()).where(activities.c.contact_id == contact_id)).scalar_one()
-    n_deals = conn.execute(select(func.count()).where(deals.c.main_contact_id == contact_id)).scalar_one()
+    n_activities = conn.execute(
+        select(func.count()).where(activities.c.contact_id == contact_id)
+    ).scalar_one()
+    n_deals = conn.execute(
+        select(func.count()).where(deals.c.main_contact_id == contact_id)
+    ).scalar_one()
     return {"activities": n_activities, "deals": n_deals}
 
 
 @router.delete("/contacts/{contact_id}", status_code=204)
-def delete_contact(contact_id: int, conn: Connection = Depends(db.get_conn)) -> Response:
+def delete_contact(contact_id: int, conn: db.Conn) -> Response:
     get_contact(conn, contact_id)
     # Their activities cascade; their deals stay, with no main contact (D1).
     conn.execute(delete(contacts).where(contacts.c.id == contact_id))

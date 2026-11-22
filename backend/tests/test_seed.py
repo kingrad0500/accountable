@@ -1,5 +1,8 @@
+import runpy
+import sys
 from collections import Counter
 from datetime import date, timedelta
+from itertools import pairwise
 
 from sqlalchemy import select
 
@@ -29,7 +32,13 @@ def test_counts_and_spread(conn):
     assert 36 <= len(rows(conn, contacts)) <= 44
     assert 28 <= len(rows(conn, deals)) <= 36
     assert 70 <= len(rows(conn, activities)) <= 100
-    assert len({o.industry for o in rows(conn, organizations)} & {"Software", "Healthcare", "Logistics", "Retail", "Finance", "Manufacturing"}) >= 5
+    assert (
+        len(
+            {o.industry for o in rows(conn, organizations)}
+            & {"Software", "Healthcare", "Logistics", "Retail", "Finance", "Manufacturing"}
+        )
+        >= 5
+    )
     assert set(Counter(c.status for c in rows(conn, contacts))) == {"lead", "qualified", "customer"}
     assert set(Counter(d.stage for d in rows(conn, deals))) == set(db.STAGES)
     assert all(5000 <= d.value <= 150000 for d in rows(conn, deals))
@@ -51,7 +60,9 @@ def test_overdue_today_and_upcoming_follow_ups(conn):
     assert 5 <= counts["overdue"] <= 7
     assert counts["today"] == 2
     assert 7 <= counts["upcoming"] <= 9
-    assert all(f["follow_up_date"] <= TODAY + timedelta(days=14) for f in compute(conn)["follow_ups"])
+    assert all(
+        f["follow_up_date"] <= TODAY + timedelta(days=14) for f in compute(conn)["follow_ups"]
+    )
 
 
 def test_stage_history_fits_each_deal(conn):
@@ -66,7 +77,7 @@ def test_stage_history_fits_each_deal(conn):
             continue
         assert steps[-1].to_stage == deal.stage
         assert steps[0].from_stage == "new"
-        for before, after in zip(steps, steps[1:]):
+        for before, after in pairwise(steps):
             assert before.to_stage == after.from_stage
         if deal.stage in ("won", "lost"):
             assert steps[-1].changed_at.date() == deal.close_date
@@ -75,7 +86,10 @@ def test_stage_history_fits_each_deal(conn):
 
 def snapshot(conn):
     def strip(table):
-        return sorted(tuple(v for k, v in r._mapping.items() if k not in ("created_at", "updated_at")) for r in rows(conn, table))
+        return sorted(
+            tuple(v for k, v in r._mapping.items() if k not in ("created_at", "updated_at"))
+            for r in rows(conn, table)
+        )
 
     return [strip(t) for t in db.ALL_TABLES]
 
@@ -99,3 +113,13 @@ def test_dates_are_relative_to_today(conn, monkeypatch):
     shifted = [n for n in before if after[n] - before[n] == timedelta(days=10)]
     assert len(shifted) >= 15  # every open deal moves with today
     assert isinstance(next(iter(after.values())), date)
+
+
+def test_npm_run_seed_loads_the_sample_data(isolated_db, monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["seed"])
+    # Run it as `python -m` does, on a fresh copy of the module.
+    monkeypatch.delitem(sys.modules, "accountable.seed")
+    runpy.run_module("accountable.seed", run_name="__main__")
+    assert f"Sample data loaded into {isolated_db}" in capsys.readouterr().out
+    with db.get_engine().connect() as c:
+        assert c.execute(select(deals.c.id)).first() is not None

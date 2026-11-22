@@ -59,9 +59,7 @@ def _friendly(error: dict) -> str:
 
 @app.exception_handler(RequestValidationError)
 async def validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
-    detail = [
-        {"loc": list(e["loc"]), "msg": _friendly(e), "type": e["type"]} for e in exc.errors()
-    ]
+    detail = [{"loc": list(e["loc"]), "msg": _friendly(e), "type": e["type"]} for e in exc.errors()]
     return JSONResponse(status_code=422, content={"detail": detail})
 
 

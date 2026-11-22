@@ -7,7 +7,10 @@ export const useContacts = (enabled = true) =>
   useQuery({ queryKey: keys.contacts, queryFn: () => api.get<Contact[]>("/contacts"), enabled });
 
 export const useContact = (id: number) =>
-  useQuery({ queryKey: keys.contact(id), queryFn: () => api.get<ContactDetail>(`/contacts/${id}`) });
+  useQuery({
+    queryKey: keys.contact(id),
+    queryFn: () => api.get<ContactDetail>(`/contacts/${id}`),
+  });
 
 export function useSaveContact() {
   const qc = useQueryClient();

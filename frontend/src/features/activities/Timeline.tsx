@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -48,10 +48,21 @@ export function Timeline({ entries, parent, hereKind }: Props) {
                 entry={e}
                 hereKind={hereKind}
                 onEdit={() => setEditing(e)}
-                onDelete={() => setDeleting({ kind: "activity", id: e.id, type: e.type, occurredAt: e.occurred_at })}
+                onDelete={() =>
+                  setDeleting({
+                    kind: "activity",
+                    id: e.id,
+                    type: e.type,
+                    occurredAt: e.occurred_at,
+                  })
+                }
               />
             ) : (
-              <li key={`s${e.id}`} className="flex gap-3 py-3 shadow-[0_-1px_0_var(--tint)] first:shadow-none" data-testid="timeline-entry">
+              <li
+                key={`s${e.id}`}
+                className="flex gap-3 py-3 shadow-[0_-1px_0_var(--tint)] first:shadow-none"
+                data-testid="timeline-entry"
+              >
                 <TypeIcon type="stage_change" />
                 <div className="min-w-0 flex-1">
                   <p>
@@ -66,7 +77,10 @@ export function Timeline({ entries, parent, hereKind }: Props) {
                     <Pill kind="stage" value={e.to_stage} className="!px-[7px] !text-[11.5px]" />
                   </p>
                   <p className="mt-0.5 text-[12.5px] text-ink-muted">
-                    Stage change · <time dateTime={e.at} title={formatDateTime(e.at)}>{relativeTime(e.at)}</time>
+                    Stage change ·{" "}
+                    <time dateTime={e.at} title={formatDateTime(e.at)}>
+                      {relativeTime(e.at)}
+                    </time>
                   </p>
                 </div>
               </li>
@@ -78,7 +92,9 @@ export function Timeline({ entries, parent, hereKind }: Props) {
       <ConfirmDelete
         target={deleting}
         onOpenChange={(o) => !o && setDeleting(null)}
-        onConfirm={() => remove.mutateAsync(deleting!.id).then(() => toast.success("Activity deleted"))}
+        onConfirm={() =>
+          remove.mutateAsync(deleting!.id).then(() => toast.success("Activity deleted"))
+        }
       />
     </section>
   );
@@ -100,15 +116,26 @@ function ActivityItem({
   const related =
     entry.deal_id !== null
       ? { to: `/deals/${entry.deal_id}`, name: entry.deal_name, show: hereKind !== "deal" }
-      : { to: `/contacts/${entry.contact_id}`, name: entry.contact_name, show: hereKind !== "contact" };
+      : {
+          to: `/contacts/${entry.contact_id}`,
+          name: entry.contact_name,
+          show: hereKind !== "contact",
+        };
   const group = entry.follow_up_date ? followUpGroup(entry.follow_up_date, todayISO()) : null;
-  // Show the new state at once, while the server saves it.
+  // Show the new state at once, while the server saves it; the server's next answer replaces it.
   const [pending, setPending] = useState<boolean | null>(null);
-  useEffect(() => setPending(null), [entry.follow_up_done]);
+  const [savedDone, setSavedDone] = useState(entry.follow_up_done);
+  if (savedDone !== entry.follow_up_done) {
+    setSavedDone(entry.follow_up_done);
+    setPending(null);
+  }
   const done = pending ?? entry.follow_up_done;
 
   return (
-    <li className="group flex gap-3 py-3 shadow-[0_-1px_0_var(--tint)] first:shadow-none" data-testid="timeline-entry">
+    <li
+      className="group flex gap-3 py-3 shadow-[0_-1px_0_var(--tint)] first:shadow-none"
+      data-testid="timeline-entry"
+    >
       <TypeIcon type={entry.type} />
       <div className="min-w-0 flex-1">
         <p className="whitespace-pre-line">{entry.description}</p>
@@ -133,7 +160,10 @@ function ActivityItem({
               checked={done}
               onChange={(e) => {
                 setPending(e.target.checked);
-                setDone.mutate({ id: entry.id, done: e.target.checked }, { onError: () => setPending(null) });
+                setDone.mutate(
+                  { id: entry.id, done: e.target.checked },
+                  { onError: () => setPending(null) },
+                );
               }}
               aria-label={`Follow-up on ${formatDate(entry.follow_up_date)} done`}
             />
@@ -150,10 +180,20 @@ function ActivityItem({
         )}
       </div>
       <div className="flex gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
-        <button type="button" className="icon-btn" aria-label={`Edit ${typeLabel}: ${entry.description}`} onClick={onEdit}>
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label={`Edit ${typeLabel}: ${entry.description}`}
+          onClick={onEdit}
+        >
           <Pencil size={15} aria-hidden />
         </button>
-        <button type="button" className="icon-btn danger" aria-label={`Delete ${typeLabel}: ${entry.description}`} onClick={onDelete}>
+        <button
+          type="button"
+          className="icon-btn danger"
+          aria-label={`Delete ${typeLabel}: ${entry.description}`}
+          onClick={onDelete}
+        >
           <Trash2 size={15} aria-hidden />
         </button>
       </div>
