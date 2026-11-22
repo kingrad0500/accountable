@@ -80,7 +80,7 @@ export function ActivityForm({ parent, activity, idPrefix, onDone, onCancel }: P
           <label
             key={t.key}
             className={`flex h-8 cursor-pointer items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-cerulean ${
-              type === t.key ? "bg-ink text-white" : "bg-bg text-ink-muted hover:text-ink"
+              type === t.key ? "bg-midnight text-white" : "bg-page text-fg-muted hover:text-fg"
             }`}
           >
             <input type="radio" value={t.key} className="sr-only" {...register("type")} />

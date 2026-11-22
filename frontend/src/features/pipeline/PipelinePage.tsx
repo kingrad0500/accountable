@@ -224,7 +224,7 @@ export function PipelinePage() {
             <span className="mono">{board.count}</span>
           </Figure>
           <Figure label="Late" testId="board-late">
-            <span className="mono text-raspberry-ink">{board.late}</span>
+            <span className="mono text-fg-raspberry">{board.late}</span>
           </Figure>
         </div>
         <div className="ml-auto">
@@ -299,9 +299,9 @@ function Figure({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`rounded-[10px] px-3.5 py-1.5 ${dark ? "bg-ink text-white" : ""}`}>
+    <div className={`rounded-[10px] px-3.5 py-1.5 ${dark ? "bg-midnight text-white" : ""}`}>
       <span
-        className={`block text-[11.5px] font-medium ${dark ? "text-sea-mist" : "text-ink-muted"}`}
+        className={`block text-[11.5px] font-medium ${dark ? "text-sea-mist" : "text-fg-muted"}`}
       >
         {label}
       </span>

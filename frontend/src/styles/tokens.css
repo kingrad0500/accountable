@@ -1,33 +1,47 @@
-/* Brand tokens (docs/spec.md, Colors). Defined once here and mapped into Tailwind.
+/* Brand tokens (docs/spec.md, Colors), in two layers, mapped into Tailwind in global.css.
+   The palette holds every hex value once and never changes with the mode. The roles are
+   aliases to it, and dark mode only points them elsewhere (Decision 13).
    Every text/background pair in use is checked by styles/contrast.test.ts. */
 @import "@fontsource-variable/instrument-sans/wght.css";
 @import "@fontsource/instrument-serif/latin-400.css";
 @import "@fontsource-variable/jetbrains-mono/wght.css";
 
+/* Palette */
 :root {
-  --bg: #f0f4f5;
-  --panel: #ffffff;
-  --tint: #e6edef;
-  --ink: #073b4c;
-  --ink-muted: #4f6e78;
+  --midnight: #073b4c;
+  --midnight-deep: #04232e;
+  --black: #000000;
+  --white: #ffffff;
+  --deep-raised: #0f3644;
+  --deep-tint: #164556;
+  --deep-line: #16404e;
+  --mist-50: #f0f4f5;
+  --mist-100: #e6edef;
+  --mist-200: #dce5e8;
+  --sea-mist: #cdd8db;
+  --sea-mist-dark: #9fb3b9;
+  --hero-muted: #a9bec4;
+  --slate: #4f6e78;
+  --slate-light: #9db4bb;
   --sea-green: #06d6a0;
+  --sea-green-hover: #05c493;
   --sea-green-ink: #04805f;
   --marigold: #ffc145;
   --marigold-ink: #9a6700;
   --coral: #f78c6b;
   --coral-ink: #b4432a;
+  --coral-light: #fa9a7c;
   --cerulean: #118ab2;
   --cerulean-ink: #0e7ca0;
+  --cerulean-light: #5cc0e2;
   --raspberry: #ef476f;
   --raspberry-ink: #d63a60;
-  --raspberry-light: #ff8fa8;
+  --raspberry-ink-hover: #c22f53;
   --raspberry-deep: #b8294f;
-  --late-tint: #fff3f5;
-  --sea-mist: #cdd8db;
-  --hero-muted: #a9bec4;
-
-  --shadow: 0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05);
-  --shadow-lift: 0 12px 32px rgb(7 59 76 / 0.18), 0 2px 6px rgb(7 59 76 / 0.1);
+  --raspberry-light: #ff8fa8;
+  --rose-50: #fff3f5;
+  --rose-900: #2b0f19;
+  --gray: #ededed;
 
   --font-sans:
     "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto,
@@ -36,4 +50,56 @@
   --font-mono:
     "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+}
+
+/* Roles: light */
+:root {
+  --bg: var(--mist-50);
+  --surface: var(--white);
+  --raised: var(--white);
+  --tint: var(--mist-100);
+  --line: var(--mist-200);
+  --text: var(--midnight);
+  --text-muted: var(--slate);
+  --text-green: var(--sea-green-ink);
+  --text-marigold: var(--marigold-ink);
+  --text-coral: var(--coral-ink);
+  --text-cerulean: var(--cerulean-ink);
+  --text-raspberry: var(--raspberry-ink);
+  --late-tint: var(--rose-50);
+  --text-late: var(--raspberry-deep);
+  --overlay: rgb(7 59 76 / 0.35);
+  --shadow: 0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05);
+  --shadow-lift: 0 12px 32px rgb(7 59 76 / 0.18), 0 2px 6px rgb(7 59 76 / 0.1);
+  /* The top bar keeps the soft shadow in light mode; in dark mode it lifts like every raised layer. */
+  --shadow-raised: var(--shadow);
+  /* Toasts keep sonner's own light border and shadow, so light mode looks as it did. */
+  --toast-line: var(--gray);
+  --shadow-toast: 0 4px 12px rgb(0 0 0 / 0.1);
+}
+
+/* Roles: dark (Decisions 13 and 14). Black wells sit below the Midnight page, and
+   anything that floats above it is a lighter raised surface with a deep shadow. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: var(--midnight-deep);
+  --surface: var(--black);
+  --raised: var(--deep-raised);
+  --tint: var(--deep-tint);
+  --line: var(--deep-line);
+  --text: var(--sea-mist);
+  --text-muted: var(--slate-light);
+  --text-green: var(--sea-green);
+  --text-marigold: var(--marigold);
+  --text-coral: var(--coral-light);
+  --text-cerulean: var(--cerulean-light);
+  --text-raspberry: var(--raspberry-light);
+  --late-tint: var(--rose-900);
+  --text-late: var(--raspberry-light);
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-lift: 0 16px 40px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4);
+  --shadow-raised: var(--shadow-lift);
+  --toast-line: var(--deep-raised);
+  --shadow-toast: var(--shadow-lift);
 }

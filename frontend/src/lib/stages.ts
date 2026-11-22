@@ -19,7 +19,7 @@ export const STAGES: Stage[] = [
     label: "New",
     probability: 10,
     fill: "var(--cerulean-ink)",
-    text: "#ffffff",
+    text: "var(--white)",
     dot: "var(--cerulean)",
   },
   {
@@ -27,7 +27,7 @@ export const STAGES: Stage[] = [
     label: "Qualified",
     probability: 25,
     fill: "var(--marigold)",
-    text: "var(--ink)",
+    text: "var(--midnight)",
     dot: "var(--marigold)",
   },
   {
@@ -35,23 +35,23 @@ export const STAGES: Stage[] = [
     label: "Proposal",
     probability: 50,
     fill: "var(--coral)",
-    text: "var(--ink)",
+    text: "var(--midnight)",
     dot: "var(--coral)",
   },
   {
     key: "negotiation",
     label: "Negotiation",
     probability: 75,
-    fill: "var(--ink)",
-    text: "#ffffff",
-    dot: "var(--ink)",
+    fill: "var(--midnight)",
+    text: "var(--white)",
+    dot: "var(--midnight)",
   },
   {
     key: "won",
     label: "Won",
     probability: 100,
     fill: "var(--sea-green)",
-    text: "var(--ink)",
+    text: "var(--midnight)",
     dot: "var(--sea-green)",
   },
   {
@@ -59,8 +59,8 @@ export const STAGES: Stage[] = [
     label: "Lost",
     probability: 0,
     fill: "var(--sea-mist)",
-    text: "var(--ink)",
-    dot: "#9fb3b9",
+    text: "var(--midnight)",
+    dot: "var(--sea-mist-dark)",
   },
 ];
 

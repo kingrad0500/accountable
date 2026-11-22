@@ -70,7 +70,7 @@ export const Column = memo(function Column({
               Expected <Money value={totals.expected} className="font-semibold" />
             </p>
             <div
-              className="mt-2.5 h-1 overflow-hidden rounded-full bg-[rgb(7_59_76/0.15)]"
+              className="mt-2.5 h-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--midnight)_15%,transparent)]"
               role="meter"
               aria-label={`${s.label} share of open value`}
               aria-valuenow={Math.round(share)}
@@ -106,11 +106,11 @@ export const Column = memo(function Column({
             </button>
           )}
           {closed && hiddenCount > 0 && (
-            <p className="px-1 py-2 text-[12px] text-ink-muted">
+            <p className="px-1 py-2 text-[12px] text-fg-muted">
               {hiddenCount} more closed earlier.{" "}
               <Link
                 to={`/deals?filter=${stage}`}
-                className="font-semibold text-cerulean-ink hover:underline"
+                className="font-semibold text-fg-cerulean hover:underline"
               >
                 See in Deals
               </Link>

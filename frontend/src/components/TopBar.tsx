@@ -4,6 +4,7 @@ import { Briefcase, Building, LayoutDashboard, Plus, SquareKanban, Users } from 
 import { ContactFormDialog } from "../features/contacts/ContactForm";
 import { DealFormDialog } from "../features/deals/DealForm";
 import { QuickSearch } from "./QuickSearch";
+import { ThemeToggle } from "./ThemeToggle";
 import { OrganizationFormDialog } from "../features/organizations/OrganizationForm";
 
 const TABS = [
@@ -28,7 +29,7 @@ const ACTION_LABELS: Record<Action, string> = {
   organization: "Add organization",
 };
 
-/** The floating top bar: wordmark, tabs, quick search and the page's main action. */
+/** The floating top bar: wordmark, tabs, quick search, the mode toggle and the page's main action. */
 export function TopBar() {
   const location = useLocation();
   const action = actionFor(location.pathname);
@@ -37,20 +38,20 @@ export function TopBar() {
   const close = () => setOpen(null);
 
   return (
-    <header className="panel mb-5 flex items-center gap-6 py-2.5 pr-3 pl-4">
+    <header className="panel mb-5 flex bg-raised shadow-raised items-center gap-6 py-2.5 pr-3 pl-4">
       <NavLink
         to="/"
         className="flex items-center gap-2.5 rounded-lg text-[17px] font-bold tracking-[-0.01em]"
       >
         <span
           aria-hidden
-          className="grid size-[30px] place-items-center rounded-[9px] bg-ink font-serif text-[21px] font-normal text-sea-green"
+          className="grid size-[30px] place-items-center rounded-[9px] bg-midnight font-serif text-[21px] font-normal text-sea-green"
         >
           A
         </span>
         Accountable
       </NavLink>
-      <nav aria-label="Main" className="flex gap-0.5 rounded-xl bg-bg p-1">
+      <nav aria-label="Main" className="flex gap-0.5 rounded-xl bg-page p-1">
         {TABS.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -59,8 +60,8 @@ export function TopBar() {
             className={({ isActive }) =>
               `flex h-[34px] items-center gap-2 rounded-[9px] px-3.5 font-medium transition-colors ${
                 isActive
-                  ? "bg-panel font-semibold text-ink shadow-soft"
-                  : "text-ink-muted hover:text-ink"
+                  ? "bg-surface font-semibold text-fg shadow-soft"
+                  : "text-fg-muted hover:text-fg"
               }`
             }
           >
@@ -71,6 +72,7 @@ export function TopBar() {
       </nav>
       <div className="ml-auto flex items-center gap-2.5">
         <QuickSearch />
+        <ThemeToggle />
         <button type="button" className="btn btn-primary" onClick={() => setOpen(action)}>
           <Plus size={16} strokeWidth={2.5} aria-hidden />
           {ACTION_LABELS[action]}

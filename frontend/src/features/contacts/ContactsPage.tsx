@@ -79,7 +79,7 @@ export function ContactsPage() {
         meta: { width: "minmax(180px, 1.6fr)" },
         cell: ({ row }) =>
           row.original.email ? (
-            <a href={`mailto:${row.original.email}`} className="text-cerulean-ink hover:underline">
+            <a href={`mailto:${row.original.email}`} className="text-fg-cerulean hover:underline">
               {row.original.email}
             </a>
           ) : null,

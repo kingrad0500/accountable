@@ -44,7 +44,7 @@ export function ContactPage() {
           {
             label: "Email",
             value: c.email ? (
-              <a href={`mailto:${c.email}`} className="text-cerulean-ink hover:underline">
+              <a href={`mailto:${c.email}`} className="text-fg-cerulean hover:underline">
                 {c.email}
               </a>
             ) : null,

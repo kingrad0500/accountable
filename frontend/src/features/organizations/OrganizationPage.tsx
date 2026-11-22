@@ -51,7 +51,7 @@ export function OrganizationPage() {
                 href={websiteHref(o.website)}
                 target="_blank"
                 rel="noreferrer"
-                className="text-cerulean-ink hover:underline"
+                className="text-fg-cerulean hover:underline"
               >
                 {o.website}
               </a>
@@ -65,7 +65,7 @@ export function OrganizationPage() {
         onDelete={() => setDeleting({ kind: "organization", id: o.id, name: o.name })}
       >
         {o.notes && (
-          <p className="mt-4 max-w-3xl text-[13.5px] whitespace-pre-line text-ink-muted">
+          <p className="mt-4 max-w-3xl text-[13.5px] whitespace-pre-line text-fg-muted">
             {o.notes}
           </p>
         )}

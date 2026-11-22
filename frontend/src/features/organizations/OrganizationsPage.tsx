@@ -52,7 +52,7 @@ export function OrganizationsPage() {
               href={websiteHref(row.original.website)}
               target="_blank"
               rel="noreferrer"
-              className="text-cerulean-ink hover:underline"
+              className="text-fg-cerulean hover:underline"
             >
               {row.original.website}
             </a>

@@ -32,7 +32,7 @@ export function Timeline({ entries, parent, hereKind }: Props) {
         {parent ? "Log activity" : "Timeline"}
       </h2>
       {parent && (
-        <div className="mb-5 rounded-xl bg-bg/60 p-3.5">
+        <div className="mb-5 rounded-xl bg-page/60 p-3.5">
           <ActivityForm parent={parent} idPrefix="log" />
         </div>
       )}
@@ -76,7 +76,7 @@ export function Timeline({ entries, parent, hereKind }: Props) {
                     {hereKind === "deal" ? "from" : "moved from"} {stageLabel(e.from_stage)} to{" "}
                     <Pill kind="stage" value={e.to_stage} className="!px-[7px] !text-[11.5px]" />
                   </p>
-                  <p className="mt-0.5 text-[12.5px] text-ink-muted">
+                  <p className="mt-0.5 text-[12.5px] text-fg-muted">
                     Stage change ·{" "}
                     <time dateTime={e.at} title={formatDateTime(e.at)}>
                       {relativeTime(e.at)}
@@ -139,10 +139,10 @@ function ActivityItem({
       <TypeIcon type={entry.type} />
       <div className="min-w-0 flex-1">
         <p className="whitespace-pre-line">{entry.description}</p>
-        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[12.5px] text-ink-muted">
+        <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[12.5px] text-fg-muted">
           {related.show && related.name && (
             <>
-              <Link to={related.to} className="font-medium text-ink hover:underline">
+              <Link to={related.to} className="font-medium text-fg hover:underline">
                 {related.name}
               </Link>
               <span aria-hidden>·</span>
@@ -153,7 +153,7 @@ function ActivityItem({
           </time>
         </p>
         {entry.follow_up_date && (
-          <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-bg px-2.5 py-1.5 text-[12.5px]">
+          <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-page px-2.5 py-1.5 text-[12.5px]">
             <input
               type="checkbox"
               className="checkbox"
@@ -167,10 +167,10 @@ function ActivityItem({
               }}
               aria-label={`Follow-up on ${formatDate(entry.follow_up_date)} done`}
             />
-            <span className={done ? "text-ink-muted line-through" : ""}>
+            <span className={done ? "text-fg-muted line-through" : ""}>
               Follow up{" "}
               <span
-                className={`mono font-semibold ${!done && group === "overdue" ? "text-raspberry-ink" : ""}`}
+                className={`mono font-semibold ${!done && group === "overdue" ? "text-fg-raspberry" : ""}`}
               >
                 {group === "today" ? "today" : formatDateShort(entry.follow_up_date)}
               </span>

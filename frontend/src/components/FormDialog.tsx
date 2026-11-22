@@ -25,9 +25,9 @@ export function FormDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-[rgb(7_59_76/0.35)]" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-overlay" />
         <Dialog.Content
-          className="panel fixed top-[8vh] left-1/2 z-50 max-h-[84vh] -translate-x-1/2 overflow-y-auto p-6 shadow-lift"
+          className="panel fixed bg-raised top-[8vh] left-1/2 z-50 max-h-[84vh] -translate-x-1/2 overflow-y-auto p-6 shadow-lift"
           style={{ width }}
           onCloseAutoFocus={returnFocus}
           {...(description ? {} : { "aria-describedby": undefined })}

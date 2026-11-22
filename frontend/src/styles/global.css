@@ -2,28 +2,39 @@
 @import "./tokens.css";
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-panel: var(--panel);
-  --color-tint: var(--tint);
-  --color-ink: var(--ink);
-  --color-ink-muted: var(--ink-muted);
+  /* Palette: fills, and the fixed text on them */
+  --color-midnight: var(--midnight);
+  --color-white: var(--white);
+  --color-sea-mist: var(--sea-mist);
   --color-sea-green: var(--sea-green);
-  --color-sea-green-ink: var(--sea-green-ink);
   --color-marigold: var(--marigold);
-  --color-marigold-ink: var(--marigold-ink);
   --color-coral: var(--coral);
-  --color-coral-ink: var(--coral-ink);
   --color-cerulean: var(--cerulean);
   --color-cerulean-ink: var(--cerulean-ink);
   --color-raspberry: var(--raspberry);
   --color-raspberry-ink: var(--raspberry-ink);
-  --color-raspberry-deep: var(--raspberry-deep);
-  --color-sea-mist: var(--sea-mist);
+  /* Roles: what sits on a surface, and the surfaces themselves */
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-tint: var(--tint);
+  --color-line: var(--line);
+  --color-overlay: var(--overlay);
+  --color-late: var(--late-tint);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-fg-green: var(--text-green);
+  --color-fg-marigold: var(--text-marigold);
+  --color-fg-coral: var(--text-coral);
+  --color-fg-cerulean: var(--text-cerulean);
+  --color-fg-raspberry: var(--text-raspberry);
+  --color-fg-late: var(--text-late);
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
   --shadow-soft: var(--shadow);
   --shadow-lift: var(--shadow-lift);
+  --shadow-raised: var(--shadow-raised);
 }
 
 @layer base {
@@ -32,7 +43,7 @@
   }
   body {
     background: var(--bg);
-    color: var(--ink);
+    color: var(--text);
     font: 14px/1.45 var(--font-sans);
     -webkit-font-smoothing: antialiased;
     min-width: 1280px;
@@ -62,10 +73,10 @@
     letter-spacing: -0.01em;
   }
   .muted {
-    color: var(--ink-muted);
+    color: var(--text-muted);
   }
   .panel {
-    background: var(--panel);
+    background: var(--surface);
     border-radius: 16px;
     box-shadow: var(--shadow);
   }
@@ -92,14 +103,14 @@
   }
   .btn-primary {
     background: var(--sea-green);
-    color: var(--ink);
+    color: var(--midnight);
   }
   .btn-primary:hover {
-    background: #05c493;
+    background: var(--sea-green-hover);
   }
   .btn-quiet {
-    background: var(--panel);
-    color: var(--ink);
+    background: var(--surface);
+    color: var(--text);
     box-shadow: var(--shadow);
   }
   .btn-quiet:hover {
@@ -107,18 +118,18 @@
   }
   .btn-danger {
     background: var(--raspberry-ink);
-    color: #fff;
+    color: var(--white);
   }
   .btn-danger:hover {
-    background: #c22f53;
+    background: var(--raspberry-ink-hover);
   }
   .btn-ghost {
-    color: var(--ink-muted);
+    color: var(--text-muted);
     background: transparent;
   }
   .btn-ghost:hover {
     background: var(--tint);
-    color: var(--ink);
+    color: var(--text);
   }
   .icon-btn {
     display: inline-grid;
@@ -126,14 +137,14 @@
     width: 30px;
     height: 30px;
     border-radius: 8px;
-    color: var(--ink-muted);
+    color: var(--text-muted);
   }
   .icon-btn:hover {
     background: var(--tint);
-    color: var(--ink);
+    color: var(--text);
   }
   .icon-btn.danger:hover {
-    color: var(--raspberry-ink);
+    color: var(--text-raspberry);
   }
 
   .pill {
@@ -156,7 +167,7 @@
   .field > label:first-child {
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--ink-muted);
+    color: var(--text-muted);
   }
   .input {
     height: 36px;
@@ -165,7 +176,7 @@
     background: var(--bg);
     padding: 0 12px;
     font-size: 14px;
-    color: var(--ink);
+    color: var(--text);
     border: 0;
   }
   textarea.input {
@@ -175,18 +186,18 @@
     resize: vertical;
   }
   .input::placeholder {
-    color: var(--ink-muted);
+    color: var(--text-muted);
   }
   .input:focus-visible {
-    background: #fff;
+    background: var(--surface);
     outline-offset: 0;
   }
   .input[aria-invalid="true"] {
-    box-shadow: inset 0 0 0 2px var(--raspberry-ink);
+    box-shadow: inset 0 0 0 2px var(--text-raspberry);
   }
   .field-error {
     font-size: 12.5px;
-    color: var(--raspberry-ink);
+    color: var(--text-raspberry);
     font-weight: 500;
   }
 
@@ -200,7 +211,7 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     background: var(--tint);
-    color: var(--ink);
+    color: var(--text);
   }
 
   .checkbox {
@@ -208,7 +219,7 @@
     width: 18px;
     height: 18px;
     border-radius: 6px;
-    box-shadow: inset 0 0 0 2px var(--ink-muted);
+    box-shadow: inset 0 0 0 2px var(--text-muted);
     display: inline-grid;
     place-items: center;
     cursor: pointer;
@@ -222,7 +233,7 @@
     content: "";
     width: 5px;
     height: 9px;
-    border: solid #fff;
+    border: solid var(--white);
     border-width: 0 2px 2px 0;
     transform: translateY(-1px) rotate(45deg);
   }

@@ -6,12 +6,12 @@ const STYLES: Record<
   ActivityType | "stage_change",
   { bg: string; fg: string; Icon: typeof Mail; label: string }
 > = {
-  note: { bg: "var(--marigold)", fg: "var(--ink)", Icon: FileText, label: "Note" },
-  call: { bg: "var(--cerulean-ink)", fg: "#ffffff", Icon: Phone, label: "Call" },
-  email: { bg: "var(--coral)", fg: "var(--ink)", Icon: Mail, label: "Email" },
+  note: { bg: "var(--marigold)", fg: "var(--midnight)", Icon: FileText, label: "Note" },
+  call: { bg: "var(--cerulean-ink)", fg: "var(--white)", Icon: Phone, label: "Call" },
+  email: { bg: "var(--coral)", fg: "var(--midnight)", Icon: Mail, label: "Email" },
   stage_change: {
     bg: "var(--sea-mist)",
-    fg: "var(--ink)",
+    fg: "var(--midnight)",
     Icon: ArrowRight,
     label: "Stage change",
   },

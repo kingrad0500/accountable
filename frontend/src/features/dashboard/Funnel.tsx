@@ -10,7 +10,7 @@ export function Funnel({ funnel }: { funnel: Dashboard["funnel"] }) {
     <section aria-label="Sales funnel" className="panel col-span-5 px-[22px] py-5">
       <div className="mb-3.5 flex items-baseline justify-between">
         <h2 className="text-[15px]">Sales funnel</h2>
-        <small className="text-[12.5px] text-ink-muted">Value that reached each stage (USD)</small>
+        <small className="text-[12.5px] text-fg-muted">Value that reached each stage (USD)</small>
       </div>
       <ol className="flex flex-col">
         {rows.map((r) => {
@@ -18,7 +18,7 @@ export function Funnel({ funnel }: { funnel: Dashboard["funnel"] }) {
           return (
             <li key={r.stage} data-testid={`funnel-${r.stage}`}>
               {r.carriedOn !== null && (
-                <p className="mono grid h-4 grid-cols-[96px_1fr_84px] gap-3 text-[11px] text-ink-muted">
+                <p className="mono grid h-4 grid-cols-[96px_1fr_84px] gap-3 text-[11px] text-fg-muted">
                   <span className="col-start-2 pl-1.5">↓ {r.carriedOn}% carried on</span>
                 </p>
               )}
@@ -31,7 +31,7 @@ export function Funnel({ funnel }: { funnel: Dashboard["funnel"] }) {
                   />
                   {s.label}
                 </span>
-                <div className="h-[26px] overflow-hidden rounded-lg bg-bg">
+                <div className="h-[26px] overflow-hidden rounded-lg bg-page">
                   <div
                     className="h-full rounded-lg"
                     style={{ width: `${r.width}%`, background: s.dot }}
@@ -48,7 +48,7 @@ export function Funnel({ funnel }: { funnel: Dashboard["funnel"] }) {
           );
         })}
       </ol>
-      <p className="mt-3 text-[12.5px] text-ink-muted" data-testid="funnel-lost">
+      <p className="mt-3 text-[12.5px] text-fg-muted" data-testid="funnel-lost">
         Lost along the way: <span className="mono">{usd(funnel.lost_value)}</span> across{" "}
         {funnel.lost_count} {funnel.lost_count === 1 ? "deal" : "deals"}
       </p>

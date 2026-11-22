@@ -31,13 +31,13 @@ export function RecordHeader({
     <header className="panel mb-[18px] px-6 py-5">
       <Link
         to={back.to}
-        className="inline-flex items-center gap-1.5 rounded text-[13px] font-medium text-ink-muted hover:text-ink"
+        className="inline-flex items-center gap-1.5 rounded text-[13px] font-medium text-fg-muted hover:text-fg"
       >
         <ArrowLeft size={14} aria-hidden /> {back.label}
       </Link>
       <div className="mt-2 flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold tracking-wide text-ink-muted uppercase">{kind}</p>
+          <p className="text-[12px] font-semibold tracking-wide text-fg-muted uppercase">{kind}</p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-[26px] tracking-[-0.02em]">{title}</h1>
             {badges}
@@ -49,7 +49,7 @@ export function RecordHeader({
           </button>
           <button
             type="button"
-            className="btn btn-quiet hover:!text-raspberry-ink"
+            className="btn btn-quiet hover:!text-fg-raspberry"
             onClick={onDelete}
           >
             <Trash2 size={15} aria-hidden /> Delete
@@ -59,7 +59,7 @@ export function RecordHeader({
       <dl className="mt-4 flex flex-wrap gap-x-10 gap-y-3">
         {facts.map((f) => (
           <div key={f.label}>
-            <dt className="text-[12px] font-medium text-ink-muted">{f.label}</dt>
+            <dt className="text-[12px] font-medium text-fg-muted">{f.label}</dt>
             <dd className="mt-0.5 font-medium">
               {f.value ?? <span className="muted font-normal">None</span>}
             </dd>
@@ -89,7 +89,7 @@ export function LinkedPanel({
         <h2 className="text-[15px]">
           {title}
           {count !== undefined && (
-            <span className="mono ml-2 text-[12px] text-ink-muted">{count}</span>
+            <span className="mono ml-2 text-[12px] text-fg-muted">{count}</span>
           )}
         </h2>
         {action}
@@ -116,7 +116,7 @@ export function LinkedRow({
         <Link to={to} className="block truncate font-semibold hover:underline">
           {title}
         </Link>
-        {sub && <p className="truncate text-[12.5px] text-ink-muted">{sub}</p>}
+        {sub && <p className="truncate text-[12.5px] text-fg-muted">{sub}</p>}
       </div>
       {right}
     </li>

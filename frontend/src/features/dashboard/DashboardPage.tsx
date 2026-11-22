@@ -20,7 +20,7 @@ export function DashboardPage() {
     <>
       <div className="mx-1 mb-4 flex items-baseline justify-between">
         <h1 className="text-[26px] tracking-[-0.02em]">{greeting(now)}</h1>
-        <span className="text-[13.5px] text-ink-muted">
+        <span className="text-[13.5px] text-fg-muted">
           {formatLongDate(now)} · all figures in USD
         </span>
       </div>

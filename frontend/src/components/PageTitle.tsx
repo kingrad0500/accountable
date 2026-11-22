@@ -40,14 +40,14 @@ export function FilterSelect<V extends string>({
 }) {
   return (
     <label
-      className={`flex h-9 items-center gap-2 rounded-[10px] pr-1 pl-3 ${onPage ? "bg-panel shadow-soft" : "bg-bg"} text-[13px] font-medium text-ink-muted focus-within:outline-2 focus-within:outline-cerulean`}
+      className={`flex h-9 items-center gap-2 rounded-[10px] pr-1 pl-3 ${onPage ? "bg-surface shadow-soft" : "bg-page"} text-[13px] font-medium text-fg-muted focus-within:outline-2 focus-within:outline-cerulean`}
     >
       {onPage && <ListFilter size={15} aria-hidden />}
       {label}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as V)}
-        className="h-full cursor-pointer appearance-none bg-transparent pr-6 font-semibold text-ink outline-none"
+        className="h-full cursor-pointer appearance-none bg-transparent pr-6 font-semibold text-fg outline-none"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -56,7 +56,7 @@ export function FilterSelect<V extends string>({
           </option>
         ))}
       </select>
-      <ChevronDown size={15} aria-hidden className="pointer-events-none -ml-6 mr-1.5 text-ink" />
+      <ChevronDown size={15} aria-hidden className="pointer-events-none -ml-6 mr-1.5 text-fg" />
     </label>
   );
 }

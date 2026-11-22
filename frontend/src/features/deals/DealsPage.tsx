@@ -136,7 +136,7 @@ export function DealsPage() {
           row.original.close_date ? (
             <span className="flex items-center gap-2">
               <span
-                className={`mono text-[13px] ${isLate(row.original, today) ? "font-semibold text-raspberry-ink" : ""}`}
+                className={`mono text-[13px] ${isLate(row.original, today) ? "font-semibold text-fg-raspberry" : ""}`}
               >
                 {formatDate(row.original.close_date)}
               </span>

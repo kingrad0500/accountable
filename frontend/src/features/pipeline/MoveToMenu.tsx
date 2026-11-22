@@ -25,10 +25,10 @@ export function MoveToMenu({
         <DropdownMenu.Content
           align="end"
           sideOffset={4}
-          className="panel z-50 min-w-[170px] p-1.5 shadow-lift"
+          className="panel z-50 bg-raised min-w-[170px] p-1.5 shadow-lift"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <DropdownMenu.Label className="px-2 py-1 text-[12px] font-semibold text-ink-muted">
+          <DropdownMenu.Label className="px-2 py-1 text-[12px] font-semibold text-fg-muted">
             Move to
           </DropdownMenu.Label>
           {STAGES.filter((s) => s.key !== deal.stage).map((s) => (

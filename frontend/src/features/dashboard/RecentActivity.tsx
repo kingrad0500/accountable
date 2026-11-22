@@ -22,7 +22,7 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
               <time
                 dateTime={e.at}
                 title={formatDateTime(e.at)}
-                className="pt-px text-[12px] text-ink-muted"
+                className="pt-px text-[12px] text-fg-muted"
               >
                 {relativeTime(e.at)}
               </time>
@@ -39,7 +39,7 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
                       className="!px-[7px] !text-[11.5px] !leading-4"
                     />
                   </p>
-                  <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-muted">
+                  <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-fg-muted">
                     <TypeIcon type="stage_change" size={12} bare />
                     <span>Stage change</span>
                     {e.organization_name && <span aria-hidden>·</span>}
@@ -49,11 +49,11 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
               ) : (
                 <div>
                   <p className="text-[13px] leading-snug">{e.description}</p>
-                  <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-muted">
+                  <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-fg-muted">
                     <TypeIcon type={e.type} size={12} bare />
                     <Link
                       to={e.deal_id ? `/deals/${e.deal_id}` : `/contacts/${e.contact_id}`}
-                      className="hover:text-ink hover:underline"
+                      className="hover:text-fg hover:underline"
                     >
                       {e.deal_name ?? e.contact_name}
                     </Link>

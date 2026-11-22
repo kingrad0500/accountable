@@ -121,6 +121,16 @@ test("every action works from the keyboard, with a visible focus (SC8)", async (
   await page.keyboard.type("lumen");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { level: 1, name: "Lumen Retail" })).toBeVisible();
+
+  // Mode toggle: Tab to it, Enter switches to dark mode and back (G11).
+  await page.goto("/");
+  await expect(page.getByTestId("kpi-revenue")).toBeVisible();
+  await tabTo(page, "Switch to dark mode");
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expectFocusVisible(page);
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme");
 });
 
 test("focus is visible on links, buttons, inputs, selects and cards (SC8)", async ({ page }) => {

@@ -31,7 +31,7 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
     <section aria-label="Follow-ups" className="panel col-span-7 px-[22px] py-5">
       <div className="mb-3.5 flex items-baseline justify-between">
         <h2 className="text-[15px]">Follow-ups</h2>
-        <small className="text-[12.5px] text-ink-muted" data-testid="follow-up-counts">
+        <small className="text-[12.5px] text-fg-muted" data-testid="follow-up-counts">
           {groups.overdue.length} overdue · {groups.today.length} today · {groups.upcoming.length}{" "}
           upcoming
         </small>
@@ -41,8 +41,8 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
       ) : (
         <div className="max-h-[540px] overflow-y-auto">
           <table className="w-full border-collapse text-[13px]">
-            <thead className="sticky top-0 z-[1] bg-panel">
-              <tr className="text-left text-[12px] text-ink-muted">
+            <thead className="sticky top-0 z-[1] bg-surface">
+              <tr className="text-left text-[12px] text-fg-muted">
                 <th className="w-8 px-2 pb-2 font-medium">
                   <span className="sr-only">Done</span>
                 </th>
@@ -58,7 +58,7 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
                   <th
                     colSpan={5}
                     scope="colgroup"
-                    className="px-2 pt-3 pb-1 text-left text-[11.5px] font-semibold tracking-wide text-ink-muted uppercase"
+                    className="px-2 pt-3 pb-1 text-left text-[11.5px] font-semibold tracking-wide text-fg-muted uppercase"
                   >
                     {g.label}
                   </th>
@@ -85,7 +85,7 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
                         />
                       </td>
                       <td
-                        className={`mono px-2 py-2.5 whitespace-nowrap ${g.key === "overdue" ? "font-semibold text-raspberry-ink" : ""}`}
+                        className={`mono px-2 py-2.5 whitespace-nowrap ${g.key === "overdue" ? "font-semibold text-fg-raspberry" : ""}`}
                       >
                         {g.key === "today" ? "Today" : formatDateShort(f.follow_up_date!)}
                       </td>
@@ -95,17 +95,17 @@ export function FollowUps({ items }: { items: FollowUp[] }) {
                       <td className="px-2 py-2.5">
                         <Link
                           to={related.to}
-                          className="inline-flex items-center gap-1.5 text-ink-muted hover:text-ink hover:underline"
+                          className="inline-flex items-center gap-1.5 text-fg-muted hover:text-fg hover:underline"
                         >
                           <TypeIcon type={f.type} size={14} bare />
                           {related.name}
                         </Link>
                       </td>
-                      <td className="px-2 py-2.5 text-ink-muted">
+                      <td className="px-2 py-2.5 text-fg-muted">
                         {f.organization_id ? (
                           <Link
                             to={`/organizations/${f.organization_id}`}
-                            className="hover:text-ink hover:underline"
+                            className="hover:text-fg hover:underline"
                           >
                             {f.organization_name}
                           </Link>

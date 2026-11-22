@@ -305,7 +305,7 @@ All under `/api`. JSON in and out. Errors use FastAPI's standard shape. Validati
 
 The design follows direction B in `docs/mockups/` (`dashboard-b.html` and `pipeline-b.html`, with screenshots). Where this text and the mockups differ, this text wins. The mockups show light mode only; dark mode follows Decisions 13 and 14 and the dark column of the roles in [Colors](#colors).
 
-**Shell.** No sidebar. A floating top bar on the raised surface (Decision 14), rounded 16px, sits 16px from the top of the page. On the left is the Accountable wordmark with its mark: a Midnight rounded square holding a Sea Green "A" in Instrument Serif. In the middle are five tabs with icons, in a light tray: Dashboard, Pipeline, Deals, Contacts, Organizations. The active tab is a pill on the surface color (white, or black in dark mode) with a soft shadow. On the right are the quick search box (G10), with a "/" hint, the mode toggle (G11), and the page's main action as a Sea Green button, such as "Add deal". Content is centered, at most 1400px wide, on the page background (`--bg`). Each page sets the browser tab's title.
+**Shell.** No sidebar. A floating top bar on the raised surface (Decision 14), rounded 16px, sits 16px from the top of the page. On the left is the Accountable wordmark with its mark: a Midnight rounded square holding a Sea Green "A" in Instrument Serif. In the middle are five tabs with icons, in a tray on the page background: Dashboard, Pipeline, Deals, Contacts, Organizations. The active tab is a pill on the surface color (white, or black in dark mode) with a soft shadow. On the right are the quick search box (G10), with a "/" hint, the mode toggle (G11), and the page's main action as a Sea Green button, such as "Add deal". Content is centered, at most 1400px wide, on the page background (`--bg`). Each page sets the browser tab's title.
 
 **Dashboard.** The title is a greeting for the time of day ("Good afternoon"), with the date and "all figures in USD" on the right. Below it, a 12-column grid:
 - Row 1, full width: a Midnight panel, rounded 20px, with Sea Mist text. On the left, the figures (DB1): revenue won over 12 months as a large Sea Green tile, then open pipeline, expected revenue, win rate, and "Needs attention" (late deals plus overdue follow-ups, its number in light Raspberry `#FF8FA8`). On the right, the revenue won line chart, drawn for a dark background: a bright Sea Green line and soft area fill, faint dashed gridlines, the best month labelled and this month's point drawn larger. Its tooltip shows the full amount and the number of deals won that month.
@@ -359,9 +359,9 @@ Defined once in `tokens.css`, in two layers (Decision 13), and both layers are m
 | `--white` | `#FFFFFF` | Light surface. Text on Midnight and the `-ink` fills |
 | `--deep-raised` | `#0F3644` | Dark raised surface |
 | `--deep-tint` | `#164556` | Dark hover and selected tint |
-| `--deep-line` | `#16404E` | Dark gridlines and meter tracks |
+| `--deep-line` | `#16404E` | Dark gridlines |
 | `--mist-50` | `#F0F4F5` | Light page |
-| `--mist-100` | `#E6EDEF` | Light hover and selected tint, light tracks, the tab tray |
+| `--mist-100` | `#E6EDEF` | Light hover and selected tint |
 | `--mist-200` | `#DCE5E8` | Light gridlines |
 | `--sea-mist` | `#CDD8DB` | Brand ink on dark. Lost stage (Midnight text), text on the Midnight panel |
 | `--sea-mist-dark` | `#9FB3B9` | Lost stage dot, which needs more weight than Sea Mist on a light track |
@@ -386,16 +386,17 @@ Defined once in `tokens.css`, in two layers (Decision 13), and both layers are m
 | `--raspberry-light` | `#FF8FA8` | Raspberry text on dark, and the "Needs attention" number on the Midnight panel |
 | `--rose-50` | `#FFF3F5` | Light late tint |
 | `--rose-900` | `#2B0F19` | Dark late tint |
+| `--gray` | `#EDEDED` | Light toast border (sonner's own, kept so light mode doesn't change) |
 
 **Roles.** Aliases to the palette. Only these change with the mode.
 
 | Role | Light | Dark | Use |
 |---|---|---|---|
-| `--bg` | `--mist-50` | `--midnight-deep` | Page background |
+| `--bg` | `--mist-50` | `--midnight-deep` | Page background; also the tab tray, inputs and the funnel's tracks |
 | `--surface` | `--white` | `--black` | Panels, cards, the active tab |
 | `--raised` | `--white` | `--deep-raised` | Top bar, dialogs, menus, popovers, tooltips, toasts, a dragged card |
-| `--tint` | `--mist-100` | `--deep-tint` | Hover and selected tints, tracks, the tab tray |
-| `--line` | `--mist-200` | `--deep-line` | Chart gridlines, meter tracks |
+| `--tint` | `--mist-100` | `--deep-tint` | Hover and selected tints, row separators |
+| `--line` | `--mist-200` | `--deep-line` | Chart gridlines |
 | `--overlay` | `rgb(7 59 76 / 0.35)` | `rgb(0 0 0 / 0.6)` | Backdrop behind dialogs |
 | `--text` | `--midnight` | `--sea-mist` | Text |
 | `--text-muted` | `--slate` | `--slate-light` | Secondary text, axis text, checkbox outlines |
@@ -408,8 +409,11 @@ Defined once in `tokens.css`, in two layers (Decision 13), and both layers are m
 | `--text-late` | `--raspberry-deep` | `--raspberry-light` | Late date on a late card |
 | `--shadow` | soft Midnight shadow | `0 1px 2px rgb(0 0 0 / 0.4)` | Panels and cards |
 | `--shadow-lift` | larger Midnight shadow | `0 16px 40px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4)` | A dragged card, and in dark mode every raised surface. In light mode each raised element keeps the shadow it has today |
+| `--shadow-raised` | `--shadow` | `--shadow-lift` | The top bar: soft in light mode, lifted like every raised layer in dark mode |
+| `--toast-line` | `--gray` | `--deep-raised` | Toast border: sonner's own in light mode, invisible against the raised toast in dark mode |
+| `--shadow-toast` | `0 4px 12px rgb(0 0 0 / 0.1)` (sonner's own) | `--shadow-lift` | Toasts |
 
-The rule is: on a fill, text is a palette color; on a surface, text is a role. So a hue like Cerulean has one fill token and one text role, and there's never a second token holding the same value. Overlay and shadows hold their own `rgb()` values because they are transparent. Any other translucent color is a `color-mix()` of a token (for example the faint Sea Mist tiles on the Midnight panel), never a written-out `rgb()` value.
+The rule is: on a fill, text is a palette color; on a surface, text is a role. So a hue like Cerulean has one fill token and one text role, and there's never a second token holding the same value. Overlay and shadows hold their own `rgb()` values because they are transparent. Any other translucent color is a `color-mix()` of a token (for example the faint Sea Mist tiles on the Midnight panel, or the column meter track, Midnight at 15% on the stage fill), never a written-out `rgb()` value. Chart gridlines and cursors drawn in SVG take a token plus `strokeOpacity` or `fillOpacity` instead.
 
 Dark text on every surface (lowest pair first): `--text-muted` on `--tint` 4.79:1, `--text-raspberry` on `--tint` 4.83:1, `--text-coral` on `--tint` 4.94:1, `--text-cerulean` on `--tint` 5.0:1; every pair on `--surface`, `--bg` and `--raised` is above 5.2:1. The focus ring (Cerulean) is 4.13:1 on the dark page, 5.3:1 on black and 3.25:1 on the raised surface.
 

@@ -51,13 +51,20 @@ Only the Latin subsets and the weights in use are imported, to keep the bundle s
 
 ### Color contrast
 
-Brand colors are defined once as CSS variables in `frontend/src/styles/tokens.css` and mapped into Tailwind. Every pairing meets WCAG AA. Normal text needs 4.5:1; large or bold text, icons and chart lines need 3:1.
+Colors are defined once, in `frontend/src/styles/tokens.css`, in two layers, and both are mapped into Tailwind in `global.css` (`docs/spec.md`, Decision 13 and Colors):
 
-- The bright brand colors (Sea Green, Marigold, Coral) are used as fills with Midnight text on top. All three pass with Midnight (6.4, 7.5 and 5.1 to 1).
-- Each brand color has a darker "ink" shade for text, icons and chart lines on white or the page background: Sea Green `#04805F`, Marigold `#9A6700`, Coral `#B4432A`, Cerulean `#0E7CA0`, Raspberry `#D63A60`. Muted text is `#4F6E78`.
+- The **palette** holds every hex value once and never changes with the mode. Fills use it directly (`bg-sea-green`, `bg-midnight`, `text-midnight`, `text-white`).
+- The **roles** are aliases to the palette (`--bg`, `--surface`, `--raised`, `--tint`, `--text`, `--text-muted`, the colored text roles and so on), mapped to short Tailwind names (`bg-page`, `bg-surface`, `bg-raised`, `text-fg`, `text-fg-muted`, `text-fg-cerulean` …). `:root[data-theme="dark"]` points them at other palette colors. Anything that sits on a surface uses a role.
+
+Every pairing meets WCAG AA. Normal text needs 4.5:1; large or bold text, icons, chart lines and the focus ring need 3:1.
+
+- The bright brand colors (Sea Green, Marigold, Coral) are used as fills with Midnight text on top. All three pass with Midnight (6.4, 7.5 and 5.1 to 1). Fills look the same in both modes.
+- In light mode each brand color has a darker "ink" shade for text, icons and chart lines on white: Sea Green `#04805F`, Marigold `#9A6700`, Coral `#B4432A`, Cerulean `#0E7CA0`, Raspberry `#D63A60`. Muted text is `#4F6E78`.
+- In dark mode the same text roles point at the bright brand colors or lighter shades instead (Sea Green, Marigold, Coral `#FA9A7C`, Cerulean `#5CC0E2`, Raspberry `#FF8FA8`), with Sea Mist text and `#9DB4BB` muted text, since they sit on black or deep Midnight.
 - White text sits on the brand Cerulean and Raspberry only at 14px bold or larger. Smaller white text, such as stage pills and the Late label, uses the darker Cerulean and Raspberry shades.
 - Focus is a 2px Cerulean outline with a 2px offset.
-- A frontend unit test checks the contrast of every text/background token pair used, so a later color change can't quietly break it.
+- `styles/contrast.test.ts` parses `tokens.css`, resolves the roles for each mode and checks every role pair in use in both modes, and every fill pair once. It also fails if a hex value appears twice, or anywhere outside the palette, and if light mode's values drift from what they were before dark mode.
+- `styles/colors.test.ts` fails if any file in `frontend/src` other than `tokens.css`, or `index.html`, holds a color value (hex, `rgb()` or `hsl()`).
 
 ### Libraries
 

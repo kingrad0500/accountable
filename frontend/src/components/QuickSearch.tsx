@@ -78,7 +78,7 @@ export function QuickSearch() {
 
   return (
     <div className="relative">
-      <label className="flex h-9 w-[300px] items-center gap-2 rounded-[10px] bg-bg px-3 text-ink-muted focus-within:outline-2 focus-within:outline-cerulean">
+      <label className="flex h-9 w-[300px] items-center gap-2 rounded-[10px] bg-page px-3 text-fg-muted focus-within:outline-2 focus-within:outline-cerulean">
         <Search size={16} aria-hidden />
         <input
           ref={input}
@@ -116,24 +116,24 @@ export function QuickSearch() {
               setOpen(false);
             }
           }}
-          className="w-full bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-muted"
+          className="w-full bg-transparent text-[13.5px] text-fg outline-none placeholder:text-fg-muted"
         />
-        <kbd className="mono rounded-md bg-panel px-1.5 text-[11px] text-ink-muted" aria-hidden>
+        <kbd className="mono rounded-md bg-surface px-1.5 text-[11px] text-fg-muted" aria-hidden>
           /
         </kbd>
       </label>
       {showList && (
-        <div className="panel absolute top-11 right-0 z-30 w-[380px] p-1.5 shadow-lift">
+        <div className="panel absolute bg-raised top-11 right-0 z-30 w-[380px] p-1.5 shadow-lift">
           <ul id={listId} role="listbox" aria-label="Search results">
             {flat.length === 0 && (
-              <li role="presentation" className="px-3 py-3 text-[13px] text-ink-muted">
+              <li role="presentation" className="px-3 py-3 text-[13px] text-fg-muted">
                 Nothing matches "{query.trim()}"
               </li>
             )}
             {groups.map((g) => (
               <li key={g.kind} role="presentation">
                 <p
-                  className="px-3 pt-2 pb-1 text-[11.5px] font-semibold tracking-wide text-ink-muted uppercase"
+                  className="px-3 pt-2 pb-1 text-[11.5px] font-semibold tracking-wide text-fg-muted uppercase"
                   aria-hidden
                 >
                   {g.label}
@@ -157,10 +157,10 @@ export function QuickSearch() {
                           onMouseEnter={() => setActive(i)}
                           className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left ${i === active ? "bg-tint" : ""}`}
                         >
-                          <Icon size={15} className="flex-none text-ink-muted" aria-hidden />
+                          <Icon size={15} className="flex-none text-fg-muted" aria-hidden />
                           <span className="truncate font-medium">{item.name}</span>
                           {item.detail && (
-                            <span className="ml-auto truncate text-[12px] text-ink-muted">
+                            <span className="ml-auto truncate text-[12px] text-fg-muted">
                               {item.detail}
                             </span>
                           )}

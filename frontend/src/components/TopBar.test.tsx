@@ -55,6 +55,17 @@ describe("TopBar", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("puts the mode toggle between quick search and the page's action", () => {
+    renderTopBar("/");
+    const search = screen.getByRole("combobox", {
+      name: "Search deals, contacts and organizations",
+    });
+    const toggle = screen.getByRole("button", { name: "Switch to dark mode" });
+    const action = screen.getByRole("button", { name: "Add deal" });
+    expect(search.compareDocumentPosition(toggle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(toggle.compareDocumentPosition(action)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   it("has the quick search", () => {
     renderTopBar("/");
     expect(

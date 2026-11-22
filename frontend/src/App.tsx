@@ -58,7 +58,14 @@ export default function App() {
       <Toaster
         position="bottom-right"
         toastOptions={{
-          style: { fontFamily: "var(--font-sans)", color: "var(--ink)", borderRadius: 12 },
+          style: {
+            fontFamily: "var(--font-sans)",
+            background: "var(--raised)",
+            color: "var(--text)",
+            border: "1px solid var(--toast-line)",
+            boxShadow: "var(--shadow-toast)",
+            borderRadius: 12,
+          },
         }}
       />
     </QueryClientProvider>

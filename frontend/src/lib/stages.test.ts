@@ -16,12 +16,12 @@ it("has the six stages in order with the spec's probabilities", () => {
 it("uses the spec's stage colors", () => {
   const fills = Object.fromEntries(STAGES.map((s) => [s.key, [s.fill, s.text]]));
   expect(fills).toEqual({
-    new: ["var(--cerulean-ink)", "#ffffff"],
-    qualified: ["var(--marigold)", "var(--ink)"],
-    proposal: ["var(--coral)", "var(--ink)"],
-    negotiation: ["var(--ink)", "#ffffff"],
-    won: ["var(--sea-green)", "var(--ink)"],
-    lost: ["var(--sea-mist)", "var(--ink)"],
+    new: ["var(--cerulean-ink)", "var(--white)"],
+    qualified: ["var(--marigold)", "var(--midnight)"],
+    proposal: ["var(--coral)", "var(--midnight)"],
+    negotiation: ["var(--midnight)", "var(--white)"],
+    won: ["var(--sea-green)", "var(--midnight)"],
+    lost: ["var(--sea-mist)", "var(--midnight)"],
   });
 });
 

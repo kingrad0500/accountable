@@ -2,9 +2,9 @@ import type { StageKey, StatusKey } from "../lib/stages";
 import { stageOf, statusLabel } from "../lib/stages";
 
 const STATUS_COLORS: Record<StatusKey, [string, string]> = {
-  lead: ["var(--tint)", "var(--ink)"],
-  qualified: ["var(--marigold)", "var(--ink)"],
-  customer: ["var(--sea-green)", "var(--ink)"],
+  lead: ["var(--tint)", "var(--text)"],
+  qualified: ["var(--marigold)", "var(--midnight)"],
+  customer: ["var(--sea-green)", "var(--midnight)"],
 };
 
 type Props =
@@ -24,7 +24,7 @@ export function Pill(props: Props) {
     label = statusLabel(props.value);
     [bg, fg] = STATUS_COLORS[props.value];
   } else {
-    [label, bg, fg] = ["Late", "var(--raspberry-ink)", "#ffffff"];
+    [label, bg, fg] = ["Late", "var(--raspberry-ink)", "var(--white)"];
   }
   return (
     <span className={`pill ${props.className ?? ""}`} style={{ background: bg, color: fg }}>

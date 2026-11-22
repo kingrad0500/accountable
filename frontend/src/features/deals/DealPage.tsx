@@ -64,7 +64,7 @@ export function DealPage() {
           {
             label: "Close date",
             value: d.close_date ? (
-              <span className={`mono ${late ? "font-semibold text-raspberry-ink" : ""}`}>
+              <span className={`mono ${late ? "font-semibold text-fg-raspberry" : ""}`}>
                 {formatDate(d.close_date)}
               </span>
             ) : null,

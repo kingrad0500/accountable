@@ -88,9 +88,9 @@ export function ConfirmDelete({ target, onOpenChange, onConfirm }: Props) {
   return (
     <AlertDialog.Root open={!!target} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-40 bg-[rgb(7_59_76/0.35)]" />
+        <AlertDialog.Overlay className="fixed inset-0 z-40 bg-overlay" />
         <AlertDialog.Content
-          className="panel fixed top-[20vh] left-1/2 z-50 w-[460px] -translate-x-1/2 p-6 shadow-lift"
+          className="panel fixed bg-raised top-[20vh] left-1/2 z-50 w-[460px] -translate-x-1/2 p-6 shadow-lift"
           onCloseAutoFocus={returnFocus}
         >
           <AlertDialog.Title className="text-lg">{message.title}</AlertDialog.Title>

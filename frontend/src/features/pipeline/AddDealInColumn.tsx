@@ -60,7 +60,7 @@ export function AddDealInColumn({ stage }: { stage: StageKey }) {
         <button
           ref={button}
           type="button"
-          className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-[13px] font-medium text-ink-muted hover:bg-panel hover:text-ink"
+          className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-2 text-[13px] font-medium text-fg-muted hover:bg-surface hover:text-fg"
           aria-label={`Add deal to ${label}`}
           onClick={() => setOpen(true)}
         >
@@ -128,7 +128,7 @@ function QuickForm({
         aria-label={`New deal in ${label}`}
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="flex flex-col gap-2 rounded-xl bg-panel p-3 shadow-lift [&_.field>label]:text-[11.5px] [&_.input]:h-8 [&_.input]:px-2.5 [&_.input]:text-[13px]"
+        className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-lift [&_.field>label]:text-[11.5px] [&_.input]:h-8 [&_.input]:px-2.5 [&_.input]:text-[13px]"
       >
         <Field id={id("name")} label="Deal name" error={errors.name?.message}>
           <input className="input" autoComplete="off" {...register("name")} />
@@ -163,7 +163,7 @@ function QuickForm({
         <div className="flex flex-wrap items-center justify-end gap-1.5">
           <button
             type="button"
-            className="mr-auto text-[12px] font-semibold text-cerulean-ink hover:underline"
+            className="mr-auto text-[12px] font-semibold text-fg-cerulean hover:underline"
             onClick={() => onMoreDetails(getValues())}
           >
             More details

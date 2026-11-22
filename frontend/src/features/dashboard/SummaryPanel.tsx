@@ -41,7 +41,7 @@ export function SummaryPanel({ data }: { data: Dashboard }) {
   return (
     <section
       aria-label="How sales are going"
-      className="col-span-12 grid grid-cols-[360px_1fr] gap-8 rounded-[20px] bg-ink px-7 pt-[26px] pb-[18px] text-sea-mist"
+      className="col-span-12 grid grid-cols-[360px_1fr] gap-8 rounded-[20px] bg-midnight px-7 pt-[26px] pb-[18px] text-sea-mist"
     >
       <div>
         <h2 className="text-[15px] text-white">How sales are going</h2>
@@ -113,12 +113,12 @@ function Kpi({
 }) {
   return (
     <div
-      className={`rounded-[14px] px-4 py-3.5 ${feature ? "col-span-2 bg-sea-green text-ink" : "bg-[rgb(205_216_219/0.07)]"}`}
+      className={`rounded-[14px] px-4 py-3.5 ${feature ? "col-span-2 bg-sea-green text-midnight" : "bg-[color-mix(in_srgb,var(--sea-mist)_7%,transparent)]"}`}
     >
       <span className="text-[12px] font-medium">{label}</span>
       <b
         data-testid={testId}
-        className={`mono mt-1.5 block font-semibold tracking-[-0.03em] ${feature ? "text-[34px] text-ink" : "text-[22px]"} ${valueClass || (feature ? "" : "text-white")}`}
+        className={`mono mt-1.5 block font-semibold tracking-[-0.03em] ${feature ? "text-[34px] text-midnight" : "text-[22px]"} ${valueClass || (feature ? "" : "text-white")}`}
       >
         {value}
       </b>
@@ -144,16 +144,21 @@ function RevenueChart({ points }: { points: MonthPoint[] }) {
         <AreaChart data={points} margin={{ top: 28, right: 12, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#06D6A0" stopOpacity={0.32} />
-              <stop offset="100%" stopColor="#06D6A0" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="var(--sea-green)" stopOpacity={0.32} />
+              <stop offset="100%" stopColor="var(--sea-green)" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid vertical={false} stroke="rgb(205 216 219 / 0.16)" strokeDasharray="4 4" />
+          <CartesianGrid
+            vertical={false}
+            stroke="var(--sea-mist)"
+            strokeOpacity={0.16}
+            strokeDasharray="4 4"
+          />
           <XAxis
             dataKey="label"
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#A9BEC4", fontSize: 12 }}
+            tick={{ fill: "var(--hero-muted)", fontSize: 12 }}
             dy={6}
           />
           <YAxis
@@ -161,13 +166,16 @@ function RevenueChart({ points }: { points: MonthPoint[] }) {
             tickLine={false}
             axisLine={false}
             width={58}
-            tick={{ fill: "#A9BEC4", fontSize: 11.5, fontFamily: "var(--font-mono)" }}
+            tick={{ fill: "var(--hero-muted)", fontSize: 11.5, fontFamily: "var(--font-mono)" }}
           />
-          <Tooltip content={<RevenueTooltip />} cursor={{ stroke: "rgb(205 216 219 / 0.35)" }} />
+          <Tooltip
+            content={<RevenueTooltip />}
+            cursor={{ stroke: "var(--sea-mist)", strokeOpacity: 0.35 }}
+          />
           <Area
             type="monotone"
             dataKey="revenue"
-            stroke="#06D6A0"
+            stroke="var(--sea-green)"
             strokeWidth={2.5}
             fill="url(#revenueFill)"
             isAnimationActive={false}
@@ -181,7 +189,12 @@ function RevenueChart({ points }: { points: MonthPoint[] }) {
                 value={points[index].revenue}
               />
             )}
-            activeDot={{ r: 5, fill: "#06D6A0", stroke: "#073B4C", strokeWidth: 2 }}
+            activeDot={{
+              r: 5,
+              fill: "var(--sea-green)",
+              stroke: "var(--midnight)",
+              strokeWidth: 2,
+            }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -209,17 +222,17 @@ function BestDot({
     <g transform={`translate(${cx} ${cy})`}>
       <circle
         r={current ? 6 : 3.5}
-        fill="#073B4C"
-        stroke="#06D6A0"
+        fill="var(--midnight)"
+        stroke="var(--sea-green)"
         strokeWidth={current ? 2.5 : 2}
       />
       {best && (
         <g data-testid="best-month">
-          <rect x={-w / 2} y={-32} width={w} height={22} rx={6} fill="#06D6A0" />
+          <rect x={-w / 2} y={-32} width={w} height={22} rx={6} fill="var(--sea-green)" />
           <text
             y={-17}
             textAnchor="middle"
-            fill="#073B4C"
+            fill="var(--midnight)"
             fontSize={12}
             fontWeight={600}
             fontFamily="var(--font-mono)"
@@ -242,12 +255,12 @@ function RevenueTooltip({
   if (!active || !payload?.length) return null;
   const p = payload[0].payload;
   return (
-    <div className="rounded-xl bg-white px-3 py-2 text-[12.5px] text-ink shadow-lift">
+    <div className="rounded-xl bg-raised px-3 py-2 text-[12.5px] text-fg shadow-lift">
       <p className="font-semibold">
         {LONG_MONTHS[Number(p.month.slice(5, 7)) - 1]} {p.month.slice(0, 4)}
       </p>
       <p className="mono">{usd(p.revenue)} USD</p>
-      <p className="text-ink-muted">
+      <p className="text-fg-muted">
         {p.won} {p.won === 1 ? "deal" : "deals"} won
       </p>
     </div>

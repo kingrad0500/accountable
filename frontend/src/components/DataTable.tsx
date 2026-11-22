@@ -124,7 +124,7 @@ export function DataTable<T>({
   return (
     <div className="panel flex flex-col">
       <div className="flex items-center gap-3 p-3 pl-4">
-        <label className="flex h-9 w-80 items-center gap-2 rounded-[10px] bg-bg px-3 text-ink-muted focus-within:outline-2 focus-within:outline-cerulean">
+        <label className="flex h-9 w-80 items-center gap-2 rounded-[10px] bg-page px-3 text-fg-muted focus-within:outline-2 focus-within:outline-cerulean">
           <Search size={16} aria-hidden />
           <input
             ref={searchRef}
@@ -133,7 +133,7 @@ export function DataTable<T>({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${noun}`}
             aria-label={`Search ${noun}`}
-            className="w-full bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-muted"
+            className="w-full bg-transparent text-[13.5px] text-fg outline-none placeholder:text-fg-muted"
           />
         </label>
         {filters}
@@ -151,7 +151,7 @@ export function DataTable<T>({
         className="relative overflow-auto px-2"
         style={{ height, minHeight: 280 }}
       >
-        <div role="rowgroup" className="sticky top-0 z-10 bg-panel">
+        <div role="rowgroup" className="sticky top-0 z-10 bg-surface">
           <div
             role="row"
             aria-rowindex={1}
@@ -175,13 +175,13 @@ export function DataTable<T>({
                           ? "none"
                           : undefined
                   }
-                  className={`text-[13px] font-medium text-ink-muted ${right ? "text-right" : ""}`}
+                  className={`text-[13px] font-medium text-fg-muted ${right ? "text-right" : ""}`}
                 >
                   {header.column.getCanSort() ? (
                     <button
                       type="button"
                       onClick={header.column.getToggleSortingHandler()}
-                      className={`inline-flex items-center gap-1 rounded-md hover:text-ink ${right ? "flex-row-reverse" : ""} ${sorted ? "text-ink" : ""}`}
+                      className={`inline-flex items-center gap-1 rounded-md hover:text-fg ${right ? "flex-row-reverse" : ""} ${sorted ? "text-fg" : ""}`}
                     >
                       {label}
                       {sorted === "asc" ? (

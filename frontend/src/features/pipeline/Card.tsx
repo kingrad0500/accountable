@@ -12,14 +12,20 @@ import { MoveToMenu } from "./MoveToMenu";
 
 type ViewProps = { deal: Deal; late: boolean; lifted?: boolean; menu?: React.ReactNode };
 
+/** A late card keeps its tint while dragged; any other card lifts onto the raised surface. */
+function cardBackground(late: boolean, lifted: boolean): string {
+  if (late) return "bg-late";
+  return lifted ? "bg-raised" : "bg-surface";
+}
+
 /** What a card shows (P5). Won and Lost cards are shorter, with the value in short form. */
 export function CardView({ deal, late, lifted = false, menu }: ViewProps) {
   const closed = CLOSED_STAGES.includes(deal.stage);
   return (
     <div
       className={`grid grid-cols-[1fr_auto] gap-x-2.5 gap-y-[3px] rounded-xl px-3 ${closed ? "py-2" : "py-2.5"} ${
-        late ? "bg-[var(--late-tint)]" : "bg-panel"
-      } ${lifted ? "shadow-lift" : "shadow-soft"}`}
+        lifted ? "shadow-lift" : "shadow-soft"
+      } ${cardBackground(late, lifted)}`}
     >
       <Link
         to={`/deals/${deal.id}`}
@@ -30,12 +36,12 @@ export function CardView({ deal, late, lifted = false, menu }: ViewProps) {
         {deal.name}
       </Link>
       <Money value={deal.value} short={closed} className="text-[13px] font-semibold" />
-      <span className="col-span-2 truncate text-[12px] text-ink-muted">
+      <span className="col-span-2 truncate text-[12px] text-fg-muted">
         {deal.organization_name ?? <span className="italic">No organization</span>}
         {!closed && ` · ${deal.probability}%`}
       </span>
       <span
-        className={`mono flex items-center gap-[5px] text-[11.5px] ${late ? "font-semibold text-raspberry-deep" : "text-ink-muted"}`}
+        className={`mono flex items-center gap-[5px] text-[11.5px] ${late ? "font-semibold text-fg-late" : "text-fg-muted"}`}
       >
         {!closed && <Calendar size={12} aria-hidden />}
         {deal.close_date ? formatDateShort(deal.close_date) : "No close date"}
@@ -116,7 +122,10 @@ export const SortableCard = memo(function SortableCard({
     >
       <div className={isDragging ? "invisible" : ""}>{view}</div>
       {isDragging && (
-        <div aria-hidden className="absolute inset-0 rounded-xl bg-[rgb(7_59_76/0.07)]" />
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-xl bg-[color-mix(in_srgb,var(--text)_7%,transparent)]"
+        />
       )}
     </div>
   );
