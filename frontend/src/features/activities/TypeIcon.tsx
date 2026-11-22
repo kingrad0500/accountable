@@ -1,9 +1,9 @@
-import { ArrowRight, Mail, Phone, StickyNote } from "lucide-react";
+import { ArrowRight, FileText, Mail, Phone } from "lucide-react";
 import type { ActivityType } from "../../api/types";
 
 // Note Marigold, call Cerulean, email Coral, stage change Sea Mist.
 const STYLES: Record<ActivityType | "stage_change", { bg: string; fg: string; Icon: typeof Mail; label: string }> = {
-  note: { bg: "var(--marigold)", fg: "var(--ink)", Icon: StickyNote, label: "Note" },
+  note: { bg: "var(--marigold)", fg: "var(--ink)", Icon: FileText, label: "Note" },
   call: { bg: "var(--cerulean-ink)", fg: "#ffffff", Icon: Phone, label: "Call" },
   email: { bg: "var(--coral)", fg: "var(--ink)", Icon: Mail, label: "Email" },
   stage_change: { bg: "var(--sea-mist)", fg: "var(--ink)", Icon: ArrowRight, label: "Stage change" },

@@ -29,8 +29,10 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
                     <Pill kind="stage" value={e.to_stage} className="!px-[7px] !text-[11.5px] !leading-4" />
                   </p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-ink-muted">
-                    <TypeIcon type="stage_change" size={12} bare /> Stage change
-                    {e.organization_name && ` · ${e.organization_name}`}
+                    <TypeIcon type="stage_change" size={12} bare />
+                    <span>Stage change</span>
+                    {e.organization_name && <span aria-hidden>·</span>}
+                    {e.organization_name && <span>{e.organization_name}</span>}
                   </p>
                 </div>
               ) : (
@@ -41,7 +43,8 @@ export function RecentActivity({ entries }: { entries: TimelineEntry[] }) {
                     <Link to={e.deal_id ? `/deals/${e.deal_id}` : `/contacts/${e.contact_id}`} className="hover:text-ink hover:underline">
                       {e.deal_name ?? e.contact_name}
                     </Link>
-                    {e.organization_name && ` · ${e.organization_name}`}
+                    {e.organization_name && <span aria-hidden>·</span>}
+                    {e.organization_name && <span>{e.organization_name}</span>}
                   </p>
                 </div>
               )}

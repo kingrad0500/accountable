@@ -97,8 +97,8 @@ def organization_timeline(conn: Connection, org_id: int) -> list[dict]:
 
 
 @router.get("/organizations")
-def list_organizations(conn: Connection = Depends(db.get_conn)) -> list[dict]:
-    return organization_rows(conn)
+def list_organizations(conn: Connection = Depends(db.get_conn)) -> Response:
+    return db.json_response(organization_rows(conn))
 
 
 @router.post("/organizations", status_code=201)

@@ -8,7 +8,8 @@ export function MoveToMenu({ deal, onMove }: { deal: Deal; onMove: (deal: Deal, 
   return (
     <DropdownMenu.Root modal={false}>
       <DropdownMenu.Trigger
-        className="icon-btn !size-6"
+        // Shown on hover and keyboard focus, as in the design; always in the Tab order.
+        className="icon-btn !size-6 opacity-0 transition-opacity group-focus-within/card:opacity-100 group-hover/card:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
         aria-label={`Move ${deal.name} to`}
         onPointerDown={(e) => e.stopPropagation()}
       >

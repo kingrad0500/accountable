@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router";
-import { Building2, Columns3, Handshake, LayoutGrid, Plus, Users } from "lucide-react";
+import { Briefcase, Building, LayoutDashboard, Plus, SquareKanban, Users } from "lucide-react";
 import { ContactFormDialog } from "../features/contacts/ContactForm";
 import { DealFormDialog } from "../features/deals/DealForm";
 import { QuickSearch } from "./QuickSearch";
 import { OrganizationFormDialog } from "../features/organizations/OrganizationForm";
 
 const TABS = [
-  { to: "/", label: "Dashboard", icon: LayoutGrid, end: true },
-  { to: "/pipeline", label: "Pipeline", icon: Columns3 },
-  { to: "/deals", label: "Deals", icon: Handshake },
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/pipeline", label: "Pipeline", icon: SquareKanban },
+  { to: "/deals", label: "Deals", icon: Briefcase },
   { to: "/contacts", label: "Contacts", icon: Users },
-  { to: "/organizations", label: "Organizations", icon: Building2 },
+  { to: "/organizations", label: "Organizations", icon: Building },
 ];
 
 type Action = "deal" | "contact" | "organization";

@@ -232,3 +232,11 @@ def test_timeline_has_activities_and_stage_changes(client, org):
     timeline = get(client, deal["id"])["timeline"]
     assert [e["kind"] for e in timeline] == ["stage_change", "activity"]
     assert timeline[0]["deal_name"] == "Website rebuild"
+
+
+def test_list_json_keeps_iso_dates_and_utc_times(client, org):
+    make_deal(client, org["id"], close_date="2026-12-01")
+    [row] = client.get("/api/deals").json()
+    assert row["close_date"] == "2026-12-01"
+    assert row["created_at"].endswith("Z") and "T" in row["created_at"]
+    assert client.get("/api/deals").headers["content-type"] == "application/json"

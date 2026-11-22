@@ -1,12 +1,12 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Building2, Handshake, Search, User } from "lucide-react";
+import { Briefcase, Building, Search, User } from "lucide-react";
 import { useContacts } from "../features/contacts/api";
 import { useDeals } from "../features/deals/api";
 import { useOrganizations } from "../features/organizations/api";
 import { quickSearch, type SearchItem, type SearchKind } from "./searchMatches";
 
-const ICONS = { deal: Handshake, contact: User, organization: Building2 };
+const ICONS = { deal: Briefcase, contact: User, organization: Building };
 const PATHS: Record<SearchKind, string> = { deal: "/deals", contact: "/contacts", organization: "/organizations" };
 
 /** The top bar's search: finds deals, contacts and organizations by name; "/" focuses it (G10). */
@@ -80,7 +80,8 @@ export function QuickSearch() {
             setUsed(true);
             setOpen(true);
           }}
-          onBlur={() => setTimeout(() => setOpen(false), 120)}
+          // Options keep focus in the box on mousedown, so a blur means focus really left.
+          onBlur={() => setOpen(false)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
               e.preventDefault();

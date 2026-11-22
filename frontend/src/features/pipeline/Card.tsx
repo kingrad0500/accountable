@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CalendarDays } from "lucide-react";
+import { Calendar } from "lucide-react";
 import type { Deal } from "../../api/types";
 import { Money } from "../../components/Money";
 import { Pill } from "../../components/Pill";
@@ -37,7 +37,7 @@ export function CardView({ deal, late, lifted = false, menu }: ViewProps) {
       <span
         className={`mono flex items-center gap-[5px] text-[11.5px] ${late ? "font-semibold text-raspberry-deep" : "text-ink-muted"}`}
       >
-        {!closed && <CalendarDays size={12} aria-hidden />}
+        {!closed && <Calendar size={12} aria-hidden />}
         {deal.close_date ? formatDateShort(deal.close_date) : "No close date"}
       </span>
       <span className="flex items-center justify-end gap-1">
@@ -100,7 +100,7 @@ export const SortableCard = memo(function SortableCard({
       data-testid="deal-card"
       data-deal-id={deal.id}
       style={{ transform: CSS.Translate.toString(transform), transition }}
-      className={`relative cursor-grab touch-none rounded-xl ${isDragging ? "z-0" : ""}`}
+      className={`group/card relative cursor-grab touch-none rounded-xl ${isDragging ? "z-0" : ""}`}
     >
       <div className={isDragging ? "invisible" : ""}>{view}</div>
       {isDragging && <div aria-hidden className="absolute inset-0 rounded-xl bg-[rgb(7_59_76/0.07)]" />}

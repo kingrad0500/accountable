@@ -22,7 +22,7 @@ export function SummaryPanel({ data }: { data: Dashboard }) {
       <div>
         <h2 className="text-[15px] text-white">How sales are going</h2>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Kpi feature label="Revenue won, last 12 months" value={usd(f.revenue_won_12m)} note={change ?? "Value of deals won"} testId="kpi-revenue" />
+          <Kpi feature label="Revenue won, last 12 months" value={usd(f.revenue_won_12m)} note={change ?? `${f.won_12m} ${f.won_12m === 1 ? "deal" : "deals"} won`} testId="kpi-revenue" />
           <Kpi label="Open pipeline" value={usd(f.open_value)} note={`${f.open_count} deals`} testId="kpi-open" />
           <Kpi label="Expected revenue" value={usd(f.expected_revenue)} note="Value × probability" testId="kpi-expected" />
           <Kpi
@@ -115,7 +115,13 @@ function RevenueChart({ points }: { points: MonthPoint[] }) {
             fill="url(#revenueFill)"
             isAnimationActive={false}
             dot={(props: { cx?: number; cy?: number; index?: number }) => (
-              <BestDot key={props.index} {...props} best={hasRevenue && props.index === best} value={points[props.index ?? 0]?.revenue ?? 0} />
+              <BestDot
+                key={props.index}
+                {...props}
+                best={hasRevenue && props.index === best}
+                current={props.index === points.length - 1}
+                value={points[props.index ?? 0]?.revenue ?? 0}
+              />
             )}
             activeDot={{ r: 5, fill: "#06D6A0", stroke: "#073B4C", strokeWidth: 2 }}
           />
@@ -125,14 +131,14 @@ function RevenueChart({ points }: { points: MonthPoint[] }) {
   );
 }
 
-/** Each point, with the best month labelled. */
-function BestDot({ cx, cy, best, value }: { cx?: number; cy?: number; best: boolean; value: number }) {
+/** Each point, with the best month labelled and this month drawn larger. */
+function BestDot({ cx, cy, best, current, value }: { cx?: number; cy?: number; best: boolean; current: boolean; value: number }) {
   if (cx === undefined || cy === undefined) return null;
   const label = usd(value);
   const w = label.length * 7.6 + 16;
   return (
     <g>
-      <circle cx={cx} cy={cy} r={3.5} fill="#073B4C" stroke="#06D6A0" strokeWidth={2} />
+      <circle cx={cx} cy={cy} r={current ? 6 : 3.5} fill="#073B4C" stroke="#06D6A0" strokeWidth={current ? 2.5 : 2} />
       {best && (
         <g data-testid="best-month">
           <rect x={cx - w / 2} y={cy - 32} width={w} height={22} rx={6} fill="#06D6A0" />

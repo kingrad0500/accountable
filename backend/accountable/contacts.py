@@ -73,8 +73,8 @@ def contact_timeline_where(contact_id: int):
 
 
 @router.get("/contacts")
-def list_contacts(conn: Connection = Depends(db.get_conn)) -> list[dict]:
-    return contact_rows(conn)
+def list_contacts(conn: Connection = Depends(db.get_conn)) -> Response:
+    return db.json_response(contact_rows(conn))
 
 
 @router.post("/contacts", status_code=201)

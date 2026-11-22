@@ -168,8 +168,8 @@ class MoveIn(BaseModel):
 
 
 @router.get("/deals")
-def list_deals(conn: Connection = Depends(db.get_conn)) -> list[dict]:
-    return deal_rows(conn)
+def list_deals(conn: Connection = Depends(db.get_conn)) -> Response:
+    return db.json_response(deal_rows(conn))
 
 
 @router.post("/deals", status_code=201)
