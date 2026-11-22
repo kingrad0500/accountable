@@ -71,6 +71,7 @@ export const Column = memo(function Column({
             </p>
             <div
               className="mt-2.5 h-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--midnight)_15%,transparent)]"
+              style={{ background: s.meterTrack }}
               role="meter"
               aria-label={`${s.label} share of open value`}
               aria-valuenow={Math.round(share)}

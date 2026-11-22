@@ -11,6 +11,8 @@ export type Stage = {
   text: string;
   /** Dot and funnel bar color. */
   dot: string;
+  /** The open-value meter's track on the header fill, when the default Midnight tint would vanish. */
+  meterTrack?: string;
 };
 
 export const STAGES: Stage[] = [
@@ -44,7 +46,8 @@ export const STAGES: Stage[] = [
     probability: 75,
     fill: "var(--midnight)",
     text: "var(--white)",
-    dot: "var(--midnight)",
+    dot: "var(--dot-negotiation)",
+    meterTrack: "color-mix(in srgb, var(--white) 20%, transparent)",
   },
   {
     key: "won",

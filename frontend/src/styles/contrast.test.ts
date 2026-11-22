@@ -78,6 +78,10 @@ const COLORED_TEXT = [
   "text-raspberry",
 ];
 
+/** Colored text that also sits on the page and on tints: links (See in Deals, hovered table
+ * rows) and late or overdue dates (follow-up chips, hovered rows). */
+const COLORED_TEXT_OFF_SURFACE = ["text-cerulean", "text-raspberry"];
+
 /** Role pairs: checked in both modes, since dark mode points the roles elsewhere. */
 const ROLE_PAIRS: Pair[] = [
   ...BACKGROUNDS.flatMap((bg): Pair[] => [
@@ -88,7 +92,16 @@ const ROLE_PAIRS: Pair[] = [
     [fg, "surface", 4.5, "colored text on panels"],
     [fg, "raised", 4.5, "colored text on raised layers"],
   ]),
+  ...COLORED_TEXT_OFF_SURFACE.flatMap((fg): Pair[] => [
+    [fg, "bg", 4.5, "colored text on the page"],
+    [fg, "tint", 4.5, "colored text on tints and hovered rows"],
+  ]),
   ["text-late", "late-tint", 4.5, "late dates on late cards"],
+  ["dot-negotiation", "surface", 3, "Negotiation dot on panels"],
+  ["dot-negotiation", "raised", 3, "Negotiation dot in the Move to menu"],
+  ["dot-negotiation", "bg", 3, "Negotiation funnel bar on its track"],
+  ["sea-green", "brand-mark", 3, "the wordmark's 21px A on its mark"],
+  ["brand-mark", "raised", 1.4, "the wordmark's mark stands out from the top bar"],
   ["text-green", "bg", 3, "chart lines on the page"],
   ["text-muted", "surface", 3, "checkbox outline"],
   ["cerulean", "bg", 3, "focus ring on the page"],
@@ -103,6 +116,7 @@ const FILL_PAIRS: Pair[] = [
   ["midnight", "coral", 4.5, "Proposal fills"],
   ["midnight", "sea-mist", 4.5, "Lost fills"],
   ["white", "midnight", 4.5, "Negotiation fills"],
+  ["white", "midnight", 3, "Negotiation meter on its white-tinted track"],
   ["white", "cerulean-ink", 4.5, "New pills and headers"],
   ["white", "raspberry-ink", 4.5, "Late pill, delete button"],
   ["white", "sea-green-ink", 3, "checkbox tick"],
@@ -162,8 +176,8 @@ describe("the two token layers", () => {
       tint: "#e6edef",
       text: "#073b4c",
       "text-muted": "#4f6e78",
-      "text-cerulean": "#0e7ca0",
-      "text-raspberry": "#d63a60",
+      "text-cerulean": "#0b6e8f",
+      "text-raspberry": "#b8294f",
       "late-tint": "#fff3f5",
       "text-late": "#b8294f",
     });

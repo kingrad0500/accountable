@@ -2,6 +2,8 @@
 @import "./tokens.css";
 
 @theme inline {
+  /* No Tailwind default colors: every color class comes from tokens.css (Decision 13). */
+  --color-*: initial;
   /* Palette: fills, and the fixed text on them */
   --color-midnight: var(--midnight);
   --color-white: var(--white);
@@ -21,6 +23,7 @@
   --color-line: var(--line);
   --color-overlay: var(--overlay);
   --color-late: var(--late-tint);
+  --color-brand-mark: var(--brand-mark);
   --color-fg: var(--text);
   --color-fg-muted: var(--text-muted);
   --color-fg-green: var(--text-green);

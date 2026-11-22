@@ -10,6 +10,7 @@ How the change in `intent.md` gets built. `docs/spec.md` already describes the r
 - `frontend/src/styles/global.css`:
   - Maps both layers into Tailwind in `@theme inline`. Palette colors keep their names (`bg-sea-green`, `bg-midnight`, `bg-cerulean-ink`). Roles get short names so classes read well: `bg-page`, `bg-surface`, `bg-raised`, `bg-tint`, `bg-line`, `text-fg`, `text-fg-muted`, `text-fg-green`, `text-fg-marigold`, `text-fg-coral`, `text-fg-cerulean`, `text-fg-raspberry`, `text-fg-late`, `bg-late`.
   - Moves the component classes (`.panel`, `.btn-*`, `.icon-btn`, `.input`, `.field`, `.avatar`, `.muted`) onto roles and palette colors.
+  - Switches off Tailwind's default color palette (`--color-*: initial`), so only token classes exist.
   - Moves the four hard-coded colors onto tokens: the hover shades `#05c493` and `#c22f53` become palette tokens `--sea-green-hover` and `--raspberry-ink-hover`, `#fff` on a focused input becomes `--surface`, and `#fff` on the danger button becomes `--white`.
   - Removes `--color-ink` and the other old names once nothing uses them.
 
@@ -29,9 +30,9 @@ How the change in `intent.md` gets built. `docs/spec.md` already describes the r
 - `frontend/src/components/TopBar.tsx`:
   - Moves the bar onto `bg-raised`.
   - Puts `ThemeToggle` between quick search and the page's action.
-  - Puts the tab tray on `bg-tint` and the active tab on `bg-surface`.
-  - Gives the wordmark's mark `bg-midnight`.
-- `frontend/src/App.tsx`: the sonner `Toaster` gets its background, text and shadow from `--raised`, `--text` and `--shadow-lift` through `toastOptions.style`, in place of `var(--ink)` and sonner's own white.
+  - Keeps the tab tray on `bg-page` (as today) and puts the active tab on `bg-surface`.
+  - Gives the wordmark's mark `bg-brand-mark` (Midnight in light mode, a lighter Midnight in dark mode, so it stands out from the raised bar).
+- `frontend/src/App.tsx`: the sonner `Toaster` gets its background, text, border and shadow from `--raised`, `--text`, `--toast-line` and `--shadow-toast` through `toastOptions.style`, in place of `var(--ink)` and sonner's own white. The two toast roles keep sonner's own border and shadow in light mode.
 
 ### Every file with colors in it (roles for text on surfaces, palette for fills)
 
@@ -54,10 +55,10 @@ How the change in `intent.md` gets built. `docs/spec.md` already describes the r
     - Gridlines → `var(--line)` and axis text → `var(--text-muted)`.
     - Bars → `var(--sea-green)` and `var(--coral)`.
     - The cursor becomes a `color-mix` of `--text`, and the tooltip moves to `bg-raised text-fg`.
-  - `features/dashboard/DashboardPage.tsx`, `Funnel.tsx` (track on `bg-tint`), `FollowUps.tsx` (overdue on `text-fg-raspberry`), `RecentActivity.tsx`: text and tint colors.
+  - `features/dashboard/DashboardPage.tsx`, `Funnel.tsx` (track stays on `bg-page`), `FollowUps.tsx` (overdue on `text-fg-raspberry`), `RecentActivity.tsx`: text and tint colors.
 - Pipeline:
   - `features/pipeline/PipelinePage.tsx`: the open-value chip moves to `bg-midnight`.
-  - `features/pipeline/Column.tsx`: the meter track `rgb(7 59 76 / 0.15)` becomes a `color-mix` of `currentColor`, since it sits on the stage fill.
+  - `features/pipeline/Column.tsx`: the meter track `rgb(7 59 76 / 0.15)` becomes a `color-mix` of `--midnight` at 15%, and Negotiation's (`meterTrack` in `stages.ts`) white at 20%, since Midnight doesn't show on its Midnight header.
   - `features/pipeline/Card.tsx`:
     - The card moves to `bg-surface`, or `bg-late` when late.
     - The date moves to `text-fg-late`.
@@ -67,7 +68,7 @@ How the change in `intent.md` gets built. `docs/spec.md` already describes the r
 - Record pages: `features/contacts/ContactPage.tsx`, `ContactsPage.tsx`, `features/deals/DealPage.tsx`, `DealsPage.tsx`, `features/organizations/OrganizationPage.tsx`, `OrganizationsPage.tsx`: `text-ink` → `text-fg`, `text-cerulean-ink` (links) → `text-fg-cerulean`, and the like.
 - `frontend/src/lib/stages.ts`:
   - Stage text `var(--ink)` → `var(--midnight)` and `#ffffff` → `var(--white)`.
-  - Negotiation fill → `var(--midnight)`.
+  - Negotiation fill → `var(--midnight)`, and its dot → `var(--dot-negotiation)` (Midnight in light mode, Steel in dark mode, where Midnight vanishes on black and raised layers).
   - The Lost dot `#9fb3b9` → `var(--sea-mist-dark)`.
 
 ### Tests changed
@@ -142,11 +143,12 @@ When the list is done:
 ### Unit tests (Vitest)
 
 - **`styles/contrast.test.ts`** (rewritten): parses `tokens.css` into the palette and the two sets of role values, and resolves every alias.
-  - Every pair a role sits on is checked in both modes: text, muted, the five colored text roles and the late date, on page, surface, raised, tint and late tint. AA is 4.5:1 for text and 3:1 for the focus ring and chart lines.
+  - Every pair in use is checked in both modes: text and muted on page, surface, raised, tint and late tint; the five colored text roles on surface and raised; Cerulean and Raspberry text (the only colored text off a panel: links, overdue and late dates) also on page and tint; the late date on the late tint; the Negotiation dot on surface, raised and page; the wordmark's A on its mark. AA is 4.5:1 for text and 3:1 for the focus ring, dots and chart lines.
+  - Light `--text-cerulean` and `--text-raspberry` point at the deep shades (`--cerulean-deep`, `--raspberry-deep`): the `-ink` shades fail on the page and tints (4.30:1 and 4.09:1 on the page). This is the one deliberate change to light mode.
   - Fill pairs are checked once: Midnight on the five bright fills, white on Midnight and the `-ink` fills, and Sea Mist, hero-muted, Sea Green and raspberry-light on the Midnight panel.
   - Every hex value appears once in the palette, and every role points at a palette token that exists.
   - The light role values equal today's values (`--bg` `#F0F4F5`, surface `#FFFFFF`, text `#073B4C` and so on), so light mode can't drift.
-- **`styles/colors.test.ts`** (new): no file in `frontend/src` except `tokens.css` contains a hex color, `rgb(`, `rgba(` or `hsl(`. This is the proof for "colors in one place, no scattered overrides".
+- **`styles/colors.test.ts`** (new): no file in `frontend/src` except `tokens.css` contains a hex color, `rgb(`, `rgba(`, `hsl(`, a named CSS color or a Tailwind default palette class. This is the proof for "colors in one place, no scattered overrides".
 - **`lib/theme.test.ts`** (new):
   - `readTheme` returns light for an empty store, an unknown value and a store that throws.
   - `saveTheme` then `readTheme` gives the saved mode back.

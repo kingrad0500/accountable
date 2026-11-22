@@ -59,12 +59,13 @@ Colors are defined once, in `frontend/src/styles/tokens.css`, in two layers, and
 Every pairing meets WCAG AA. Normal text needs 4.5:1; large or bold text, icons, chart lines and the focus ring need 3:1.
 
 - The bright brand colors (Sea Green, Marigold, Coral) are used as fills with Midnight text on top. All three pass with Midnight (6.4, 7.5 and 5.1 to 1). Fills look the same in both modes.
-- In light mode each brand color has a darker "ink" shade for text, icons and chart lines on white: Sea Green `#04805F`, Marigold `#9A6700`, Coral `#B4432A`, Cerulean `#0E7CA0`, Raspberry `#D63A60`. Muted text is `#4F6E78`.
+- In light mode each brand color has a darker "ink" shade for text, icons and chart lines on white: Sea Green `#04805F`, Marigold `#9A6700`, Coral `#B4432A`, Cerulean `#0B6E8F`, Raspberry `#B8294F`. Cerulean and Raspberry text also sits on the page and on tints (links, overdue and late dates), so they use deeper shades than the `-ink` fills (`#0E7CA0`, `#D63A60`), which only pass on white. Muted text is `#4F6E78`.
 - In dark mode the same text roles point at the bright brand colors or lighter shades instead (Sea Green, Marigold, Coral `#FA9A7C`, Cerulean `#5CC0E2`, Raspberry `#FF8FA8`), with Sea Mist text and `#9DB4BB` muted text, since they sit on black or deep Midnight.
 - White text sits on the brand Cerulean and Raspberry only at 14px bold or larger. Smaller white text, such as stage pills and the Late label, uses the darker Cerulean and Raspberry shades.
 - Focus is a 2px Cerulean outline with a 2px offset.
+- Two Midnight marks get dark-mode roles so they don't vanish: the Negotiation dot and funnel bar (`--dot-negotiation`, Steel `#6E97A5`) and the wordmark's mark (`--brand-mark`, `#1D5568`).
 - `styles/contrast.test.ts` parses `tokens.css`, resolves the roles for each mode and checks every role pair in use in both modes, and every fill pair once. It also fails if a hex value appears twice, or anywhere outside the palette, and if light mode's values drift from what they were before dark mode.
-- `styles/colors.test.ts` fails if any file in `frontend/src` other than `tokens.css`, or `index.html`, holds a color value (hex, `rgb()` or `hsl()`).
+- `styles/colors.test.ts` fails if any file in `frontend/src` other than `tokens.css`, or `index.html`, holds a color value: hex, `rgb()`, `hsl()`, a named CSS color or a Tailwind default palette class. `global.css` switches Tailwind's default palette off (`--color-*: initial`), so only token classes exist.
 
 ### Libraries
 

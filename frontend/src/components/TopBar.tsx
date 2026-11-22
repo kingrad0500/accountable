@@ -45,7 +45,7 @@ export function TopBar() {
       >
         <span
           aria-hidden
-          className="grid size-[30px] place-items-center rounded-[9px] bg-midnight font-serif text-[21px] font-normal text-sea-green"
+          className="grid size-[30px] place-items-center rounded-[9px] bg-brand-mark font-serif text-[21px] font-normal text-sea-green"
         >
           A
         </span>

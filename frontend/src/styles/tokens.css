@@ -10,6 +10,7 @@
 :root {
   --midnight: #073b4c;
   --midnight-deep: #04232e;
+  --midnight-lifted: #1d5568;
   --black: #000000;
   --white: #ffffff;
   --deep-raised: #0f3644;
@@ -23,6 +24,7 @@
   --hero-muted: #a9bec4;
   --slate: #4f6e78;
   --slate-light: #9db4bb;
+  --steel: #6e97a5;
   --sea-green: #06d6a0;
   --sea-green-hover: #05c493;
   --sea-green-ink: #04805f;
@@ -34,6 +36,7 @@
   --cerulean: #118ab2;
   --cerulean-ink: #0e7ca0;
   --cerulean-light: #5cc0e2;
+  --cerulean-deep: #0b6e8f;
   --raspberry: #ef476f;
   --raspberry-ink: #d63a60;
   --raspberry-ink-hover: #c22f53;
@@ -64,10 +67,13 @@
   --text-green: var(--sea-green-ink);
   --text-marigold: var(--marigold-ink);
   --text-coral: var(--coral-ink);
-  --text-cerulean: var(--cerulean-ink);
-  --text-raspberry: var(--raspberry-ink);
+  /* The deep shades: cerulean-ink and raspberry-ink fall under 4.5:1 on the page and the tint. */
+  --text-cerulean: var(--cerulean-deep);
+  --text-raspberry: var(--raspberry-deep);
   --late-tint: var(--rose-50);
   --text-late: var(--raspberry-deep);
+  --dot-negotiation: var(--midnight);
+  --brand-mark: var(--midnight);
   --overlay: rgb(7 59 76 / 0.35);
   --shadow: 0 1px 2px rgb(7 59 76 / 0.06), 0 4px 16px rgb(7 59 76 / 0.05);
   --shadow-lift: 0 12px 32px rgb(7 59 76 / 0.18), 0 2px 6px rgb(7 59 76 / 0.1);
@@ -96,6 +102,9 @@
   --text-raspberry: var(--raspberry-light);
   --late-tint: var(--rose-900);
   --text-late: var(--raspberry-light);
+  /* Midnight would vanish on black and raised layers; these keep the dot and the mark visible. */
+  --dot-negotiation: var(--steel);
+  --brand-mark: var(--midnight-lifted);
   --overlay: rgb(0 0 0 / 0.6);
   --shadow: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-lift: 0 16px 40px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.4);
